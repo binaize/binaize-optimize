@@ -1,0 +1,6 @@
+notebooks
+.idea
+.DS_Store
+config.py
+*.pyc
+__pycache__
