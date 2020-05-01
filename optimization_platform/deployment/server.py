@@ -68,3 +68,9 @@ async def sign_up_new_client(client: NewClient):
     add_new_client(data_store=rds_data_store, client_id=client.client_id, full_name=client.full_name,
                    company_name=client.company_name, hashed_password=hashed_password, disabled=client.disabled)
     return SuccessMessage()
+
+
+# send multiple post parameters along with access token
+@app.get("/test", response_model=str)
+async def read_current_client(*, current_client: Client = Depends(get_current_active_client), s: str):
+    return current_client.client_id+s
