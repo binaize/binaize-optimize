@@ -4,3 +4,4 @@ notebooks
 config.py
 *.pyc
 __pycache__
+config.env
