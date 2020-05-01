@@ -1,0 +1,10 @@
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY", None)
+ALGORITHM = os.getenv("ALGORITHM", None)
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", None))
+AWS_RDS_HOST = os.getenv("AWS_RDS_HOST", None)
+AWS_RDS_PORT = os.getenv('AWS_RDS_PORT', None)
+AWS_RDS_DBNAME = os.getenv("AWS_RDS_DBNAME", None)
+AWS_RDS_USER = os.getenv("AWS_RDS_USER", None)
+AWS_RDS_PASSWORD = os.getenv("AWS_RDS_PASSWORD", None)

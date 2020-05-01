@@ -1,0 +1,18 @@
+version: "3"
+services:
+  optim:
+    build:
+      context: ""
+      dockerfile: Dockerfile.optim
+    image: optim:latest
+    network_mode: bridge
+    entrypoint:
+      - /bin/entrypoint.sh
+    env_file:
+      - ./config.env
+    environment:
+      - SERVICE_PORT=6006
+      - SERVICE_TIMEOUT=900
+      - WORKER_COUNT=2
+    ports:
+      - "6006:6006"
