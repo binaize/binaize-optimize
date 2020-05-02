@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
-from optimization_platform.deployment.server_utils import *
-from optimization_platform.src.operation.score import add_new_client
+from optimization_platform.deployment.app_utils import *
+from optimization_platform.src.service_layer.serve import add_new_client
 from utils.data_store.rds_data_store import RDSDataStore
 
 rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,

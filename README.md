@@ -47,5 +47,11 @@
     OK
     
     ```
+   
+## To reset the tables on AWS RDS
+
+```bash
+bash initialize_rds.sh
+```
 
 

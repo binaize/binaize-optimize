@@ -5,3 +5,5 @@ config.py
 *.pyc
 __pycache__
 config.env
+initialize_rds.sh
+
