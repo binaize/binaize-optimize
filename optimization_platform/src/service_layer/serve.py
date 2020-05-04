@@ -30,15 +30,47 @@ def get_client_details_for_client_id(data_store, client_id):
     return client_details
 
 
+def add_shopify_credentials_to_existing_client(data_store, client_id, shopify_app_api_key, shopify_app_password,
+                                               shopify_app_eg_url, shopify_app_shared_secret):
+    table = "clients"
+
+    columns_value_dict = {"shopify_app_api_key": shopify_app_api_key,
+                          "shopify_app_password": shopify_app_password,
+                          "shopify_app_eg_url": shopify_app_eg_url,
+                          "shopify_app_shared_secret": shopify_app_shared_secret}
+
+    where = "client_id='{client_id}'".format(client_id=client_id)
+
+    data_store.update_record_in_data_store(table=table, columns_value_dict=columns_value_dict, where=where)
+
+
 def main():
-    s3_data_store = S3DataStore(src_bucket_name="binaize-dev", access_key=AWS_ACCESS_KEY_ID,
+    pass
+    s3_data_store = S3DataStore(access_key=AWS_ACCESS_KEY_ID,
                                 secret_key=AWS_SECRET_ACCESS_KEY)
-    print(s3_data_store.get_name())
+    x = s3_data_store.create_bucket(bucket_name="binaize-wow")
+    print(x)
     d = {"hi": 6}
-    s3_data_store.write_json_file(filename="tuhin/file.json", contents=d)
-    f = s3_data_store.read_json_file(filename="tuhin/file.json")
+    x = s3_data_store.write_json_file(bucket_name="binaize-wow", filename="tuhin/file1.json", contents=d)
+    print(x)
+
+    x = s3_data_store.write_json_file(bucket_name="binaize-wow", filename="tuhin/file2.json", contents=d)
+    print(x)
+    f = s3_data_store.read_json_file(bucket_name="binaize-wow", filename="tuhin/file1.json")
     print(f)
-    s3_data_store.download_folder(src="tuhin", target=".")
+    x = s3_data_store.download_file(bucket_name="binaize-wow", src="tuhin/file1.json", target="./x.json")
+    print(x)
+    x = s3_data_store.list_files(bucket_name="binaize-wow")
+    print(x)
+    x = s3_data_store.delete_bucket(bucket_name="binaize-wow")
+    print(x)
+
+    # rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+    #                               dbname=AWS_RDS_DBNAME,
+    #                               user=AWS_RDS_USER,
+    #                               password=AWS_RDS_PASSWORD)
+    #
+    # add_shopify_credentials_to_existing_client(rds_data_store, "string1")
 
 
 if __name__ == "__main__":

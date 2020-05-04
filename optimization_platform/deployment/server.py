@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
-from optimization_platform.deployment.app_utils import *
+from optimization_platform.deployment.server_utils import *
 from optimization_platform.src.service_layer.serve import add_new_client, add_shopify_credentials_to_existing_client
 from utils.data_store.rds_data_store import RDSDataStore
 
@@ -62,12 +62,16 @@ async def read_current_client(current_client: Client = Depends(get_current_activ
     return current_client
 
 
-@app.post("/sign_up", response_model=SuccessMessage)
+@app.post("/sign_up", response_model=ResponseMessage)
 async def sign_up_new_client(client: NewClient):
     hashed_password = get_password_hash(client.password)
     add_new_client(data_store=rds_data_store, client_id=client.client_id, full_name=client.full_name,
                    company_name=client.company_name, hashed_password=hashed_password, disabled=client.disabled)
-    return SuccessMessage()
+    response = ResponseMessage()
+    response.message = "Sign up for new client with client_id {client_id} is successful.".format(
+        client_id=client.client_id)
+    response.status = status.HTTP_200_OK
+    return response
 
 
 # send multiple post parameters along with access token
@@ -76,7 +80,7 @@ async def read_current_client(*, current_client: Client = Depends(get_current_ac
     return current_client.client_id + s
 
 
-@app.post("/add_shopify_credentials", response_model=dict)
+@app.post("/add_shopify_credentials", response_model=ResponseMessage)
 async def add_shopify_credentials(*, current_client: Client = Depends(get_current_active_client),
                                   shopify_credentials: ShopifyCredential):
     add_shopify_credentials_to_existing_client(data_store=rds_data_store, client_id=current_client.client_id,
@@ -84,5 +88,8 @@ async def add_shopify_credentials(*, current_client: Client = Depends(get_curren
                                                shopify_app_password=shopify_credentials.shopify_app_password,
                                                shopify_app_eg_url=shopify_credentials.shopify_app_eg_url,
                                                shopify_app_shared_secret=shopify_credentials.shopify_app_shared_secret)
-    d = {"status_code": status.HTTP_200_OK}
-    return d
+    response = ResponseMessage()
+    response.message = "Addition of Shopify Credentials for client_id {client_id} is successful.".format(
+        client_id=current_client.client_id)
+    response.status = status.HTTP_200_OK
+    return response

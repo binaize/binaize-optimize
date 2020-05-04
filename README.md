@@ -34,9 +34,10 @@
 
 ## To run the test cases
 
-1. docker build -t optim-tests -f Dockerfile.tests .
+1. docker-compose -f docker-compose-test.yaml build
 
-2. docker run -it optim-tests
+2. docker-compose -f docker-compose-test.yaml up
+
     
     The output should be 
 

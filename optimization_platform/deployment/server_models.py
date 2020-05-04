@@ -32,5 +32,6 @@ class ShopifyCredential(BaseModel):
     shopify_app_shared_secret: str = None
 
 
-class SuccessMessage(BaseModel):
-    message: str = "yayyy!!!!"
+class ResponseMessage(BaseModel):
+    status: str = None
+    message: str = None
