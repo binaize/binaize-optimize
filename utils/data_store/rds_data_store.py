@@ -1,9 +1,8 @@
-from utils.data_store.abstract_data_store import AbstractDataStore
-import psycopg2
 import pandas as pd
+import psycopg2
 
 
-class RDSDataStore(AbstractDataStore):
+class RDSDataStore(object):
     def __init__(self, host, port, dbname, user, password):
         self.host = host
         self.port = port
@@ -70,5 +69,27 @@ class RDSDataStore(AbstractDataStore):
         cursor.close()
         return
 
-    def update_record_indata_store(self, **args):
-        pass
+    def update_record_in_data_store(self, **args):
+        table = args["table"]
+        columns_value_dict = args["columns_value_dict"]
+        where = args["where"]
+
+        set_string_list = list()
+        for column, value in columns_value_dict.items():
+            if type(value) == str:
+                temp = "{column}='{value}'".format(column=column, value=value)
+            else:
+                temp = "{column}={value}".format(column=column, value=value)
+            set_string_list.append(temp)
+        set_string = ",".join(set_string_list)
+
+        sql = """ UPDATE {table} SET {set_string} where {where}"""
+        query = sql.format(set_string=set_string, table=table, where=where)
+        # query = " UPDATE clients SET shopify_app_api_key=shopify_app_api_key,shopify_app_password=shopify_app_password,shopify_app_eg_url=shopify_app_eg_url,shopify_app_shared_secret=shopify_app_shared_secret where client_id=string"
+        # print(query)
+
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        self.conn.commit()
+        cursor.close()
+        return

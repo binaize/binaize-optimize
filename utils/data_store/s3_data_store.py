@@ -1,28 +1,55 @@
 import json
-import os
 
 import boto3
-import botocore
-
-from utils.data_store.abstract_data_store import AbstractDataStore
 
 
-class S3DataStore(AbstractDataStore):
-    def __init__(self, src_bucket_name, access_key, secret_key):
+class S3DataStore(object):
+    def __init__(self, access_key, secret_key):
         self.session = boto3.session.Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-        self.s3_resource = self.session.resource('s3', config=botocore.client.Config(signature_version='s3v4'))
-        self.bucket = self.s3_resource.Bucket(src_bucket_name)
-        self.bucket_name = src_bucket_name
+        self.s3_resource = self.session.resource('s3')
 
-    def get_name(self):
-        return "S3:" + self.bucket_name
+    def create_bucket(self, bucket_name):
+        x = self.s3_resource.create_bucket(Bucket=bucket_name)
+        return x
 
-    def list_files(self, prefix=None, max_count=None):
+    def delete_bucket(self, bucket_name):
+        bucket = self.s3_resource.Bucket(bucket_name)
+        for key in bucket.objects.all():
+            key.delete()
+        x = bucket.delete()
+        return x
+
+    def write_json_file(self, bucket_name, filename, contents):
+        """Write JSON file into S3 bucket"""
+        x = self.s3_resource.Object(bucket_name, filename).put(Body=json.dumps(contents))
+        return x
+
+    def read_json_file(self, bucket_name, filename):
+        """Read JSON file from the S3 bucket"""
+        obj = self.s3_resource.Object(bucket_name, filename).get()['Body'].read()
+        utf_data = obj.decode("utf-8")
+        file_content = json.loads(utf_data)
+        return file_content
+
+    def upload_file(self, bucket_name, src, target):
+        """Upload file into data store"""
+        bucket = self.s3_resource.Bucket(bucket_name)
+        bucket.upload_file(src, target)
+        return None
+
+    def download_file(self, bucket_name, src, target):
+        """Download file from data store"""
+        bucket = self.s3_resource.Bucket(bucket_name)
+        x = bucket.download_file(src, target)
+        return x
+
+    def list_files(self, bucket_name, prefix=None, max_count=None):
         """List all the files in the S3 bucket"""
 
+        bucket = self.s3_resource.Bucket(bucket_name)
         list_filenames = []
         if prefix is None:
-            objects = self.bucket.objects.all()
+            objects = bucket.objects.all()
             if max_count is None:
                 list_filenames = [x.key for x in objects]
             else:
@@ -33,7 +60,7 @@ class S3DataStore(AbstractDataStore):
                     if counter == max_count:
                         break
         else:
-            objects = self.bucket.objects.filter(Prefix=prefix)
+            objects = bucket.objects.filter(Prefix=prefix)
             if max_count is None:
                 list_filenames = [x.key for x in objects]
             else:
@@ -45,40 +72,3 @@ class S3DataStore(AbstractDataStore):
                         break
 
         return list_filenames
-
-    def read_json_file(self, filename):
-        """Read JSON file from the S3 bucket"""
-
-        obj = self.s3_resource.Object(self.bucket_name, filename).get()['Body'].read()
-        utf_data = obj.decode("utf-8")
-        return json.loads(utf_data)
-
-    def write_json_file(self, filename, contents):
-        """Write JSON file into S3 bucket"""
-        self.s3_resource.Object(self.bucket_name, filename).put(Body=json.dumps(contents))
-        return None
-
-    def upload_file(self, src, target):
-        """Upload file into data store"""
-        self.bucket.upload_file(src, target)
-        return None
-
-    def download_file(self, src, target):
-        """Download file from data store"""
-        self.bucket.download_file(src, target)
-        return None
-
-    def upload_folder(self, src, target):
-        for root, dirs, files in os.walk(src):
-            for file in files:
-                self.upload_file(os.path.join(root, file), os.path.join(target, file))
-
-    def download_folder(self, src, target):
-        """Download folder from data store"""
-        files = self.list_files(prefix=src)
-        print(files)
-        for file in files:
-            filename = file.replace(src, "")
-            print(target + filename)
-            self.bucket.download_file(file, target + filename)
-        return None
