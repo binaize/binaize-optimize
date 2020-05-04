@@ -25,5 +25,12 @@ class NewClient(Client):
     password: str
 
 
+class ShopifyCredential(BaseModel):
+    shopify_app_api_key: str = None
+    shopify_app_password: str = None
+    shopify_app_eg_url: str = None
+    shopify_app_shared_secret: str = None
+
+
 class SuccessMessage(BaseModel):
     message: str = "yayyy!!!!"

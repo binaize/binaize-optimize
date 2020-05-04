@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
 from optimization_platform.deployment.app_utils import *
-from optimization_platform.src.service_layer.serve import add_new_client
+from optimization_platform.src.service_layer.serve import add_new_client, add_shopify_credentials_to_existing_client
 from utils.data_store.rds_data_store import RDSDataStore
 
 rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
@@ -73,4 +73,16 @@ async def sign_up_new_client(client: NewClient):
 # send multiple post parameters along with access token
 @app.get("/test", response_model=str)
 async def read_current_client(*, current_client: Client = Depends(get_current_active_client), s: str):
-    return current_client.client_id+s
+    return current_client.client_id + s
+
+
+@app.post("/add_shopify_credentials", response_model=dict)
+async def add_shopify_credentials(*, current_client: Client = Depends(get_current_active_client),
+                                  shopify_credentials: ShopifyCredential):
+    add_shopify_credentials_to_existing_client(data_store=rds_data_store, client_id=current_client.client_id,
+                                               shopify_app_api_key=shopify_credentials.shopify_app_api_key,
+                                               shopify_app_password=shopify_credentials.shopify_app_password,
+                                               shopify_app_eg_url=shopify_credentials.shopify_app_eg_url,
+                                               shopify_app_shared_secret=shopify_credentials.shopify_app_shared_secret)
+    d = {"status_code": status.HTTP_200_OK}
+    return d
