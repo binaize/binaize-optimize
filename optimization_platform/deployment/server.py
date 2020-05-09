@@ -11,12 +11,24 @@ from optimization_platform.src.service_layer.serve import add_new_client, add_sh
     get_variation_id_to_recommend, register_event_for_client
 from utils.data_store.rds_data_store import RDSDataStore
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
                               dbname=AWS_RDS_DBNAME,
                               user=AWS_RDS_USER,
                               password=AWS_RDS_PASSWORD)
-
-app = FastAPI()
 
 
 async def _get_current_client(token: str = Depends(oauth2_scheme)):
