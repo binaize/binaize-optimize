@@ -6,4 +6,4 @@ config.py
 __pycache__
 config.env
 initialize_rds.sh
-
+*.pem

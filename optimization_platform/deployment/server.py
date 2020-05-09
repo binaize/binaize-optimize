@@ -45,9 +45,12 @@ async def get_current_active_client(current_client: BaseClient = Depends(_get_cu
     return current_client
 
 
-@app.get("/clients/me/", response_model=ShopifyClient)
-async def read_current_client(current_client: BaseClient = Depends(get_current_active_client)):
-    return current_client
+@app.get("/", response_model=ResponseMessage)
+async def get_current_active_client():
+    response = ResponseMessage()
+    response.message = "Binaize Optim is up and running"
+    response.status = status.HTTP_200_OK
+    return response
 
 
 @app.post("/token", response_model=Token)
