@@ -49,7 +49,3 @@ COPY ./config.py.template /config.py
 ADD ./optimization_platform/scripts/test_suites.sh /bin/test_suites.sh
 RUN chmod +x /bin/test_suites.sh
 ENTRYPOINT ["/bin/test_suites.sh"]
-
-#ADD ./optimization_platform/scripts/entrypoint.sh /bin/entrypoint.sh
-#RUN chmod +x /bin/entrypoint.sh
-#ENTRYPOINT ["/bin/entrypoint.sh"]

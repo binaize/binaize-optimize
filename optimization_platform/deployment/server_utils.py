@@ -12,6 +12,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -23,7 +24,7 @@ def get_password_hash(password):
 def get_client(data_store, client_id: str):
     client_details = get_client_details_for_client_id(data_store=data_store, client_id=client_id)
     if client_details is not None:
-        return ClientInDB(**client_details)
+        return ShopifyClient(**client_details)
 
 
 def authenticate_client(data_store, client_id: str, password: str):
@@ -44,5 +45,3 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-

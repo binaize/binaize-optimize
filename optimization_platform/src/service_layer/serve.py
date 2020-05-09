@@ -1,7 +1,7 @@
-from utils.data_store.rds_data_store import RDSDataStore
-from utils.data_store.s3_data_store import S3DataStore
 import uuid
+
 from config import *
+from utils.data_store.rds_data_store import RDSDataStore
 
 
 def add_new_client(data_store, client_id, full_name, company_name, hashed_password, disabled):
@@ -21,7 +21,8 @@ def add_new_client(data_store, client_id, full_name, company_name, hashed_passwo
 
 def get_client_details_for_client_id(data_store, client_id):
     table = "clients"
-    columns = ["client_id", "full_name", "company_name", "hashed_password", "disabled"]
+    columns = ["client_id", "full_name", "company_name", "hashed_password", "disabled", "hashed_password",
+               "shopify_app_api_key", "shopify_app_password", "shopify_app_eg_url", "shopify_app_shared_secret"]
     where = "client_id='{client_id}'".format(client_id=client_id)
     df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
     client_details = None
@@ -44,34 +45,106 @@ def add_shopify_credentials_to_existing_client(data_store, client_id, shopify_ap
     data_store.update_record_in_data_store(table=table, columns_value_dict=columns_value_dict, where=where)
 
 
-def main():
-    pass
-    s3_data_store = S3DataStore(access_key=AWS_ACCESS_KEY_ID,
-                                secret_key=AWS_SECRET_ACCESS_KEY)
-    x = s3_data_store.create_bucket(bucket_name="binaize-wow")
-    print(x)
-    d = {"hi": 6}
-    x = s3_data_store.write_json_file(bucket_name="binaize-wow", filename="tuhin/file1.json", contents=d)
-    print(x)
+def create_experiment_for_client_id(data_store, client_id, experiment_name, page_type, experiment_type):
+    experiment_id = uuid.uuid4().hex
+    experiment_name = "experiment_name"
+    page_type = "page_type"
+    experiment_type = "experiment_type"
 
-    x = s3_data_store.write_json_file(bucket_name="binaize-wow", filename="tuhin/file2.json", contents=d)
-    print(x)
-    f = s3_data_store.read_json_file(bucket_name="binaize-wow", filename="tuhin/file1.json")
-    print(f)
-    x = s3_data_store.download_file(bucket_name="binaize-wow", src="tuhin/file1.json", target="./x.json")
-    print(x)
-    x = s3_data_store.list_files(bucket_name="binaize-wow")
-    print(x)
-    x = s3_data_store.delete_bucket(bucket_name="binaize-wow")
-    print(x)
+    table = "experiments"
+    experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
+                  "page_type": page_type, "experiment_type": experiment_type}
+    try:
+        data_store.insert_record_to_data_store(table=table, columns_value_dict=experiment)
+    except Exception as e:
+        print("create_experiment_for_client_id failed")
+        experiment = None
+    return experiment
 
-    # rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
-    #                               dbname=AWS_RDS_DBNAME,
-    #                               user=AWS_RDS_USER,
-    #                               password=AWS_RDS_PASSWORD)
-    #
-    # add_shopify_credentials_to_existing_client(rds_data_store, "string1")
+
+def get_experiments_for_client_id(data_store, client_id):
+    table = "experiments"
+    columns = ["client_id", "experiment_id", "experiment_name", "page_type", "experiment_type"]
+    where = "client_id='{client_id}'".format(client_id=client_id)
+    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+    experiments = None
+    if df is not None:
+        experiments = df.to_dict(orient="records")
+    return experiments
+
+
+def create_variation_for_client_id_and_experiment_id(data_store, client_id, experiment_id, variation_name,
+                                                     traffic_percentage):
+    variation_id = uuid.uuid4().hex
+
+    table = "variations"
+    variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id,
+                 "variation_name": variation_name,
+                 "traffic_percentage": traffic_percentage}
+    data_store.insert_record_to_data_store(table=table, columns_value_dict=variation)
+    # except Exception as e:
+    #     print("create_variation_for_client_id_and_experiment_id failed")
+    #     variation = None
+    return variation
+
+
+def get_variation_ids_for_client_id_and_experiment_id(data_store, client_id, experiment_id):
+    table = "variations"
+    columns = ["variation_id"]
+    where = "client_id='{client_id}' and experiment_id='{experiment_id}'".format(client_id=client_id,
+                                                                                 experiment_id=experiment_id)
+    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+    variations = None
+    if df is not None:
+        variations = df["variation_id"].tolist()
+    return variations
+
+
+def register_event_for_client(data_store, client_id, experiment_id, session_id, variation_id, event_name):
+    table = "events"
+    columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
+                          "variation_id": variation_id,
+                          "session_id": session_id, "event_name": event_name}
+    data_store.insert_record_to_data_store(table=table, columns_value_dict=columns_value_dict)
+
+
+def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_id):
+    table = "events"
+
+    columns = ["client_id", "experiment_id", "session_id", "variation_id"]
+    where = "client_id='{client_id}' and experiment_id='{experiment_id}' and session_id='{session_id}'".format(
+        client_id=client_id,
+        experiment_id=experiment_id, session_id=session_id)
+
+    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+
+    if df is not None and len(df) > 0:
+        variation_id_to_recommend = df["variation_id"][0]
+    else:
+
+        variation_ids = get_variation_ids_for_client_id_and_experiment_id(data_store=data_store, client_id=client_id,
+                                                                          experiment_id=experiment_id)
+
+        import random
+        variation_id_to_recommend = random.choice(variation_ids)
+
+    register_event_for_client(data_store=data_store, client_id=client_id, experiment_id=experiment_id, session_id=session_id,
+                              variation_id=variation_id_to_recommend, event_name="served")
+
+    variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id_to_recommend}
+
+    return variation
 
 
 if __name__ == "__main__":
-    main()
+    rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+                                  dbname=AWS_RDS_DBNAME,
+                                  user=AWS_RDS_USER,
+                                  password=AWS_RDS_PASSWORD)
+    client_id = "string"
+    experiment_id = "f6f92235a6984e4a8710a0e04b87301c"
+    session_id = "string1"
+
+    x = get_variation_id_to_recommend(data_store=rds_data_store, client_id=client_id, experiment_id=experiment_id,
+                                      session_id=session_id)
+    print(x)
