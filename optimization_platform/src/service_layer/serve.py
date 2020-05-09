@@ -1,26 +1,16 @@
 import uuid
-
 from config import *
-from utils.data_store.rds_data_store import RDSDataStore
 
 
 def add_new_client(data_store, client_id, full_name, company_name, hashed_password, disabled):
-    """
-
-    :param data_store: data store object
-    :param client_id: id of the smb client
-    :param experiment_id: id of the experiment
-    :param variation_ids: id of the variation ids for the experiment id
-    :return: True in case of success, False in case of failure
-    """
-    table = "clients"
+    table = TABLE_CLIENTS
     columns_value_dict = {"client_id": client_id, "full_name": full_name, "company_name": company_name,
                           "hashed_password": hashed_password, "disabled": disabled}
     data_store.insert_record_to_data_store(table=table, columns_value_dict=columns_value_dict)
 
 
 def get_client_details_for_client_id(data_store, client_id):
-    table = "clients"
+    table = TABLE_CLIENTS
     columns = ["client_id", "full_name", "company_name", "hashed_password", "disabled", "hashed_password",
                "shopify_app_api_key", "shopify_app_password", "shopify_app_eg_url", "shopify_app_shared_secret"]
     where = "client_id='{client_id}'".format(client_id=client_id)
@@ -33,7 +23,7 @@ def get_client_details_for_client_id(data_store, client_id):
 
 def add_shopify_credentials_to_existing_client(data_store, client_id, shopify_app_api_key, shopify_app_password,
                                                shopify_app_eg_url, shopify_app_shared_secret):
-    table = "clients"
+    table = TABLE_CLIENTS
 
     columns_value_dict = {"shopify_app_api_key": shopify_app_api_key,
                           "shopify_app_password": shopify_app_password,
@@ -47,11 +37,8 @@ def add_shopify_credentials_to_existing_client(data_store, client_id, shopify_ap
 
 def create_experiment_for_client_id(data_store, client_id, experiment_name, page_type, experiment_type):
     experiment_id = uuid.uuid4().hex
-    experiment_name = "experiment_name"
-    page_type = "page_type"
-    experiment_type = "experiment_type"
 
-    table = "experiments"
+    table = TABLE_EXPERIMENTS
     experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
                   "page_type": page_type, "experiment_type": experiment_type}
     try:
@@ -63,7 +50,7 @@ def create_experiment_for_client_id(data_store, client_id, experiment_name, page
 
 
 def get_experiments_for_client_id(data_store, client_id):
-    table = "experiments"
+    table = TABLE_EXPERIMENTS
     columns = ["client_id", "experiment_id", "experiment_name", "page_type", "experiment_type"]
     where = "client_id='{client_id}'".format(client_id=client_id)
     df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
@@ -77,7 +64,7 @@ def create_variation_for_client_id_and_experiment_id(data_store, client_id, expe
                                                      traffic_percentage):
     variation_id = uuid.uuid4().hex
 
-    table = "variations"
+    table = TABLE_VARIATIONS
     variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id,
                  "variation_name": variation_name,
                  "traffic_percentage": traffic_percentage}
@@ -89,7 +76,7 @@ def create_variation_for_client_id_and_experiment_id(data_store, client_id, expe
 
 
 def get_variation_ids_for_client_id_and_experiment_id(data_store, client_id, experiment_id):
-    table = "variations"
+    table = TABLE_VARIATIONS
     columns = ["variation_id"]
     where = "client_id='{client_id}' and experiment_id='{experiment_id}'".format(client_id=client_id,
                                                                                  experiment_id=experiment_id)
@@ -101,7 +88,7 @@ def get_variation_ids_for_client_id_and_experiment_id(data_store, client_id, exp
 
 
 def register_event_for_client(data_store, client_id, experiment_id, session_id, variation_id, event_name):
-    table = "events"
+    table = TABLE_EVENTS
     columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
                           "variation_id": variation_id,
                           "session_id": session_id, "event_name": event_name}
@@ -109,7 +96,7 @@ def register_event_for_client(data_store, client_id, experiment_id, session_id, 
 
 
 def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_id):
-    table = "events"
+    table = TABLE_EVENTS
 
     columns = ["client_id", "experiment_id", "session_id", "variation_id"]
     where = "client_id='{client_id}' and experiment_id='{experiment_id}' and session_id='{session_id}'".format(
@@ -128,23 +115,10 @@ def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_
         import random
         variation_id_to_recommend = random.choice(variation_ids)
 
-    register_event_for_client(data_store=data_store, client_id=client_id, experiment_id=experiment_id, session_id=session_id,
+    register_event_for_client(data_store=data_store, client_id=client_id, experiment_id=experiment_id,
+                              session_id=session_id,
                               variation_id=variation_id_to_recommend, event_name="served")
 
     variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id_to_recommend}
 
     return variation
-
-
-if __name__ == "__main__":
-    rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
-                                  dbname=AWS_RDS_DBNAME,
-                                  user=AWS_RDS_USER,
-                                  password=AWS_RDS_PASSWORD)
-    client_id = "string"
-    experiment_id = "f6f92235a6984e4a8710a0e04b87301c"
-    session_id = "string1"
-
-    x = get_variation_id_to_recommend(data_store=rds_data_store, client_id=client_id, experiment_id=experiment_id,
-                                      session_id=session_id)
-    print(x)
