@@ -32,7 +32,6 @@ RUN wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz && \
 COPY ./requirements.txt /
 RUN pip3 install -r /requirements.txt
 
-
 # --------------------------------------------------------------------------------------------------
 # copy src code and scripts into root dir /
 # --------------------------------------------------------------------------------------------------
@@ -40,8 +39,6 @@ RUN pip3 install -r /requirements.txt
 COPY ./optimization_platform /optimization_platform
 COPY ./utils /utils
 COPY ./config.py.template /config.py
-COPY ./myserver-dev.crt /myserver-dev.crt
-COPY ./myserver-dev.key /myserver-dev.key
 
 # --------------------------------------------------------------------------------------------------
 # add entrypoint for the container

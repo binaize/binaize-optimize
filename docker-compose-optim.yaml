@@ -15,4 +15,4 @@ services:
       - SERVICE_TIMEOUT=900
       - WORKER_COUNT=2
     ports:
-      - "6006:6006"
+      - "443:6006"
