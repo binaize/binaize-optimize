@@ -5,7 +5,6 @@ services:
       context: ""
       dockerfile: Dockerfile.optim
     image: optim:latest
-    network_mode: bridge
     entrypoint:
       - /bin/entrypoint.sh
     env_file:
@@ -15,4 +14,17 @@ services:
       - SERVICE_TIMEOUT=900
       - WORKER_COUNT=2
     ports:
-      - "443:6006"
+      - "6006"
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - optim
+    ports:
+      - "80:80"
+      - "443:443"
+
+
+
