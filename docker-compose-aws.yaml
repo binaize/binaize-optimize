@@ -1,10 +1,13 @@
 version: "3"
 services:
   optim:
-    build:
-      context: ""
-      dockerfile: Dockerfile.optim
-    image: optim:latest
+    image: 117859797117.dkr.ecr.us-east-1.amazonaws.com/binaize-optim-repo:latest
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: binaize-optimize
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: optim
     entrypoint:
       - /bin/entrypoint.sh
     env_file:
@@ -16,15 +19,8 @@ services:
     ports:
       - "6006"
   nginx:
-    build:
-      context: ""
-      dockerfile: Dockerfile.nginx
     image: nginx:latest
     depends_on:
       - optim
     ports:
       - "443:443"
-      - "80:80"
-
-
-
