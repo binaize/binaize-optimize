@@ -7,7 +7,10 @@ create table if not exists experiments (
     client_id varchar(50) not null,
     experiment_name varchar(100),
     page_type varchar(50),
-    experiment_type varchar(50)
+    experiment_type varchar(50),
+    status varchar(50),
+    created_on timestamptz not null default now(),
+    last_updated_on timestamptz not null default now()
 );
 
 create index if not exists experiments_client_idx on experiments (client_id);

@@ -41,15 +41,27 @@ class ResponseMessage(BaseModel):
     message: str = None
 
 
-class NewExperiment(BaseModel):
+class BaseExperiment(BaseModel):
     experiment_name: str
     page_type: str
     experiment_type: str
+    status: str
 
 
-class Experiment(NewExperiment):
+class NewExperiment(BaseExperiment):
+    experiment_name: str
+    page_type: str
+    experiment_type: str
+    created_on_timestamp: int = None
+    last_updated_on_timestamp: int
+    status: str
+
+
+class Experiment(BaseExperiment):
     client_id: str
     experiment_id: str
+    created_on: str
+    last_updated_on: str
 
 
 class NewVariation(BaseModel):

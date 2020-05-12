@@ -1,5 +1,10 @@
 import uuid
+
+from pytz import timezone
+
 from config import *
+from utils.data_store.rds_data_store import RDSDataStore
+from utils.date_utils import *
 
 
 def add_new_client(data_store, client_id, full_name, company_name, hashed_password, disabled):
@@ -35,12 +40,16 @@ def add_shopify_credentials_to_existing_client(data_store, client_id, shopify_ap
     data_store.update_record_in_data_store(table=table, columns_value_dict=columns_value_dict, where=where)
 
 
-def create_experiment_for_client_id(data_store, client_id, experiment_name, page_type, experiment_type):
+def create_experiment_for_client_id(data_store, client_id, experiment_name, page_type, experiment_type, status,
+                                    created_on_timestamp, last_updated_on_timestamp):
     experiment_id = uuid.uuid4().hex
+    created_on_utc_str = utc_timestamp_to_utc_datetime_string(created_on_timestamp)
+    last_updated_on_utc_str = utc_timestamp_to_utc_datetime_string(last_updated_on_timestamp)
 
     table = TABLE_EXPERIMENTS
     experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
-                  "page_type": page_type, "experiment_type": experiment_type}
+                  "page_type": page_type, "experiment_type": experiment_type, "status": status,
+                  "created_on": created_on_utc_str, "last_updated_on": last_updated_on_utc_str}
     try:
         data_store.insert_record_to_data_store(table=table, columns_value_dict=experiment)
     except Exception as e:
@@ -51,9 +60,20 @@ def create_experiment_for_client_id(data_store, client_id, experiment_name, page
 
 def get_experiments_for_client_id(data_store, client_id):
     table = TABLE_EXPERIMENTS
-    columns = ["client_id", "experiment_id", "experiment_name", "page_type", "experiment_type"]
+    columns = ["client_id", "experiment_id", "experiment_name", "status", "page_type", "experiment_type", "created_on",
+               "last_updated_on"]
     where = "client_id='{client_id}'".format(client_id=client_id)
     df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+
+    def timestampz_to_string(x):
+        localtz = timezone('UTC')
+        y = x.astimezone(localtz)
+        # return y.strftime("%d-%b-%Y %H:%M:%S")
+        return y.strftime("%d-%b-%Y")
+
+    df["created_on"] = df["created_on"].map(timestampz_to_string)
+    df["last_updated_on"] = df["last_updated_on"].map(timestampz_to_string)
+
     experiments = None
     if df is not None:
         experiments = df.to_dict(orient="records")
@@ -122,3 +142,18 @@ def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_
     variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id_to_recommend}
 
     return variation
+
+#
+# if __name__ == "__main__":
+#     rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+#                                   dbname=AWS_RDS_DBNAME,
+#                                   user=AWS_RDS_USER,
+#                                   password=AWS_RDS_PASSWORD)
+#     x = create_experiment_for_client_id(data_store=rds_data_store, client_id="string", experiment_name="string",
+#                                         page_type="string", experiment_type="string", status="string",
+#                                         created_on_timestamp=1589310054,
+#                                         last_updated_on_timestamp=1589310054)
+#     print(x)
+#
+#     f = get_experiments_for_client_id(data_store=rds_data_store, client_id="string")
+#     print(f)

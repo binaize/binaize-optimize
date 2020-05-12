@@ -13,7 +13,27 @@ from utils.data_store.rds_data_store import RDSDataStore
 
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.openapi.utils import get_openapi
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Binaize API",
+        version="2.5.0",
+        description="apis for the binaize service",
+        routes=app.routes,
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://fastapi.tiangolo.com/img/logo-margin/logo-teal.png"
+    }
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
 app = FastAPI()
+app.openapi = custom_openapi
 
 origins = ["*"]
 
@@ -122,7 +142,10 @@ async def add_experiment(*, current_client: ShopifyClient = Depends(get_current_
     experiment = create_experiment_for_client_id(data_store=rds_data_store, client_id=current_client.client_id,
                                                  experiment_name=new_experiment.experiment_name,
                                                  page_type=new_experiment.page_type,
-                                                 experiment_type=new_experiment.experiment_type)
+                                                 experiment_type=new_experiment.experiment_type,
+                                                 status=new_experiment.status,
+                                                 created_on_timestamp=new_experiment.created_on_timestamp,
+                                                 last_updated_on_timestamp=new_experiment.last_updated_on_timestamp)
     return experiment
 
 
