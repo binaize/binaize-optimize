@@ -4,11 +4,11 @@ from utils.date_utils import get_date_range_in_utc_str
 
 
 def get_session_count_per_variation_over_time(data_store, client_id, experiment_id):
-    df_list = list()
     date_list = get_date_range_in_utc_str("Asia/Kolkata")
+    sql_list = list()
     for start_date, end_date, client_date in date_list:
-        sql = """ select
-                      variation_id, count(session_id) as num_session 
+        sql_temp = """ select
+                      variation_id, count(session_id) as num_session, '{date}' as date, '{start_date}' as keydate
                   from events 
                   where
                       creation_time  > '{start_date}' and
@@ -16,14 +16,15 @@ def get_session_count_per_variation_over_time(data_store, client_id, experiment_
                       client_id = '{client_id}' and
                       experiment_id = '{experiment_id}'
                   group by 
-                      variation_id  """.format(client_id=client_id, experiment_id=experiment_id, start_date=start_date,
-                                               end_date=end_date)
-        mobile_records = data_store.run_sql(sql=sql)
-        df = pd.DataFrame.from_records(mobile_records)
-        df.columns = ["variation_id", "num_session"]
-        df["date"] = client_date
-        df_list.append(df)
-    session_df = pd.concat(df_list, axis=0)
+                      variation_id  """.format(client_id="client", experiment_id="66f5d1fc432d47b994250688fd728ff7",
+                                               start_date=start_date, end_date=end_date, date=client_date)
+
+        sql_list.append(sql_temp)
+    sql = " union ".join(sql_list)
+    mobile_records = data_store.run_sql(sql)
+    df = pd.DataFrame.from_records(mobile_records)
+    df.columns = ["variation_id", "num_session", "date", "keydate"]
+    session_df = df.sort_values(['keydate'])
     variation_ids = session_df["variation_id"].unique()
     variation_dict = dict()
     for variation_id in variation_ids:
@@ -37,11 +38,11 @@ def get_session_count_per_variation_over_time(data_store, client_id, experiment_
 
 
 def get_visitor_count_per_variation_over_time(data_store, client_id, experiment_id):
-    df_list = list()
     date_list = get_date_range_in_utc_str("Asia/Kolkata")
+    sql_list = list()
     for start_date, end_date, client_date in date_list:
-        sql = """ select
-                      variation_id, count(distinct(session_id)) as num_visitor 
+        sql_temp = """ select
+                      variation_id, count(distinct(session_id)) as num_visitor, '{date}' as date, '{start_date}' as keydate
                   from events 
                   where
                       creation_time  > '{start_date}' and
@@ -49,14 +50,15 @@ def get_visitor_count_per_variation_over_time(data_store, client_id, experiment_
                       client_id = '{client_id}' and
                       experiment_id = '{experiment_id}'
                   group by 
-                      variation_id  """.format(client_id=client_id, experiment_id=experiment_id, start_date=start_date,
-                                               end_date=end_date)
-        mobile_records = data_store.run_sql(sql=sql)
-        df = pd.DataFrame.from_records(mobile_records)
-        df.columns = ["variation_id", "num_visitor"]
-        df["date"] = client_date
-        df_list.append(df)
-    session_df = pd.concat(df_list, axis=0)
+                      variation_id  """.format(client_id="client", experiment_id="66f5d1fc432d47b994250688fd728ff7",
+                                               start_date=start_date, end_date=end_date, date=client_date)
+
+        sql_list.append(sql_temp)
+    sql = " union ".join(sql_list)
+    mobile_records = data_store.run_sql(sql=sql)
+    df = pd.DataFrame.from_records(mobile_records)
+    df.columns = ["variation_id", "num_visitor", "date", "keydate"]
+    session_df = df.sort_values(['keydate'])
     variation_ids = session_df["variation_id"].unique()
     variation_dict = dict()
     for variation_id in variation_ids:
@@ -70,27 +72,29 @@ def get_visitor_count_per_variation_over_time(data_store, client_id, experiment_
 
 
 def get_conversion_rate_per_variation_over_time(data_store, client_id, experiment_id):
-    df_list = list()
     date_list = get_date_range_in_utc_str("Asia/Kolkata")
+    sql_list = list()
     for start_date, end_date, client_date in date_list:
-        sql = """ select
-                          variation_id, count(session_id) as num_session, event_name
-                      from events 
-                      where
-                          creation_time  > '{start_date}' and
-                          creation_time < '{end_date}' and
-                          client_id = '{client_id}' and
-                          experiment_id = '{experiment_id}'
-                      group by 
-                          variation_id, event_name""".format(client_id=client_id, experiment_id=experiment_id,
-                                                             start_date=start_date,
-                                                             end_date=end_date)
-        mobile_records = data_store.run_sql(sql=sql)
-        df = pd.DataFrame.from_records(mobile_records)
-        df.columns = ["variation_id", "num_session", "event_name"]
-        df["date"] = client_date
-        df_list.append(df)
-    conversion_df = pd.concat(df_list, axis=0)
+        sql_temp = """ select
+                      variation_id, count(session_id) as num_session, event_name,
+                      '{date}' as date, '{start_date}' as keydate
+                  from events 
+                  where
+                      creation_time  > '{start_date}' and
+                      creation_time < '{end_date}' and
+                      client_id = '{client_id}' and
+                      experiment_id = '{experiment_id}' 
+                  group by 
+                      variation_id,event_name  """.format(client_id=client_id,
+                                                          experiment_id=experiment_id,
+                                                          start_date=start_date, end_date=end_date, date=client_date)
+
+        sql_list.append(sql_temp)
+    sql = " union ".join(sql_list)
+    mobile_records = data_store.run_sql(sql=sql)
+    df = pd.DataFrame.from_records(mobile_records)
+    df.columns = ["variation_id", "num_session", "event_name", "date", "keydate"]
+    conversion_df = df.sort_values(['keydate'])
     served_df = conversion_df[conversion_df["event_name"] == "served"].copy()
     clicked_df = conversion_df[conversion_df["event_name"] == "clicked"].copy()
     conversion_df = pd.merge(served_df, clicked_df, on=["variation_id", "date"])
@@ -109,7 +113,8 @@ def get_conversion_rate_per_variation_over_time(data_store, client_id, experimen
 
 
 def get_conversion_rate_of_experiment(data_store, client_id, experiment_id):
-    sql = """ select table1.variation_id, table2.num_session, table2.num_visitor, table1.num_visitor 
+    sql = """ select table1.variation_id, table2.num_session, table2.num_visitor, 
+                        table1.num_visitor , cast(table1.num_visitor as float)/table2.num_visitor
                     from (select
                       variation_id, count(distinct(session_id)) as num_visitor
                   from events 
@@ -131,8 +136,7 @@ def get_conversion_rate_of_experiment(data_store, client_id, experiment_id):
 
     mobile_records = data_store.run_sql(sql=sql)
     df = pd.DataFrame.from_records(mobile_records)
-    df.columns = ["variation_id", "num_session", "num_visitor", "visitor_converted"]
-    df["conversion"] = df["visitor_converted"] / df["num_visitor"]
+    df.columns = ["variation_id", "num_session", "num_visitor", "visitor_converted", "conversion"]
     df["conversion"] = df["conversion"].map(lambda x: round(x, 2))
     result = df.to_dict(orient="records")
     return result
