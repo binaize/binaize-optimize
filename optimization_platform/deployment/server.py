@@ -2,24 +2,21 @@ from typing import List
 
 from fastapi import Depends, HTTPException, status
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
 from optimization_platform.deployment.server_utils import *
 from optimization_platform.src.service_layer.client import add_new_client, add_shopify_credentials_to_existing_client
-
+from optimization_platform.src.service_layer.dashboard import get_session_count_per_variation, \
+    get_visitor_count_per_variation, get_conversion_rate_per_variation
+from optimization_platform.src.service_layer.event import register_event_for_client
 from optimization_platform.src.service_layer.experiment import create_experiment_for_client_id, \
     get_experiments_for_client_id
 from optimization_platform.src.service_layer.variation import create_variation_for_client_id_and_experiment_id, \
     get_variation_id_to_recommend
-from optimization_platform.src.service_layer.event import register_event_for_client
-from optimization_platform.src.service_layer.dashboard import get_session_count_per_variation, \
-    get_visitor_count_per_variation
 from utils.data_store.rds_data_store import RDSDataStore
-
-from fastapi.middleware.cors import CORSMiddleware
-
-from fastapi.openapi.utils import get_openapi
 
 
 def custom_openapi():
@@ -207,5 +204,14 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
                                           experiment_id: str):
     result = get_visitor_count_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
                                              experiment_id=experiment_id)
+
+    return result
+
+
+@app.post("/get_conversion_rate_for_dashboard", response_model=dict)
+async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+                                            experiment_id: str):
+    result = get_conversion_rate_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
+                                               experiment_id=experiment_id)
 
     return result
