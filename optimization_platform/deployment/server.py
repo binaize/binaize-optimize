@@ -9,8 +9,9 @@ from jwt import PyJWTError
 
 from optimization_platform.deployment.server_utils import *
 from optimization_platform.src.service_layer.client import add_new_client, add_shopify_credentials_to_existing_client
-from optimization_platform.src.service_layer.dashboard import get_session_count_per_variation, \
-    get_visitor_count_per_variation, get_conversion_rate_per_variation
+from optimization_platform.src.service_layer.dashboard import get_session_count_per_variation_over_time, \
+    get_visitor_count_per_variation_over_time, get_conversion_rate_per_variation_over_time, \
+    get_conversion_rate_of_experiment
 from optimization_platform.src.service_layer.event import register_event_for_client
 from optimization_platform.src.service_layer.experiment import create_experiment_for_client_id, \
     get_experiments_for_client_id
@@ -193,8 +194,8 @@ async def register_event(*, event: Event):
 @app.post("/get_session_count_for_dashboard", response_model=dict)
 async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                           experiment_id: str):
-    result = get_session_count_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
-                                             experiment_id=experiment_id)
+    result = get_session_count_per_variation_over_time(data_store=rds_data_store, client_id=current_client.client_id,
+                                                       experiment_id=experiment_id)
 
     return result
 
@@ -202,8 +203,8 @@ async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Dep
 @app.post("/get_visitor_count_for_dashboard", response_model=dict)
 async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                           experiment_id: str):
-    result = get_visitor_count_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
-                                             experiment_id=experiment_id)
+    result = get_visitor_count_per_variation_over_time(data_store=rds_data_store, client_id=current_client.client_id,
+                                                       experiment_id=experiment_id)
 
     return result
 
@@ -211,7 +212,16 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
 @app.post("/get_conversion_rate_for_dashboard", response_model=dict)
 async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                             experiment_id: str):
-    result = get_conversion_rate_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
+    result = get_conversion_rate_per_variation_over_time(data_store=rds_data_store, client_id=current_client.client_id,
+                                                         experiment_id=experiment_id)
+
+    return result
+
+
+@app.post("/get_conversion_table_for_dashboard", response_model=List[dict])
+async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+                                             experiment_id: str):
+    result = get_conversion_rate_of_experiment(data_store=rds_data_store, client_id=current_client.client_id,
                                                experiment_id=experiment_id)
 
     return result
