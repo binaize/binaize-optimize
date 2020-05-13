@@ -89,3 +89,4 @@ class Event(BaseModel):
     variation_id: str
     session_id: str
     event_name: str
+    timestamp: str

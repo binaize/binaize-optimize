@@ -49,7 +49,7 @@ def create_experiment_for_client_id(data_store, client_id, experiment_name, page
     table = TABLE_EXPERIMENTS
     experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
                   "page_type": page_type, "experiment_type": experiment_type, "status": status,
-                  "created_on": created_on_utc_str, "last_updated_on": last_updated_on_utc_str}
+                  "creation_time": created_on_utc_str, "last_updation_time": last_updated_on_utc_str}
     try:
         data_store.insert_record_to_data_store(table=table, columns_value_dict=experiment)
     except Exception as e:
@@ -60,8 +60,9 @@ def create_experiment_for_client_id(data_store, client_id, experiment_name, page
 
 def get_experiments_for_client_id(data_store, client_id):
     table = TABLE_EXPERIMENTS
-    columns = ["client_id", "experiment_id", "experiment_name", "status", "page_type", "experiment_type", "created_on",
-               "last_updated_on"]
+    columns = ["client_id", "experiment_id", "experiment_name", "status", "page_type", "experiment_type",
+               "creation_time",
+               "last_updation_time"]
     where = "client_id='{client_id}'".format(client_id=client_id)
     df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
 
@@ -71,8 +72,8 @@ def get_experiments_for_client_id(data_store, client_id):
         # return y.strftime("%d-%b-%Y %H:%M:%S")
         return y.strftime("%d-%b-%Y")
 
-    df["created_on"] = df["created_on"].map(timestampz_to_string)
-    df["last_updated_on"] = df["last_updated_on"].map(timestampz_to_string)
+    df["creation_time"] = df["creation_time"].map(timestampz_to_string)
+    df["last_updation_time"] = df["last_updation_time"].map(timestampz_to_string)
 
     experiments = None
     if df is not None:
@@ -143,17 +144,18 @@ def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_
 
     return variation
 
+
 #
-# if __name__ == "__main__":
-#     rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
-#                                   dbname=AWS_RDS_DBNAME,
-#                                   user=AWS_RDS_USER,
-#                                   password=AWS_RDS_PASSWORD)
-#     x = create_experiment_for_client_id(data_store=rds_data_store, client_id="string", experiment_name="string",
-#                                         page_type="string", experiment_type="string", status="string",
-#                                         created_on_timestamp=1589310054,
-#                                         last_updated_on_timestamp=1589310054)
-#     print(x)
-#
-#     f = get_experiments_for_client_id(data_store=rds_data_store, client_id="string")
-#     print(f)
+if __name__ == "__main__":
+    rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+                                  dbname=AWS_RDS_DBNAME,
+                                  user=AWS_RDS_USER,
+                                  password=AWS_RDS_PASSWORD)
+    x = create_experiment_for_client_id(data_store=rds_data_store, client_id="string", experiment_name="string",
+                                        page_type="string", experiment_type="string", status="string",
+                                        created_on_timestamp=1589310054,
+                                        last_updated_on_timestamp=1589310054)
+    print(x)
+
+    f = get_experiments_for_client_id(data_store=rds_data_store, client_id="string")
+    print(f)

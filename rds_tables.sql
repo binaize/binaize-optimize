@@ -9,8 +9,10 @@ create table if not exists experiments (
     page_type varchar(50),
     experiment_type varchar(50),
     status varchar(50),
-    created_on timestamptz not null default now(),
-    last_updated_on timestamptz not null default now()
+    creation_time timestamptz not null default now(),
+    last_updation_time timestamptz not null default now(),
+    start_time timestamptz not null default now(),
+    end_time timestamptz not null default now()
 );
 
 create index if not exists experiments_client_idx on experiments (client_id);
@@ -59,7 +61,8 @@ create table if not exists events (
     client_id varchar(50) not null,
     experiment_id varchar(100) not null,
     session_id varchar(100),
-    event_name varchar(50)
+    event_name varchar(50),
+    creation_time timestamptz not null default now()
 );
 
 create index if not exists events_client_idx on events (client_id);
