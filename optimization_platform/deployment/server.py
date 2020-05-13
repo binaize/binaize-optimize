@@ -13,6 +13,8 @@ from optimization_platform.src.service_layer.experiment import create_experiment
 from optimization_platform.src.service_layer.variation import create_variation_for_client_id_and_experiment_id, \
     get_variation_id_to_recommend
 from optimization_platform.src.service_layer.event import register_event_for_client
+from optimization_platform.src.service_layer.dashboard import get_session_count_per_variation, \
+    get_visitor_count_per_variation
 from utils.data_store.rds_data_store import RDSDataStore
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -189,3 +191,21 @@ async def register_event(*, event: Event):
         client_id=event.client_id)
     response.status = status.HTTP_200_OK
     return response
+
+
+@app.post("/get_session_count_for_dashboard", response_model=dict)
+async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+                                          experiment_id: str):
+    result = get_session_count_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
+                                             experiment_id=experiment_id)
+
+    return result
+
+
+@app.post("/get_visitor_count_for_dashboard", response_model=dict)
+async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+                                          experiment_id: str):
+    result = get_visitor_count_per_variation(data_store=rds_data_store, client_id=current_client.client_id,
+                                             experiment_id=experiment_id)
+
+    return result

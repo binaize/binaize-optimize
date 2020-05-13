@@ -85,11 +85,16 @@ class RDSDataStore(object):
 
         sql = """ UPDATE {table} SET {set_string} where {where}"""
         query = sql.format(set_string=set_string, table=table, where=where)
-        # query = " UPDATE clients SET shopify_app_api_key=shopify_app_api_key,shopify_app_password=shopify_app_password,shopify_app_eg_url=shopify_app_eg_url,shopify_app_shared_secret=shopify_app_shared_secret where client_id=string"
-        # print(query)
-
         cursor = self.conn.cursor()
         cursor.execute(query)
         self.conn.commit()
         cursor.close()
         return
+
+    def run_sql(self, sql):
+        cursor = self.conn.cursor()
+        cursor.execute(sql)
+        self.conn.commit()  # <- We MUST commit to reflect the inserted data
+        mobile_records = cursor.fetchall()
+        cursor.close()
+        return mobile_records
