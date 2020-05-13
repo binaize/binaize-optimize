@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 
 from config import *
 from optimization_platform.deployment.server_models import *
-from optimization_platform.src.service_layer.serve import get_client_details_for_client_id
+from optimization_platform.src.service_layer.client import get_client_details_for_client_id
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

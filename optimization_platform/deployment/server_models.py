@@ -60,8 +60,8 @@ class NewExperiment(BaseExperiment):
 class Experiment(BaseExperiment):
     client_id: str
     experiment_id: str
-    created_on: str
-    last_updated_on: str
+    creation_time: str
+    last_updation_time: str
 
 
 class NewVariation(BaseModel):

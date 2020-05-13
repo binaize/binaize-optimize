@@ -6,9 +6,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
 from optimization_platform.deployment.server_utils import *
-from optimization_platform.src.service_layer.serve import add_new_client, add_shopify_credentials_to_existing_client, \
-    create_experiment_for_client_id, get_experiments_for_client_id, create_variation_for_client_id_and_experiment_id, \
-    get_variation_id_to_recommend, register_event_for_client
+from optimization_platform.src.service_layer.client import add_new_client, add_shopify_credentials_to_existing_client
+
+from optimization_platform.src.service_layer.experiment import create_experiment_for_client_id, \
+    get_experiments_for_client_id
+from optimization_platform.src.service_layer.variation import create_variation_for_client_id_and_experiment_id, \
+    get_variation_id_to_recommend
+from optimization_platform.src.service_layer.event import register_event_for_client
 from utils.data_store.rds_data_store import RDSDataStore
 
 from fastapi.middleware.cors import CORSMiddleware

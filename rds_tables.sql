@@ -68,3 +68,5 @@ create table if not exists events (
 create index if not exists events_client_idx on events (client_id);
 create index if not exists events_experiment_idx on events (experiment_id);
 create index if not exists events_variation_idx on events (variation_id);
+create index if not exists events_creation_time on events (creation_time);
+

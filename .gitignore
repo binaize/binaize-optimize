@@ -10,3 +10,5 @@ initialize_rds.sh
 *.crt
 *.key
 /ecs-params.yaml
+test.py
+
