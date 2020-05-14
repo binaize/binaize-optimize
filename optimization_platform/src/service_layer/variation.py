@@ -1,6 +1,7 @@
 import uuid
 
 from config import *
+from optimization_platform.src.service_layer.event import register_event_for_client
 
 
 def create_variation_for_client_id_and_experiment_id(data_store, client_id, experiment_id, variation_name,
