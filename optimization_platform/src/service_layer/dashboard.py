@@ -129,7 +129,7 @@ def get_conversion_rate_per_variation_over_time(data_store, client_id, experimen
 
 def get_conversion_rate_of_experiment(data_store, client_id, experiment_id):
     sql = """ select variation_table.variation_name,overview_table.variation_id, overview_table.num_session, overview_table.num_visitor, 
-            overview_table.num_visitor , overview_table.conversion
+            overview_table.num_conversion , overview_table.conversion
             from (select 
             table1.variation_id, table2.num_session, table2.num_visitor, 
             table1.num_conversion , cast(table1.num_conversion as float)/table2.num_visitor as conversion
