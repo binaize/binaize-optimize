@@ -7,14 +7,12 @@ def register_event_for_client(data_store, client_id, experiment_id, session_id, 
                               creation_time=None):
     table = TABLE_EVENTS
 
-    if creation_time is not None:
-        creation_time_utc_str = utc_timestamp_to_utc_datetime_string(creation_time)
-        columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
-                              "variation_id": variation_id,
-                              "session_id": session_id, "event_name": event_name,
-                              "creation_time": creation_time_utc_str}
-    else:
-        columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
-                              "variation_id": variation_id,
-                              "session_id": session_id, "event_name": event_name}
+    if creation_time is None:
+        creation_time = int(datetime.datetime.now(pytz.timezone("UTC")).timestamp())
+
+    creation_time_utc_str = utc_timestamp_to_utc_datetime_string(creation_time)
+    columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
+                          "variation_id": variation_id,
+                          "session_id": session_id, "event_name": event_name,
+                          "creation_time": creation_time_utc_str}
     data_store.insert_record_to_data_store(table=table, columns_value_dict=columns_value_dict)
