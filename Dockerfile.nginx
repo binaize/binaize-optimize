@@ -107,7 +107,11 @@ RUN apt-get update --fix-missing && \
     apt-get install -y libbz2-dev && \
     apt-get install -y liblzma-dev && \
     apt-get -y install wget
-RUN openssl req -newkey rsa:2048 -nodes -keyout /myserver-dev.key -x509 -out /myserver-dev.crt -subj "/C=US/ST=TEXAS/L=AUSTIN/O=IT/CN="${SSL_CN} -days 3650
+
+RUN apt-get -y update
+    apt-get -y install software-properties-common
+    apt-get -y install certbot python3-certbot-nginx
+
 COPY ./optimization_platform/scripts/nginx.conf /etc/nginx/nginx.conf
 
 
@@ -116,3 +120,7 @@ EXPOSE 80
 STOPSIGNAL SIGTERM
 
 CMD ["nginx", "-g", "daemon off;"]
+
+ADD ./optimization_platform/scripts/entrypoint_nginx.sh /bin/entrypoint.sh
+RUN chmod +x /bin/entrypoint.sh
+ENTRYPOINT ["/bin/entrypoint.sh"]
