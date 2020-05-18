@@ -107,12 +107,7 @@ RUN apt-get update --fix-missing && \
     apt-get install -y libbz2-dev && \
     apt-get install -y liblzma-dev && \
     apt-get -y install wget
-
-RUN apt-get -y update && \
-    apt-get -y install software-properties-common && \
-    apt-get -y install certbot python3-certbot-nginx
-
-RUN certbot certonly --nginx -d api.dev.binaize.com -n --agree-tos --email tuhinsharma121@gmail.com
+RUN openssl req -newkey rsa:2048 -nodes -keyout /myserver-dev.key -x509 -out /myserver-dev.crt -subj "/C=US/ST=TEXAS/L=AUSTIN/O=IT/CN="${SSL_CN} -days 3650
 COPY ./optimization_platform/scripts/nginx.conf /etc/nginx/nginx.conf
 
 
