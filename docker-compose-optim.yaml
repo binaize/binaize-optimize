@@ -14,17 +14,18 @@ services:
       - SERVICE_TIMEOUT=900
       - WORKER_COUNT=2
     ports:
-      - "6006"
+      - "6006:6006"
   nginx:
-    build:
-      context: ""
-      dockerfile: Dockerfile.nginx
-    image: nginx:latest
-    depends_on:
-      - optim
+    image: steveltn/https-portal:1
     ports:
-      - "443:443"
-      - "80:80"
+      - '80:80'
+      - '443:443'
+    links:
+      - optim
+    restart: always
+    environment:
+      DOMAINS: 'test.binaize.com -> http://optim:6006'
+      STAGE: 'production'
 
 
 
