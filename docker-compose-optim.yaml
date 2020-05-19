@@ -16,7 +16,9 @@ services:
     ports:
       - "6006"
   nginx:
-    image: steveltn/https-portal:1
+    build:
+      context: ""
+      dockerfile: Dockerfile.nginx
     ports:
       - '80:80'
       - '443:443'
