@@ -43,6 +43,6 @@ COPY ./config.py.template /config.py
 # --------------------------------------------------------------------------------------------------
 # add entrypoint for the container
 # --------------------------------------------------------------------------------------------------
-ADD ./optimization_platform/scripts/entrypoint.sh /bin/entrypoint.sh
+ADD ./deployment_config/scripts/entrypoint.sh /bin/entrypoint.sh
 RUN chmod +x /bin/entrypoint.sh
 ENTRYPOINT ["/bin/entrypoint.sh"]

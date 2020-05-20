@@ -9,25 +9,20 @@ services:
       - /bin/entrypoint.sh
     env_file:
       - ./config.env
-    environment:
-      - SERVICE_PORT=6006
-      - SERVICE_TIMEOUT=900
-      - WORKER_COUNT=2
     ports:
       - "6006"
   nginx:
     build:
       context: ""
       dockerfile: Dockerfile.nginx
+    env_file:
+      - ./config.env
     ports:
       - '80:80'
       - '443:443'
     links:
       - optim
     restart: always
-    environment:
-      DOMAINS: 'test.binaize.com -> http://optim:6006'
-      STAGE: 'production'
 
 
 

@@ -46,6 +46,6 @@ COPY ./config.py.template /config.py
 # write the tests
 # --------------------------------------------------------------------------------------------------
 
-ADD ./optimization_platform/scripts/test_suites.sh /bin/test_suites.sh
+ADD ./test_config/scripts/test_suites.sh /bin/test_suites.sh
 RUN chmod +x /bin/test_suites.sh
 ENTRYPOINT ["/bin/test_suites.sh"]

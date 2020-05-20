@@ -1,4 +1,5 @@
 FROM nginx:1.17.3
+MAINTAINER Tuhin Sharma "tuhinsharma121@gmail.com"
 
 WORKDIR /root
 
@@ -6,9 +7,13 @@ ENV S6_OVERLAY_VERSION v1.22.1.0
 ENV DOCKER_GEN_VERSION 0.7.4
 ENV ACME_TINY_VERSION 4.1.0
 
-ADD s6-overlay-amd64.tar.gz /tmp/
-ADD docker-gen-linux-amd64-0.7.4.tar.gz /tmp/
-ADD acme_tiny.py /bin/acme_tiny
+
+#https://github.com/just-containers/s6-overlay/releases/download/$S6_OVERLAY_VERSION/s6-overlay-amd64.tar.gz
+COPY deployment_config/s6-overlay-amd64.tar.gz /tmp/
+#https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
+COPY deployment_config/docker-gen-linux-amd64-0.7.4.tar.gz /tmp/
+#https://raw.githubusercontent.com/diafygi/acme-tiny/$ACME_TINY_VERSION/acme_tiny.py
+COPY deployment_config/acme_tiny.py /bin/acme_tiny
 
 
 RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C / &&\
@@ -21,7 +26,7 @@ RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C / &&\
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./fs_overlay /
+COPY deployment_config/fs_overlay /
 
 RUN chmod a+x /bin/*
 
