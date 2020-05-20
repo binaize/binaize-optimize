@@ -93,7 +93,7 @@ async def home_page():
     response.message = "Binaize Optim and Nginx are up and running"
     response.status = status.HTTP_200_OK
     logger.info("prod info message")
-    logger.info(time.time()-t)
+    logger.info(time.time() - t)
     return response
 
 
@@ -130,6 +130,18 @@ async def sign_up_new_client(new_client: NewClient):
         response.status = status.HTTP_200_OK
 
     return response
+
+
+@app.get("/items/{item_id}")
+async def read_item(item_id):
+    import time
+    t = time.time()
+    response = ResponseMessage()
+    response.message = "Binaize Optim and Nginx are up and running"
+    response.status = status.HTTP_200_OK
+    logger.info("item_id {item_id}".format(item_id=item_id))
+    logger.info(time.time() - t)
+    return {"item_id": item_id}
 
 
 @app.post("/add_shopify_credentials", response_model=ResponseMessage)

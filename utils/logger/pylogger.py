@@ -1,12 +1,10 @@
 import logging.config
 
 from config import *
-import os
-import aws_logging_handlers
 
 
 def get_logger(logger_name, log_level):
-    log_path = LOG_FOLDER + "/" + logger_name + ".log"
+    log_path = LOGGING_FOLDER + "/" + logger_name + ".log"
     directory = os.path.dirname(log_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -29,8 +27,8 @@ def get_logger(logger_name, log_level):
                 'formatter': logger_name,
                 'filename': log_path,
                 'mode': 'a',
-                'maxBytes': 10485760,
-                'backupCount': 10
+                'maxBytes': LOGGING_MAX_FILE_SIZE_BYTES,
+                'backupCount': LOGGING_LOCAL_BACK_UP_COUNT
             },
             's3': {
                 'level': log_level,
@@ -40,7 +38,7 @@ def get_logger(logger_name, log_level):
                 "aws_access_key_id": AWS_ACCESS_KEY_ID,
                 "aws_secret_access_key": AWS_SECRET_ACCESS_KEY,
                 "bucket": "binaize-dev",
-                "max_file_size_bytes": 10,
+                "max_file_size_bytes": LOGGING_MAX_FILE_SIZE_BYTES,
             }
         },
         'loggers': {
