@@ -2,13 +2,11 @@ import logging.config
 
 from config import *
 import os
+import aws_logging_handlers
 
 
-def get_log_path(name):
-    return LOG_FOLDER + "/" + name + ".log"
-
-
-def configure_logger(logger_name, log_path, log_level):
+def get_logger(logger_name, log_level):
+    log_path = LOG_FOLDER + "/" + logger_name + ".log"
     directory = os.path.dirname(log_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -29,13 +27,26 @@ def configure_logger(logger_name, log_path, log_level):
                 'level': log_level,
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': logger_name,
-                'filename': log_path
+                'filename': log_path,
+                'mode': 'a',
+                'maxBytes': 10485760,
+                'backupCount': 10
+            },
+            's3': {
+                'level': log_level,
+                'class': 'aws_logging_handlers.S3.S3Handler',
+                'formatter': logger_name,
+                'key': logger_name,
+                "aws_access_key_id": AWS_ACCESS_KEY_ID,
+                "aws_secret_access_key": AWS_SECRET_ACCESS_KEY,
+                "bucket": "binaize-dev",
+                "max_file_size_bytes": 100,
             }
         },
         'loggers': {
             logger_name: {
                 'level': log_level,
-                'handlers': ['console', 'file']
+                'handlers': ['console', 'file', 's3']
             }
         },
         'disable_existing_loggers': False

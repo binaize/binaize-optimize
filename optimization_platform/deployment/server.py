@@ -19,6 +19,10 @@ from optimization_platform.src.service_layer.variation import create_variation_f
     get_variation_id_to_recommend
 from utils.data_store.rds_data_store import RDSDataStore
 
+from utils.logger.pylogger import get_logger
+
+logger = get_logger("server", "INFO")
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -86,6 +90,7 @@ async def home_page():
     response = ResponseMessage()
     response.message = "Binaize Optim and Nginx are up and running"
     response.status = status.HTTP_200_OK
+    logger.info("prod info message")
     return response
 
 
