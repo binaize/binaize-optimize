@@ -87,10 +87,13 @@ async def get_current_active_client(current_client: BaseClient = Depends(_get_cu
 
 @app.get("/", response_model=ResponseMessage)
 async def home_page():
+    import time
+    t = time.time()
     response = ResponseMessage()
     response.message = "Binaize Optim and Nginx are up and running"
     response.status = status.HTTP_200_OK
     logger.info("prod info message")
+    logger.info(time.time()-t)
     return response
 
 
