@@ -67,7 +67,7 @@ cd binaize-optimize
 git checkout development
 scp -i "binaize-optimize.pem" ./config.env ubuntu@34.201.173.41:~/binaize-optimize/
 sudo docker-compose -f docker-compose-optim.yaml build
-sudo docker-compose -f docker-compose-optim.yaml up
+nohup sudo docker-compose -f docker-compose-optim.yaml up >> ~/optim.out&
 ```
 
 ## How to deploy to ECS

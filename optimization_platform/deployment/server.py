@@ -251,7 +251,7 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
 async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                  experiment_id: str):
     result = dict()
-    result["status"] = "Variation 1 is winning. It is 4% better than the others."
+    result["status"] = "Variation Yellow is winning. It is 4% better than the others."
     result[
         "conclusion"] = "There is NOT enough evidence to conclude the experiment (It is NOT yet statistically significant)."
     result["recommendation"] = "Recommendation: CONTINUE the Experiment."
