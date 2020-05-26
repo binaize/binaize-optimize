@@ -2,6 +2,7 @@ import uuid
 
 from config import *
 from optimization_platform.src.service_layer.event import register_event_for_client
+import pandas as pd
 
 
 def create_variation_for_client_id_and_experiment_id(data_store, client_id, experiment_id, variation_name,
@@ -12,10 +13,14 @@ def create_variation_for_client_id_and_experiment_id(data_store, client_id, expe
     variation = {"client_id": client_id, "experiment_id": experiment_id, "variation_id": variation_id,
                  "variation_name": variation_name,
                  "traffic_percentage": traffic_percentage}
-    data_store.insert_record_to_data_store(table=table, columns_value_dict=variation)
-    # except Exception as e:
-    #     print("create_variation_for_client_id_and_experiment_id failed")
-    #     variation = None
+    columns = list(variation.keys())
+    column = ",".join(columns)
+    values = [variation[key] for key in columns]
+    value = str(tuple(values))
+
+    sql = """INSERT INTO {table} ({column}) VALUES {value}"""
+    query = sql.format(table=table, column=column, value=value)
+    data_store.run_insert_into_sql(query=query)
     return variation
 
 
@@ -24,7 +29,14 @@ def get_variation_ids_for_client_id_and_experiment_id(data_store, client_id, exp
     columns = ["variation_id"]
     where = "client_id='{client_id}' and experiment_id='{experiment_id}'".format(client_id=client_id,
                                                                                  experiment_id=experiment_id)
-    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+    column = ",".join(columns)
+    sql = """ SELECT {column} from {table} where {where}"""
+    query = sql.format(column=column, table=table, where=where)
+    mobile_records = data_store.run_select_sql(query=query)
+    if len(mobile_records) > 0:
+        df = pd.DataFrame.from_records(mobile_records)
+        df.columns = columns
+
     variations = None
     if df is not None:
         variations = df["variation_id"].tolist()
@@ -39,7 +51,7 @@ def get_variation_id_to_recommend(data_store, client_id, experiment_id, session_
         client_id=client_id,
         experiment_id=experiment_id, session_id=session_id)
 
-    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+    df = data_store.run_select_sql(table=table, columns=columns, where=where)
 
     if df is not None and len(df) > 0:
         variation_id_to_recommend = df["variation_id"][0]

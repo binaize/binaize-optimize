@@ -15,4 +15,11 @@ def register_event_for_client(data_store, client_id, experiment_id, session_id, 
                           "variation_id": variation_id,
                           "session_id": session_id, "event_name": event_name,
                           "creation_time": creation_time_utc_str}
-    data_store.insert_record_to_data_store(table=table, columns_value_dict=columns_value_dict)
+    columns = list(columns_value_dict.keys())
+    column = ",".join(columns)
+    values = [columns_value_dict[key] for key in columns]
+    value = str(tuple(values))
+
+    sql = """INSERT INTO {table} ({column}) VALUES {value}"""
+    query = sql.format(table=table, column=column, value=value)
+    data_store.run_insert_into_sql(query=query)

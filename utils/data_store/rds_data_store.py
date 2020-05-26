@@ -15,86 +15,34 @@ class RDSDataStore(object):
                                      user=self.user,
                                      password=self.password)
 
-    def read_record_from_data_store(self, **args):
-        """
-        Read table into PANDAS dataframe
-
-        TODO complete docstring
-
-        """
-
-        table = args["table"]
-        columns = args["columns"]
-        column = ",".join(columns)
-        where = args["where"]
-
-        sql = """ SELECT {column} from {table} where {where}"""
-        query = sql.format(column=column, table=table, where=where)
-
-        cursor = self.conn.cursor()
-        cursor.execute(query)
-
-        self.conn.commit()  # <- We MUST commit to reflect the inserted data
-        mobile_records = cursor.fetchall()
-        cursor.close()
-        df = None
-        if len(mobile_records) > 0:
-            df = pd.DataFrame.from_records(mobile_records)
-            df.columns = columns
-        return df
-
-    def insert_record_to_data_store(self, **args):
-        def lst2pgarr(alist):
-            return '{' + ','.join(alist) + '}'
-
-        table = args["table"]
-        columns_value_dict = args["columns_value_dict"]
-
-        columns = list(columns_value_dict.keys())
-        column = ",".join(columns)
-
-        values = [
-            columns_value_dict[key] if type(columns_value_dict[key]) != list else lst2pgarr(columns_value_dict[key]) for
-            key in columns]
-        value = str(tuple(values))
-
-        sql = """INSERT INTO {table} ({column}) \
-                       VALUES {value}"""
-
-        query = sql.format(table=table, column=column, value=value)
-
+    def _run_sql_to_get_data(self, query):
         cursor = self.conn.cursor()
         cursor.execute(query)
         self.conn.commit()
-        cursor.close()
-        return
-
-    def update_record_in_data_store(self, **args):
-        table = args["table"]
-        columns_value_dict = args["columns_value_dict"]
-        where = args["where"]
-
-        set_string_list = list()
-        for column, value in columns_value_dict.items():
-            if type(value) == str:
-                temp = "{column}='{value}'".format(column=column, value=value)
-            else:
-                temp = "{column}={value}".format(column=column, value=value)
-            set_string_list.append(temp)
-        set_string = ",".join(set_string_list)
-
-        sql = """ UPDATE {table} SET {set_string} where {where}"""
-        query = sql.format(set_string=set_string, table=table, where=where)
-        cursor = self.conn.cursor()
-        cursor.execute(query)
-        self.conn.commit()
-        cursor.close()
-        return
-
-    def run_sql(self, sql):
-        cursor = self.conn.cursor()
-        cursor.execute(sql)
-        self.conn.commit()  # <- We MUST commit to reflect the inserted data
         mobile_records = cursor.fetchall()
         cursor.close()
         return mobile_records
+
+    def _run_sql_to_push_data(self, query):
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        self.conn.commit()
+        cursor.close()
+        return None
+
+    def run_select_sql(self, query):
+        mobile_records = self._run_sql_to_get_data(query=query)
+        return mobile_records
+
+    def run_insert_into_sql(self, query):
+        return self._run_sql_to_push_data(query=query)
+
+    def run_update_sql(self, query):
+        return self._run_sql_to_push_data(query=query)
+
+    def run_custom_sql(self, query):
+        mobile_records = self._run_sql_to_get_data(query=query)
+        return mobile_records
+
+    def run_create_table_sql(self, query):
+        return self._run_sql_to_push_data(query=query)

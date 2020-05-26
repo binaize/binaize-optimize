@@ -2,6 +2,7 @@ import uuid
 
 from config import *
 from utils.date_utils import *
+import pandas as pd
 
 
 def create_experiment_for_client_id(data_store, client_id, experiment_name, page_type, experiment_type, status,
@@ -14,8 +15,15 @@ def create_experiment_for_client_id(data_store, client_id, experiment_name, page
     experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
                   "page_type": page_type, "experiment_type": experiment_type, "status": status,
                   "creation_time": created_on_utc_str, "last_updation_time": last_updated_on_utc_str}
+    columns = list(experiment.keys())
+    column = ",".join(columns)
+    values = [experiment[key] for key in columns]
+    value = str(tuple(values))
+
+    sql = """INSERT INTO {table} ({column}) VALUES {value}"""
+    query = sql.format(table=table, column=column, value=value)
     try:
-        data_store.insert_record_to_data_store(table=table, columns_value_dict=experiment)
+        data_store.run_insert_into_sql(query=query)
     except Exception as e:
         print("create_experiment_for_client_id failed")
         experiment = None
@@ -28,7 +36,13 @@ def get_experiments_for_client_id(data_store, client_id):
                "creation_time",
                "last_updation_time"]
     where = "client_id='{client_id}'".format(client_id=client_id)
-    df = data_store.read_record_from_data_store(table=table, columns=columns, where=where)
+    column = ",".join(columns)
+    sql = """ SELECT {column} from {table} where {where}"""
+    query = sql.format(column=column, table=table, where=where)
+    mobile_records = data_store.run_select_sql(query=query)
+    if len(mobile_records) > 0:
+        df = pd.DataFrame.from_records(mobile_records)
+        df.columns = columns
     df["creation_time"] = df["creation_time"].map(timestampz_to_string)
     df["last_updation_time"] = df["last_updation_time"].map(timestampz_to_string)
 
