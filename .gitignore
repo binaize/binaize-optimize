@@ -11,4 +11,5 @@ initialize_rds.sh
 *.key
 /ecs-params.yaml
 test.py
-
+htmlcov
+.coverage

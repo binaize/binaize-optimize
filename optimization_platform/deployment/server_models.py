@@ -6,10 +6,6 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    client_id: str = None
-
-
 class BaseClient(BaseModel):
     client_id: str
     company_name: str
