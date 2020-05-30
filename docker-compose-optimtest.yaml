@@ -3,16 +3,14 @@ services:
   optim-test:
     build:
       context: ""
-      dockerfile: Dockerfile.tests
+      dockerfile: Dockerfile.optimtest
     image: optim-test:latest
     network_mode: bridge
     entrypoint:
       - /bin/test_suites.sh
     env_file:
-      - ./config.env
+      - optimtest.env
     environment:
       - SERVICE_PORT=6006
       - SERVICE_TIMEOUT=900
       - WORKER_COUNT=2
-    ports:
-      - "6006:6006"

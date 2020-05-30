@@ -1,7 +1,10 @@
 from unittest import TestCase
 
+import testing.postgresql
 from fastapi.testclient import TestClient
 
+pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=55895)
+params = pgsql.dsn()
 from optimization_platform.deployment.server import app, logger
 
 logger.disabled = True

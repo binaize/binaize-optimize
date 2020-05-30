@@ -34,21 +34,15 @@
 
 ## To run the test cases
 
-1. docker-compose -f docker-compose-test.yaml build
+docker-compose -f docker-compose-optim.yaml up --build --remove-orphans
 
-2. docker-compose -f docker-compose-test.yaml up
+The output should be 
+```
+----------------------------------------------------------------------     
+Ran X tests in 0.001s          
+OK
+```
 
-    
-    The output should be 
-
-    ```bash
-    ----------------------------------------------------------------------
-    Ran X tests in 0.001s
-    
-    OK
-    
-    ```
-   
 ## To reset the tables on AWS RDS
 
 ```bash
@@ -66,8 +60,7 @@ git clone https://github.com/binaize/binaize-optimize.git
 cd binaize-optimize
 git checkout development
 scp -i "binaize-optimize.pem" ./config.env ubuntu@34.201.173.41:~/binaize-optimize/
-sudo docker-compose -f docker-compose-optim.yaml build
-nohup sudo docker-compose -f docker-compose-optim.yaml up >> ~/optim.out&
+nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans >> ~/optim.out&
 ```
 
 ## How to deploy to ECS

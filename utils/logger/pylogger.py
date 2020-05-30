@@ -8,7 +8,7 @@ def get_logger(logger_name, log_level):
     directory = os.path.dirname(log_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-    logging.config.dictConfig({
+    logger_config = {
         'version': 1,
         'formatters': {
             logger_name: {'format': '%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -48,5 +48,12 @@ def get_logger(logger_name, log_level):
             }
         },
         'disable_existing_loggers': False
-    })
+    }
+    if AWS_SECRET_ACCESS_KEY is "" or AWS_SECRET_ACCESS_KEY is "":
+        logger_config["handlers"].pop("s3", None)
+        handler_list = logger_config["loggers"][logger_name]["handlers"]
+        handler_list.remove("s3")
+        logger_config["loggers"][logger_name]["handlers"] = handler_list
+
+    logging.config.dictConfig(config=logger_config)
     return logging.getLogger(logger_name)

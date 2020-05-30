@@ -11,7 +11,7 @@ services:
     entrypoint:
       - /bin/entrypoint.sh
     env_file:
-      - ./config.env
+      - optim.env
     environment:
       - SERVICE_PORT=6006
       - SERVICE_TIMEOUT=900

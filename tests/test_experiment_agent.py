@@ -66,6 +66,6 @@ class TestExperimentAgent(TestCase):
                             'creation_time': '27-May-2020', 'last_updation_time': '27-May-2020'}]
 
         for i in range(len(result)):
-            expected_result[i]['experiment_id'] = result[i]['experiment_id']
+            result[i].pop('experiment_id', None)
 
-        self.assertEqual(first=result, second=expected_result)
+        self.assertCountEqual(first=result, second=expected_result)

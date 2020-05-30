@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 from utils.date_utils import DateUtils
 import psycopg2
+import pytz
 
 
 class TestDateUtils(TestCase):
@@ -27,17 +28,17 @@ class TestDateUtils(TestCase):
 
     def test_get_date_range_in_utc_str(self):
         datetime_mock = Mock(wraps=datetime.datetime)
-        datetime_now = datetime.datetime(2020, 5, 21)
+        datetime_now = datetime.datetime(2020, 5, 21, 13, 0, 0, 0, pytz.timezone("Asia/Kolkata"))
         datetime_mock.now.return_value = datetime_now
         with patch('datetime.datetime', new=datetime_mock):
             result = DateUtils.get_date_range_in_utc_str("Asia/Kolkata")
-            expected_result = [('2020-05-14 18:30:00', '2020-05-15 18:29:59', 'May 15'),
-                               ('2020-05-15 18:30:00', '2020-05-16 18:29:59', 'May 16'),
-                               ('2020-05-16 18:30:00', '2020-05-17 18:29:59', 'May 17'),
-                               ('2020-05-17 18:30:00', '2020-05-18 18:29:59', 'May 18'),
-                               ('2020-05-18 18:30:00', '2020-05-19 18:29:59', 'May 19'),
-                               ('2020-05-19 18:30:00', '2020-05-20 18:29:59', 'May 20'),
-                               ('2020-05-20 18:30:00', '2020-05-20 18:30:00', 'May 21')]
+            expected_result = [('2020-05-14 18:07:00', '2020-05-15 18:06:59', 'May 15'),
+                               ('2020-05-15 18:07:00', '2020-05-16 18:06:59', 'May 16'),
+                               ('2020-05-16 18:07:00', '2020-05-17 18:06:59', 'May 17'),
+                               ('2020-05-17 18:07:00', '2020-05-18 18:06:59', 'May 18'),
+                               ('2020-05-18 18:07:00', '2020-05-19 18:06:59', 'May 19'),
+                               ('2020-05-19 18:07:00', '2020-05-20 18:06:59', 'May 20'),
+                               ('2020-05-20 18:07:00', '2020-05-21 07:07:00', 'May 21')]
         self.assertListEqual(list1=result, list2=expected_result)
 
     def test_timestampz_to_string(self):

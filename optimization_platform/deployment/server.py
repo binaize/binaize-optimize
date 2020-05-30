@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import List
 
 import jwt
-import testing.postgresql
 from fastapi import Depends, HTTPException, status
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -52,15 +51,6 @@ app.rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
                                   dbname=AWS_RDS_DBNAME,
                                   user=AWS_RDS_USER,
                                   password=AWS_RDS_PASSWORD)
-
-if TEST is True:
-    pgsql = testing.postgresql.Postgresql(cache_initialized_db=True)
-    params = pgsql.dsn()
-    app.rds_data_store = RDSDataStore(host=params['host'],
-                                      port=params['port'],
-                                      dbname=params["database"],
-                                      user=params["user"],
-                                      password=None)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

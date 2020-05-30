@@ -8,7 +8,7 @@ services:
     entrypoint:
       - /bin/entrypoint.sh
     env_file:
-      - ./config.env
+      - optim.env
     ports:
       - "6006"
   nginx:
@@ -16,7 +16,7 @@ services:
       context: ""
       dockerfile: Dockerfile.nginx
     env_file:
-      - ./config.env
+      - optim.env
     ports:
       - '80:80'
       - '443:443'

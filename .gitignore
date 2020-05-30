@@ -4,7 +4,7 @@ notebooks
 config.py
 *.pyc
 __pycache__
-config.env
+optim.env
 initialize_rds.sh
 *.pem
 *.crt

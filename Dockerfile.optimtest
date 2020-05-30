@@ -7,31 +7,40 @@ MAINTAINER Tuhin Sharma "tuhinsharma121@gmail.com"
 
 RUN apt-get update --fix-missing && \
     apt-get -y install build-essential && \
-    apt-get install -y apt-utils && \
+    apt-get -y install apt-utils && \
     apt-get -y install zlib1g-dev && \
-    apt-get install -y libssl-dev && \
-    apt-get install -y libbz2-dev && \
-    apt-get install -y liblzma-dev && \
+    apt-get -y install libssl-dev && \
+    apt-get -y install libbz2-dev && \
+    apt-get -y install liblzma-dev && \
     apt-get -y install wget
 
 # --------------------------------------------------------------------------------------------------
 # install python 3.6.8
 # --------------------------------------------------------------------------------------------------
 
+RUN apt-get -y install libsqlite3-dev
 RUN wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz && \
     tar -xzf Python-3.6.8.tgz && \
     cd Python-3.6.8 && \
-    ./configure && \
+    ./configure --enable-loadable-sqlite-extensions && \
     make && \
     make install
+
+# --------------------------------------------------------------------------------------------------
+# install postgres
+# --------------------------------------------------------------------------------------------------
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata && \
+    apt-get -y install postgresql postgresql-contrib --fix-missing
 
 ## --------------------------------------------------------------------------------------------------
 ## install python packages
 ## --------------------------------------------------------------------------------------------------
 
 COPY ./requirements.txt /
+RUN pip3 install --upgrade setuptools
 RUN pip3 install -r /requirements.txt
-
 
 # --------------------------------------------------------------------------------------------------
 # copy src code and scripts into root dir /
@@ -40,7 +49,15 @@ RUN pip3 install -r /requirements.txt
 COPY ./optimization_platform /optimization_platform
 COPY ./utils /utils
 COPY ./config.py.template /config.py
+COPY ./tests /tests
+COPY ./rds_tables.sql /rds_tables.sql
 
+# --------------------------------------------------------------------------------------------------
+# set timezone for the container as Asia/Kolkata
+# --------------------------------------------------------------------------------------------------
+
+ENV TZ=Asia/Kolkata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # --------------------------------------------------------------------------------------------------
 # write the tests
@@ -48,4 +65,8 @@ COPY ./config.py.template /config.py
 
 ADD ./test_config/scripts/test_suites.sh /bin/test_suites.sh
 RUN chmod +x /bin/test_suites.sh
+RUN chown postgres:postgres /
+USER postgres
+WORKDIR "/"
 ENTRYPOINT ["/bin/test_suites.sh"]
+
