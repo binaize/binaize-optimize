@@ -5,7 +5,8 @@ config.py
 *.pyc
 __pycache__
 optim.env
-initialize_rds.sh
+optim-*.env
+initialize*
 *.pem
 *.crt
 *.key

@@ -52,7 +52,7 @@ bash initialize_rds.sh
 ## To deploy in EC2
 
 ```bash
-ssh -i "binaize-optimize.pem" ubuntu@34.201.173.41
+ssh -i "binaize-optimize.pem" ubuntu@api.binaize.com
 sudo apt update
 sudo apt -y install docker.io
 sudo apt -y install docker-compose
