@@ -248,7 +248,7 @@ async def register_event(*, event: Event):
 @app.post("/get_session_count_for_dashboard", response_model=dict)
 async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                           experiment_id: str):
-    result = VariationAgent.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
+    result = DashboardAgent.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
                                                                       client_id=current_client.client_id,
                                                                       experiment_id=experiment_id)
 
