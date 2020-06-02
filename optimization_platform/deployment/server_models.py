@@ -86,3 +86,10 @@ class Event(BaseModel):
     session_id: str
     event_name: str
     timestamp: str
+
+
+class Visit(BaseModel):
+    client_id: str
+    session_id: str
+    event_name: str
+    timestamp: str

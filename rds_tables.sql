@@ -70,3 +70,16 @@ create index if not exists events_experiment_idx on events (experiment_id);
 create index if not exists events_variation_idx on events (variation_id);
 create index if not exists events_creation_time on events (creation_time);
 
+drop table if exists visits;
+
+create table if not exists visits (
+    client_id varchar(50) not null,
+    session_id varchar(100),
+    event_name varchar(50),
+    creation_time timestamptz not null default now()
+);
+
+create index if not exists visits_client_idx on visits (client_id);
+create index if not exists visits_event_name on visits (event_name);
+create index if not exists visits_creation_time on visits (creation_time);
+

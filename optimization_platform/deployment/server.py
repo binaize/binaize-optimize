@@ -17,6 +17,7 @@ from optimization_platform.src.agents.dashboard_agent import DashboardAgent
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
+from optimization_platform.src.agents.visits_agent import VisitAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from utils.logger.pylogger import get_logger
 from utils.date_utils import DateUtils
@@ -298,3 +299,17 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
         "conclusion"] = "There is NOT enough evidence to conclude the experiment (It is NOT yet statistically significant)."
     result["recommendation"] = "Recommendation: CONTINUE the Experiment."
     return result
+
+
+@app.post("/register_visit", response_model=ResponseMessage)
+async def register_visit(*, visit: Visit):
+    creation_time = DateUtils.get_timestamp_now()
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id=visit.client_id,
+                                         session_id=visit.session_id,
+                                         event_name=visit.event_name, creation_time=creation_time)
+
+    response = ResponseMessage()
+    response.message = "Visit registration for client_id {client_id} and event name {event_name} is successful.".format(
+        client_id=visit.client_id, event_name=visit.event_name)
+    response.status = status.HTTP_200_OK
+    return response
