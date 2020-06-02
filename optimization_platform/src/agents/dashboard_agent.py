@@ -294,9 +294,129 @@ class DashboardAgent(object):
         result = {}
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
-            df.columns = df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
-                                       "visitor_converted",
-                                       "conversion"]
+            df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
+                          "visitor_converted",
+                          "conversion"]
             df["conversion"] = df["conversion"].map(lambda x: round(x, 2))
             result = df.to_dict(orient="records")
+        return result
+
+    @classmethod
+    def get_shop_funnel_analytics(cls, data_store, client_id):
+        sql = \
+            """
+                select '1' as id, 'Home Page' as event,count(distinct(session_id)) as blah
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'home'
+                union
+                (select '2' as id, 'Collection Page' as event,count(distinct(session_id)) as blahblah
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'collection')
+                union
+                (select '3' as id, 'Product Page' as event,count(distinct(session_id)) as blahblahd
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'product')
+                union
+                (select '4' as id, 'Cart Page' as event,count(distinct(session_id)) as blahblahdd
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'cart')
+                union
+                (select '5' as id, 'Checkout Page' as event,count(distinct(session_id)) as blahblah
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'checkout')
+                union
+                (select '6' as id, 'Purchase' as event,count(distinct(session_id))/3 as blahblah
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'checkout')
+
+            """.format(client_id=client_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        result = {}
+        if mobile_records is not None and len(mobile_records) > 0:
+            df = pd.DataFrame.from_records(mobile_records)
+            df.columns = ["id", "pages", "count"]
+            df = df.sort_values(['id'])
+            df["percentage"] = df["count"] * 100 / (max(df["count"]) + 1)
+            df["percentage"] = df["percentage"].map(lambda x: round(x, 2))
+        result["pages"] = df["pages"].tolist()
+        temp_dict = dict()
+        temp_dict["count"] = df["count"].tolist()
+        temp_dict["percentage"] = df["percentage"][1:].tolist()
+        result["shop_funnel"] = temp_dict
+        return result
+
+    @classmethod
+    def get_product_conversion_analytics(cls, data_store, client_id):
+        result = {
+            "products": [
+                "Tissot T Race",
+                "Tissot T Classic",
+                "Tissot T Sport",
+                "Tissot 1853",
+                "Ordinary Watch",
+                "Titan Classic Watch",
+                "IWC Watch"
+            ],
+            "product_conversion": {
+                "visitor_count": [
+                    1156,
+                    900,
+                    600,
+                    1456,
+                    800,
+                    500,
+                    760
+                ],
+                "convertion_count": [
+                    20,
+                    12,
+                    37,
+                    29,
+                    9,
+                    13,
+                    11
+
+                ],
+                "convertion_percentage": [
+                    1.78,
+                    1.33,
+                    6.12,
+                    1.99,
+                    1.12,
+                    2.41,
+                    1.44
+
+                ]
+            }
+        }
+        return result
+
+    @classmethod
+    def get_landing_page_analytics(cls, data_store, client_id):
+        result = {
+            "pages": [
+                "Home Page",
+                "Product Page",
+                "Blog Page"
+            ],
+            "landing_conversion": {
+                "convertion_percentage": [
+                    4.32,
+                    5.34,
+                    2.28
+                ]
+            }
+        }
         return result

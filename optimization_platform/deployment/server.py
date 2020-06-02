@@ -313,3 +313,31 @@ async def register_visit(*, visit: Visit):
         client_id=visit.client_id, event_name=visit.event_name)
     response.status = status.HTTP_200_OK
     return response
+
+
+@app.post("/get_shop_funnel_analytics_for_dashboard", response_model=dict)
+async def get_shop_funnel_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client)
+                                                  ):
+    result = DashboardAgent.get_shop_funnel_analytics(data_store=app.rds_data_store,
+                                                      client_id=current_client.client_id)
+
+    return result
+
+
+@app.post("/get_product_conversion_analytics_for_dashboard", response_model=dict)
+async def get_product_conversion_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(
+    get_current_active_client)
+                                                         ):
+    result = DashboardAgent.get_product_conversion_analytics(data_store=app.rds_data_store,
+                                                             client_id=current_client.client_id)
+
+    return result
+
+
+@app.post("/get_landing_page_analytics_for_dashboard", response_model=dict)
+async def get_landing_page_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client)
+                                                   ):
+    result = DashboardAgent.get_landing_page_analytics(data_store=app.rds_data_store,
+                                                       client_id=current_client.client_id)
+
+    return result
