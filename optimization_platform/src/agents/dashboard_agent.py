@@ -353,7 +353,7 @@ class DashboardAgent(object):
         result["pages"] = df["pages"].tolist()
         temp_dict = dict()
         temp_dict["count"] = df["count"].tolist()
-        temp_dict["percentage"] = df["percentage"][1:].tolist()
+        temp_dict["percentage"] = [100.00] + df["percentage"][1:].tolist()
         result["shop_funnel"] = temp_dict
         return result
 
