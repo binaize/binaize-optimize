@@ -19,6 +19,7 @@ from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from utils.logger.pylogger import get_logger
+from utils.date_utils import DateUtils
 
 logger = get_logger("server", "INFO")
 
@@ -223,20 +224,23 @@ async def get_variation_id_to_redirect(*, recommendation_request: Recommendation
                                                              client_id=recommendation_request.client_id,
                                                              experiment_id=recommendation_request.experiment_id,
                                                              session_id=recommendation_request.session_id)
+    creation_time = DateUtils.get_timestamp_now()
     EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=recommendation_request.client_id,
                                          experiment_id=recommendation_request.experiment_id,
                                          session_id=recommendation_request.session_id,
-                                         variation_id=variation["variation_id"], event_name="served")
+                                         variation_id=variation["variation_id"], event_name="served",
+                                         creation_time=creation_time)
 
     return variation
 
 
 @app.post("/register_event", response_model=ResponseMessage)
 async def register_event(*, event: Event):
+    creation_time = DateUtils.get_timestamp_now()
     EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=event.client_id,
                                          experiment_id=event.experiment_id,
                                          session_id=event.session_id, variation_id=event.variation_id,
-                                         event_name=event.event_name)
+                                         event_name=event.event_name, creation_time=creation_time)
 
     response = ResponseMessage()
     response.message = "Event registration for client_id {client_id} is successful.".format(
