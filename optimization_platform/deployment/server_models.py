@@ -77,6 +77,7 @@ class RecommendationRequest(BaseModel):
     client_id: str
     experiment_id: str
     session_id: str
+    flag: str = None
 
 
 class Event(BaseModel):

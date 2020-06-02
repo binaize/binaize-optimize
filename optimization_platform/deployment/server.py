@@ -225,12 +225,13 @@ async def get_variation_id_to_redirect(*, recommendation_request: Recommendation
                                                              client_id=recommendation_request.client_id,
                                                              experiment_id=recommendation_request.experiment_id,
                                                              session_id=recommendation_request.session_id)
-    creation_time = DateUtils.get_timestamp_now()
-    EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=recommendation_request.client_id,
-                                         experiment_id=recommendation_request.experiment_id,
-                                         session_id=recommendation_request.session_id,
-                                         variation_id=variation["variation_id"], event_name="served",
-                                         creation_time=creation_time)
+    if recommendation_request.flag is None:
+        creation_time = DateUtils.get_timestamp_now()
+        EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=recommendation_request.client_id,
+                                             experiment_id=recommendation_request.experiment_id,
+                                             session_id=recommendation_request.session_id,
+                                             variation_id=variation["variation_id"], event_name="served",
+                                             creation_time=creation_time)
 
     return variation
 
