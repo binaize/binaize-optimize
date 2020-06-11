@@ -1,23 +1,25 @@
 import uuid
 
+import pandas as pd
+
 from config import *
 from utils.date_utils import DateUtils
-import pandas as pd
 
 
 class ExperimentAgent(object):
 
     @classmethod
     def create_experiment_for_client_id(cls, data_store, client_id, experiment_name, page_type, experiment_type, status,
-                                        created_on_timestamp, last_updated_on_timestamp):
+                                        creation_time, last_updation_time):
         experiment_id = uuid.uuid4().hex
-        created_on_utc_str = DateUtils.convert_timestamp_to_utc_datetime_string(created_on_timestamp)
-        last_updated_on_utc_str = DateUtils.convert_timestamp_to_utc_datetime_string(last_updated_on_timestamp)
+
+        creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_time)
+        last_updation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(last_updation_time)
 
         table = TABLE_EXPERIMENTS
         experiment = {"client_id": client_id, "experiment_id": experiment_id, "experiment_name": experiment_name,
                       "page_type": page_type, "experiment_type": experiment_type, "status": status,
-                      "creation_time": created_on_utc_str, "last_updation_time": last_updated_on_utc_str}
+                      "creation_time": creation_time_utc_str, "last_updation_time": last_updation_time_utc_str}
         columns = list(experiment.keys())
         column = ",".join(columns)
         values = [experiment[key] for key in columns]
@@ -43,8 +45,8 @@ class ExperimentAgent(object):
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = columns
-            df["creation_time"] = df["creation_time"].map(DateUtils.timestampz_to_string)
-            df["last_updation_time"] = df["last_updation_time"].map(DateUtils.timestampz_to_string)
+            df["creation_time"] = df["creation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
+            df["last_updation_time"] = df["last_updation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
 
         experiments = None
         if df is not None:

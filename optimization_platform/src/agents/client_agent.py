@@ -66,3 +66,19 @@ class ClientAgent(object):
         query = sql.format(set_string=set_string, table=table, where=where)
 
         data_store.run_update_sql(query=query)
+
+    @classmethod
+    def get_all_client_ids(cls, data_store):
+        table = TABLE_CLIENTS
+        columns = ["client_id"]
+        column = ",".join(columns)
+        query = """ select {column} from {table}""".format(column=column, table=table)
+        mobile_records = data_store.run_select_sql(query=query)
+        df = None
+        if mobile_records is not None and len(mobile_records) > 0:
+            df = pd.DataFrame.from_records(mobile_records)
+            df.columns = columns
+        client_ids = None
+        if df is not None:
+            client_ids = df[columns[0]].tolist()
+        return client_ids

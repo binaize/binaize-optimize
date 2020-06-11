@@ -1,28 +1,40 @@
 version: "3"
 services:
-  optim:
+  optim-server:
     build:
       context: ""
-      dockerfile: Dockerfile.optim
-    image: optim:latest
+      dockerfile: Dockerfile.optim-server
+    image: optim-server:latest
     entrypoint:
       - /bin/entrypoint.sh
     env_file:
       - optim.env
     ports:
       - "6006"
-  nginx:
+  optim-nginx:
     build:
       context: ""
-      dockerfile: Dockerfile.nginx
+      dockerfile: Dockerfile.optim-nginx
+    image: optim-nginx:latest
     env_file:
       - optim.env
     ports:
       - '80:80'
       - '443:443'
     links:
-      - optim
+      - optim-server
     restart: always
+  optim-scheduler:
+    build:
+      context: ""
+      dockerfile: Dockerfile.optim-scheduler
+    image: optim-scheduler:latest
+    entrypoint:
+      - /bin/entrypoint.sh
+    env_file:
+      - optim.env
+    ports:
+      - "6008"
 
 
 

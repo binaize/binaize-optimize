@@ -4,6 +4,7 @@ from utils.data_store.rds_data_store import RDSDataStore
 from utils.date_utils import DateUtils
 
 
+# noinspection SqlResolve
 class DashboardAgent(object):
     @classmethod
     def get_session_count_per_variation_over_time(cls, data_store: RDSDataStore, client_id, experiment_id):
@@ -344,16 +345,16 @@ class DashboardAgent(object):
             """.format(client_id=client_id)
         mobile_records = data_store.run_custom_sql(sql)
         result = {}
+        temp_dict = dict()
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = ["id", "pages", "count"]
             df = df.sort_values(['id'])
             df["percentage"] = df["count"] * 100 / (max(df["count"]) + 1)
             df["percentage"] = df["percentage"].map(lambda x: round(x, 2))
-        result["pages"] = df["pages"].tolist()
-        temp_dict = dict()
-        temp_dict["count"] = df["count"].tolist()
-        temp_dict["percentage"] = [100.00] + df["percentage"][1:].tolist()
+            result["pages"] = df["pages"].tolist()
+            temp_dict["count"] = df["count"].tolist()
+            temp_dict["percentage"] = df["percentage"].tolist()
         result["shop_funnel"] = temp_dict
         return result
 

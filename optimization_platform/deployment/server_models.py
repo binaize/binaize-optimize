@@ -44,15 +44,6 @@ class BaseExperiment(BaseModel):
     status: str
 
 
-class NewExperiment(BaseExperiment):
-    experiment_name: str
-    page_type: str
-    experiment_type: str
-    created_on_timestamp: int = None
-    last_updated_on_timestamp: int
-    status: str
-
-
 class Experiment(BaseExperiment):
     client_id: str
     experiment_id: str
@@ -62,21 +53,14 @@ class Experiment(BaseExperiment):
 
 class NewVariation(BaseModel):
     experiment_id: str
-    variation_name: str = None
-    traffic_percentage: int = None
+    variation_name: str
+    traffic_percentage: int
 
 
-class Variation(NewVariation):
+class Variation(BaseModel):
     variation_id: str
     client_id: str
-    s3_bucket_name: str = None
-    s3_html_location: str = None
-
-
-class RecommendationRequest(BaseModel):
-    client_id: str
     experiment_id: str
-    session_id: str
 
 
 class Event(BaseModel):
@@ -85,11 +69,10 @@ class Event(BaseModel):
     variation_id: str
     session_id: str
     event_name: str
-    timestamp: str
 
 
 class Visit(BaseModel):
     client_id: str
     session_id: str
     event_name: str
-    timestamp: str
+    url: str

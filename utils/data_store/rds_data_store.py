@@ -1,4 +1,6 @@
-import pandas as pd
+import io
+import sys
+
 import psycopg2
 
 
@@ -46,3 +48,44 @@ class RDSDataStore(object):
 
     def run_create_table_sql(self, query):
         return self._run_sql_to_push_data(query=query)
+
+    def run_batch_insert_sql(self, file, table, columns):
+        cursor = self.conn.cursor()
+        cursor.copy_from(file=file, table=table, columns=columns)
+        self.conn.commit()
+        cursor.close()
+        return None
+
+    def run_batch_delete_sql(self, query, data_list):
+        cursor = self.conn.cursor()
+        sql = cursor.mogrify(query, data_list)
+        cursor.execute(sql)
+        self.conn.commit()
+
+
+class IteratorFile(io.TextIOBase):
+    """ given an iterator which yields strings,
+    return a file like object for reading those strings """
+
+    def __init__(self, it):
+        self._it = it
+        self._f = io.StringIO()
+
+    def read(self, length=sys.maxsize):
+
+        try:
+            while self._f.tell() < length:
+                self._f.write(next(self._it) + "\n")
+
+        except StopIteration as e:
+            pass
+
+        finally:
+            self._f.seek(0)
+            data = self._f.read(length)
+            remainder = self._f.read()
+            self._f.seek(0)
+            self._f.truncate(0)
+            self._f.write(remainder)
+            return data
+

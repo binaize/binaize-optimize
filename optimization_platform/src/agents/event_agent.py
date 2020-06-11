@@ -9,10 +9,7 @@ class EventAgent(object):
                                   creation_time):
         table = TABLE_EVENTS
 
-        # if creation_time is None:
-        #     creation_time = int(datetime.datetime.now(pytz.timezone("UTC")).timestamp())
-
-        creation_time_utc_str = DateUtils.convert_timestamp_to_utc_datetime_string(creation_time)
+        creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_time)
         columns_value_dict = {"client_id": client_id, "experiment_id": experiment_id,
                               "variation_id": variation_id,
                               "session_id": session_id, "event_name": event_name,

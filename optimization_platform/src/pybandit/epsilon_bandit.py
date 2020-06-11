@@ -1,6 +1,7 @@
-import numpy as np
-import random
 import copy
+import random
+
+import numpy as np
 
 
 class EpsilonGreedy(object):

@@ -2,9 +2,15 @@ import datetime
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from utils.date_utils import DateUtils
 import psycopg2
 import pytz
+
+from utils.date_utils import DateUtils
+
+datetime_mock = Mock(wraps=datetime.datetime)
+tz = pytz.timezone("Asia/Kolkata")
+datetime_now = tz.localize(datetime.datetime(2020, 5, 21, 13, 0, 0, 0))
+datetime_mock.now.return_value = datetime_now
 
 
 class TestDateUtils(TestCase):
@@ -12,38 +18,32 @@ class TestDateUtils(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDateUtils, self).__init__(*args, **kwargs)
 
+    @patch('datetime.datetime', new=datetime_mock)
     def test_get_timestamp_now_for_timezone(self):
-        datetime_mock = Mock(wraps=datetime.datetime)
-        datetime_now = datetime.datetime(2020, 5, 21)
         expected_timestamp_now = int(datetime_now.timestamp())
-        datetime_mock.now.return_value = datetime_now
-        with patch('datetime.datetime', new=datetime_mock):
-            timestamp_now = DateUtils.get_timestamp_now()
+        timestamp_now = DateUtils.get_timestamp_now()
         self.assertEqual(first=timestamp_now, second=expected_timestamp_now)
 
     def test_convert_timestamp_to_utc_datetime_string(self):
-        expected_result = '2020-05-28 10:05:21'
-        result = DateUtils.convert_timestamp_to_utc_datetime_string(1590660321)
+        expected_result = '2020-05-21T07:30:00+00:00'
+        result = DateUtils.convert_timestamp_to_utc_iso_string(1590046200)
         self.assertEqual(first=result, second=expected_result)
 
+    @patch('datetime.datetime', new=datetime_mock)
     def test_get_date_range_in_utc_str(self):
-        datetime_mock = Mock(wraps=datetime.datetime)
-        datetime_now = datetime.datetime(2020, 5, 21, 13, 0, 0, 0, pytz.timezone("Asia/Kolkata"))
-        datetime_mock.now.return_value = datetime_now
-        with patch('datetime.datetime', new=datetime_mock):
-            result = DateUtils.get_date_range_in_utc_str("Asia/Kolkata")
-            expected_result = [('2020-05-14 18:07:00', '2020-05-15 18:06:59', 'May 15'),
-                               ('2020-05-15 18:07:00', '2020-05-16 18:06:59', 'May 16'),
-                               ('2020-05-16 18:07:00', '2020-05-17 18:06:59', 'May 17'),
-                               ('2020-05-17 18:07:00', '2020-05-18 18:06:59', 'May 18'),
-                               ('2020-05-18 18:07:00', '2020-05-19 18:06:59', 'May 19'),
-                               ('2020-05-19 18:07:00', '2020-05-20 18:06:59', 'May 20'),
-                               ('2020-05-20 18:07:00', '2020-05-21 07:07:00', 'May 21')]
+        result = DateUtils.get_date_range_in_utc_str("Asia/Kolkata")
+        expected_result = [('2020-05-14T18:30:00+00:00', '2020-05-15T18:29:59+00:00', 'May 15'),
+                           ('2020-05-15T18:30:00+00:00', '2020-05-16T18:29:59+00:00', 'May 16'),
+                           ('2020-05-16T18:30:00+00:00', '2020-05-17T18:29:59+00:00', 'May 17'),
+                           ('2020-05-17T18:30:00+00:00', '2020-05-18T18:29:59+00:00', 'May 18'),
+                           ('2020-05-18T18:30:00+00:00', '2020-05-19T18:29:59+00:00', 'May 19'),
+                           ('2020-05-19T18:30:00+00:00', '2020-05-20T18:29:59+00:00', 'May 20'),
+                           ('2020-05-20T18:30:00+00:00', '2020-05-21T07:30:00+00:00', 'May 21')]
         self.assertListEqual(list1=result, list2=expected_result)
 
     def test_timestampz_to_string(self):
         timestampz = datetime.datetime(2020, 5, 27, 9, 15, 23,
                                        tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=330, name=None))
-        result = DateUtils.timestampz_to_string(timestampz=timestampz)
+        result = DateUtils.timestampz_to_dashboard_formatted_string(timestampz=timestampz)
         expected_result = '27-May-2020'
         self.assertEqual(first=result, second=expected_result)

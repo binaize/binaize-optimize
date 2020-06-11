@@ -7,9 +7,11 @@ from utils.data_store.s3_data_store import S3DataStore
 
 class TestS3DataStore(TestCase):
 
-    @mock_s3
     def __init__(self, *args, **kwargs):
         super(TestS3DataStore, self).__init__(*args, **kwargs)
+
+    @mock_s3
+    def setUp(self):
         self.s3_data_store = S3DataStore(access_key="AWS_ACCESS_KEY_ID",
                                          secret_key="AWS_SECRET_ACCESS_KEY")
 

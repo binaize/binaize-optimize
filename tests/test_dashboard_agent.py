@@ -1,30 +1,43 @@
+import datetime
 from unittest import TestCase
+from unittest import mock
+from unittest.mock import Mock
 
+import pytz
 import testing.postgresql
 
+from config import *
 from optimization_platform.src.agents.dashboard_agent import DashboardAgent
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
+from optimization_platform.src.agents.visit_agent import VisitAgent
 from utils.data_store.rds_data_store import RDSDataStore
+
+pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=int(AWS_RDS_PORT))
+rds_data_store = RDSDataStore(host=AWS_RDS_HOST,
+                              port=AWS_RDS_PORT,
+                              dbname=AWS_RDS_DBNAME,
+                              user=AWS_RDS_USER,
+                              password=AWS_RDS_PASSWORD)
+
+datetime_mock = Mock(wraps=datetime.datetime)
+tz = pytz.timezone("Asia/Kolkata")
+datetime_now = tz.localize(datetime.datetime(2020, 5, 30, 13, 0, 0, 0))
+datetime_mock.now.return_value = datetime_now
 
 
 class TestDashboardAgent(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDashboardAgent, self).__init__(*args, **kwargs)
-        self.pgsql = testing.postgresql.Postgresql(cache_initialized_db=True)
-        self.assertIsNotNone(self.pgsql)
-        params = self.pgsql.dsn()
-        self.assertEqual('test', params['database'])
-        self.assertEqual('127.0.0.1', params['host'])
-        self.assertEqual(self.pgsql.settings['port'], params['port'])
-        self.assertEqual('postgres', params['user'])
-        self.rds_data_store = RDSDataStore(host=params['host'],
-                                           port=params['port'],
-                                           dbname=params["database"],
-                                           user=params["user"],
-                                           password=None)
 
-        self.rds_data_store.run_create_table_sql(open("rds_tables.sql", "r").read())
+    def setUp(self):
+        self.rds_data_store = rds_data_store
+        with open("rds_tables.sql", "r") as fp:
+            self.rds_data_store.run_create_table_sql(fp.read())
+
+    def tearDown(self):
+        with open("rds_tables.sql", "r") as fp:
+            self.rds_data_store.run_create_table_sql(fp.read())
 
     def _create_event(self, variation_1, variation_2):
         timestamp = 1590673060
@@ -79,6 +92,49 @@ class TestDashboardAgent(TestCase):
                                                                                       traffic_percentage=50)
         return variation_1, variation_2
 
+    def _create_visit_event(self):
+        timestamp = 1590673060
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_1", event_name="home", creation_time=timestamp,
+                                             url="url_1")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_2", event_name="collection",
+                                             creation_time=timestamp + 10,
+                                             url="url_2")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_2", event_name="product",
+                                             creation_time=timestamp + 20,
+                                             url="url_3")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_4", event_name="cart",
+                                             creation_time=timestamp + 30,
+                                             url="url_4")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_5", event_name="checkout",
+                                             creation_time=timestamp + 40,
+                                             url="url_5")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_6", event_name="checkout",
+                                             creation_time=timestamp + 50,
+                                             url="url_6")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_7", event_name="home",
+                                             creation_time=timestamp + 60,
+                                             url="url_7")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_8", event_name="home",
+                                             creation_time=timestamp + 70,
+                                             url="url_8")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_9", event_name="collection",
+                                             creation_time=timestamp + 80,
+                                             url="url_9")
+        VisitAgent.register_visit_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             session_id="test_session_id_10", event_name="prooduct",
+                                             creation_time=timestamp + 90,
+                                             url="url_10")
+
+    @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_session_count_per_variation_over_time(self):
         """events and variations table both has are empty"""
 
@@ -119,6 +175,7 @@ class TestDashboardAgent(TestCase):
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
+    @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_visitor_count_per_variation_over_time(self):
         """events and variations table both has are empty"""
 
@@ -159,6 +216,7 @@ class TestDashboardAgent(TestCase):
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
+    @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_conversion_rate_per_variation_over_time(self):
         """events and variations table both has are empty"""
 
@@ -199,6 +257,7 @@ class TestDashboardAgent(TestCase):
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
+    @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_conversion_rate_of_experiment(self):
         """events and variations table both has are empty"""
 
@@ -241,4 +300,48 @@ class TestDashboardAgent(TestCase):
                                                                   client_id="test_client_id",
                                                                   experiment_id="test_experiment_id")
         expected_result = {}
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+    @mock.patch('datetime.datetime', new=datetime_mock)
+    def test_get_shop_funnel_analytics(self):
+        """visits table is empty"""
+
+        result = DashboardAgent.get_shop_funnel_analytics(data_store=self.rds_data_store,
+                                                          client_id="test_client_id")
+        expected_result = {
+            'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
+            'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}
+
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+        """visits table has data"""
+
+        self._create_visit_event()
+
+        result = DashboardAgent.get_shop_funnel_analytics(data_store=self.rds_data_store,
+                                                          client_id="test_client_id")
+        expected_result = {
+            'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
+            'shop_funnel': {'count': [3, 2, 1, 1, 2, 0], 'percentage': [75.0, 50.0, 25.0, 25.0, 50.0, 0.0]}}
+
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+    def test_get_product_conversion_analytics(self):
+        result = DashboardAgent.get_product_conversion_analytics(data_store=self.rds_data_store,
+                                                                 client_id="test_client_id")
+        expected_result = {
+            'products': ['Tissot T Race', 'Tissot T Classic', 'Tissot T Sport', 'Tissot 1853', 'Ordinary Watch',
+                         'Titan Classic Watch', 'IWC Watch'],
+            'product_conversion': {'visitor_count': [1156, 900, 600, 1456, 800, 500, 760],
+                                   'convertion_count': [20, 12, 37, 29, 9, 13, 11],
+                                   'convertion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]}}
+
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+    def test_get_landing_page_analytics(self):
+        result = DashboardAgent.get_landing_page_analytics(data_store=self.rds_data_store,
+                                                           client_id="test_client_id")
+        expected_result = {'pages': ['Home Page', 'Product Page', 'Blog Page'],
+                           'landing_conversion': {'convertion_percentage': [4.32, 5.34, 2.28]}}
+
         self.assertDictEqual(d1=result, d2=expected_result)

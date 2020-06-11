@@ -2,27 +2,30 @@ from unittest import TestCase
 
 import testing.postgresql
 
+from config import *
 from optimization_platform.src.agents.variation_agent import VariationAgent
 from utils.data_store.rds_data_store import RDSDataStore
+
+pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=int(AWS_RDS_PORT))
+rds_data_store = RDSDataStore(host=AWS_RDS_HOST,
+                              port=AWS_RDS_PORT,
+                              dbname=AWS_RDS_DBNAME,
+                              user=AWS_RDS_USER,
+                              password=AWS_RDS_PASSWORD)
 
 
 class TestVariationAgent(TestCase):
     def __init__(self, *args, **kwargs):
         super(TestVariationAgent, self).__init__(*args, **kwargs)
-        self.pgsql = testing.postgresql.Postgresql(cache_initialized_db=True)
-        self.assertIsNotNone(self.pgsql)
-        params = self.pgsql.dsn()
-        self.assertEqual('test', params['database'])
-        self.assertEqual('127.0.0.1', params['host'])
-        self.assertEqual(self.pgsql.settings['port'], params['port'])
-        self.assertEqual('postgres', params['user'])
-        self.rds_data_store = RDSDataStore(host=params['host'],
-                                           port=params['port'],
-                                           dbname=params["database"],
-                                           user=params["user"],
-                                           password=None)
 
-        self.rds_data_store.run_create_table_sql(open("rds_tables.sql", "r").read())
+    def setUp(self):
+        self.rds_data_store = rds_data_store
+        with open("rds_tables.sql", "r") as fp:
+            self.rds_data_store.run_create_table_sql(fp.read())
+
+    def tearDown(self):
+        with open("rds_tables.sql", "r") as fp:
+            self.rds_data_store.run_create_table_sql(fp.read())
 
     def test_create_variation_for_client_id_and_experiment_id(self):
         VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,

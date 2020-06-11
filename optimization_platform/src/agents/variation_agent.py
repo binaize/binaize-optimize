@@ -1,9 +1,9 @@
+import random
 import uuid
 
 import pandas as pd
 
 from config import *
-import random
 
 
 class VariationAgent(object):

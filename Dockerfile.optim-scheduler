@@ -32,6 +32,15 @@ RUN wget https://www.python.org/ftp/python/3.6.8/Python-3.6.8.tgz && \
 COPY ./requirements.txt /
 RUN pip3 install -r /requirements.txt
 
+## --------------------------------------------------------------------------------------------------
+## install cron and set up cron job
+## --------------------------------------------------------------------------------------------------
+
+RUN apt-get update && apt-get -y install cron
+COPY ./deployment_config/scripts/optim-scheduler-cron /etc/cron.d/optim-cron
+RUN chmod +x /etc/cron.d/optim-cron
+RUN crontab /etc/cron.d/optim-cron
+
 # --------------------------------------------------------------------------------------------------
 # copy src code and scripts into root dir /
 # --------------------------------------------------------------------------------------------------
@@ -39,10 +48,12 @@ RUN pip3 install -r /requirements.txt
 COPY ./optimization_platform /optimization_platform
 COPY ./utils /utils
 COPY ./config.py.template /config.py
+COPY ./cron /cron
+RUN chmod -R +x cron
 
 # --------------------------------------------------------------------------------------------------
 # add entrypoint for the container
 # --------------------------------------------------------------------------------------------------
-ADD ./deployment_config/scripts/entrypoint.sh /bin/entrypoint.sh
+ADD ./deployment_config/scripts/entrypoint-optim-scheduler.sh /bin/entrypoint.sh
 RUN chmod +x /bin/entrypoint.sh
 ENTRYPOINT ["/bin/entrypoint.sh"]

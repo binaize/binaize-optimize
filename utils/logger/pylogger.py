@@ -6,8 +6,7 @@ from config import *
 def get_logger(logger_name, log_level):
     log_path = LOGGING_FOLDER + "/" + logger_name + ".log"
     directory = os.path.dirname(log_path)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    os.makedirs(directory, exist_ok=True)
     logger_config = {
         'version': 1,
         'formatters': {
@@ -53,6 +52,11 @@ def get_logger(logger_name, log_level):
         logger_config["handlers"].pop("s3", None)
         handler_list = logger_config["loggers"][logger_name]["handlers"]
         handler_list.remove("s3")
+        logger_config["loggers"][logger_name]["handlers"] = handler_list
+    else:
+        logger_config["handlers"].pop("console", None)
+        handler_list = logger_config["loggers"][logger_name]["handlers"]
+        handler_list.remove("console")
         logger_config["loggers"][logger_name]["handlers"] = handler_list
 
     logging.config.dictConfig(config=logger_config)
