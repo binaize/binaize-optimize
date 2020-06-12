@@ -145,7 +145,7 @@ async def sign_up_new_client(new_client: NewClient):
     return response
 
 
-@app.post("/api/v1/schemas/client/token", response_model=Token)
+@app.post("/token", response_model=Token)
 async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_client(app.rds_data_store, form_data.username, form_data.password)
     if not user:
