@@ -5,12 +5,16 @@ from unittest.mock import Mock, patch
 import pytz
 import testing.postgresql
 from fastapi.testclient import TestClient
+from optimization_platform.src.agents.event_agent import EventAgent
+from optimization_platform.src.agents.variation_agent import VariationAgent
+from optimization_platform.src.agents.visit_agent import VisitAgent
 
 from config import AWS_RDS_PORT
-from optimization_platform.deployment.server import app, logger
 
 pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=int(AWS_RDS_PORT))
 params = pgsql.dsn()
+
+from optimization_platform.deployment.server import app, logger
 
 logger.disabled = True
 
@@ -48,7 +52,7 @@ class TestServer(TestCase):
 
     def _sign_up_new_client(self):
         response = client.post(
-            "/sign_up",
+            "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False,
@@ -62,7 +66,7 @@ class TestServer(TestCase):
                                   "message": "Sign up for new client with client_id test_client is successful."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
         response = client.post(
-            "/sign_up",
+            "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False,
@@ -80,7 +84,7 @@ class TestServer(TestCase):
 
     def test_login_and_get_access_token(self):
         response = client.post(
-            "/sign_up",
+            "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False,
@@ -88,7 +92,7 @@ class TestServer(TestCase):
         )
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -97,7 +101,7 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=fake_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -106,7 +110,7 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=fake_password&scope=&client_id=&client_secret="
         )
@@ -117,14 +121,14 @@ class TestServer(TestCase):
     def test_get_client_details(self):
         """ one active and one disabled client signed up"""
         client.post(
-            "/sign_up",
+            "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False,
                   "password": "test_password"},
         )
         client.post(
-            "/sign_up",
+            "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "disabled_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": True,
@@ -133,7 +137,7 @@ class TestServer(TestCase):
 
         """get access token for the disabled client"""
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=disabled_client&password=disabled_password&scope=&client_id=&client_secret="
         )
@@ -141,7 +145,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_client_details",
+            "/api/v1/schemas/client/details",
             headers={
                 "Authorization": "Bearer " + access_token},
         )
@@ -156,7 +160,7 @@ class TestServer(TestCase):
         """get access token for the active client"""
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -168,7 +172,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_client_details",
+            "/api/v1/schemas/client/details",
             headers={"Authorization": "Bearer " + access_token}
         )
 
@@ -179,7 +183,7 @@ class TestServer(TestCase):
         """send an expired access token for active user"""
 
         response = client.post(
-            "/get_client_details",
+            "/api/v1/schemas/client/details",
             headers={
                 "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X2NsaWVudCIsImV4cCI6MTU5MDc2NTI0OX0.4dU20UbYFHM5H_qdccx7ELVoEwijqtZrsCtkKvMJOTE"}
 
@@ -195,7 +199,7 @@ class TestServer(TestCase):
         app.rds_data_store.run_create_table_sql("truncate table clients")
 
         response = client.get(
-            "/get_client_details",
+            "/api/v1/schemas/client/details",
             headers={"Authorization": "Bearer " + access_token}
         )
 
@@ -210,7 +214,7 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -218,7 +222,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/add_shopify_credentials",
+            "/api/v1/schemas/client/add-credential",
             headers={"Authorization": "Bearer " + access_token},
             json={"shopify_app_api_key": "test_shopify_app_api_key",
                   "shopify_app_password": "test_shopify_app_password",
@@ -240,7 +244,7 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -248,7 +252,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "test_experiment_name",
                   "page_type": "test_page_type",
@@ -274,7 +278,7 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
@@ -286,7 +290,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "test_experiment_name_1",
                   "page_type": "test_page_type_1",
@@ -294,7 +298,7 @@ class TestServer(TestCase):
                   "status": "test_status_1"}
         )
         client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "test_experiment_name_2",
                   "page_type": "test_page_type_2",
@@ -302,7 +306,7 @@ class TestServer(TestCase):
                   "status": "test_status_2"}
         )
         client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "test_experiment_name_3",
                   "page_type": "test_page_type_3",
@@ -311,7 +315,7 @@ class TestServer(TestCase):
         )
 
         response = client.get(
-            "/list_experiments",
+            "/api/v1/schemas/experiment/list",
             headers={"Authorization": "Bearer " + access_token}
         )
 
@@ -340,14 +344,14 @@ class TestServer(TestCase):
     def test_add_variation(self):
         self._sign_up_new_client()
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "",
                   "page_type": "test_page_type_1",
@@ -358,7 +362,7 @@ class TestServer(TestCase):
         experiment_id = response.json()["experiment_id"]
 
         response = client.post(
-            "/add_variation",
+            "/api/v1/schemas/variation/create",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "experiment_id": experiment_id,
@@ -377,14 +381,14 @@ class TestServer(TestCase):
     def test_get_variation_id_to_redirect(self):
         self._sign_up_new_client()
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/add_experiment",
+            "/api/v1/schemas/experiment/create",
             headers={"Authorization": "Bearer " + access_token},
             json={"experiment_name": "",
                   "page_type": "test_page_type_1",
@@ -395,7 +399,7 @@ class TestServer(TestCase):
         experiment_id = response.json()["experiment_id"]
 
         client.post(
-            "/add_variation",
+            "/api/v1/schemas/variation/create",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "experiment_id": experiment_id,
@@ -405,7 +409,7 @@ class TestServer(TestCase):
         )
 
         client.post(
-            "/add_variation",
+            "/api/v1/schemas/variation/create",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "experiment_id": experiment_id,
@@ -415,7 +419,7 @@ class TestServer(TestCase):
         )
 
         client.post(
-            "/add_variation",
+            "/api/v1/schemas/variation/create",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "experiment_id": experiment_id,
@@ -425,7 +429,7 @@ class TestServer(TestCase):
         )
 
         response = client.get(
-            "/get_variation_id_to_redirect",
+            "/api/v1/schemas/variation/redirection",
             headers={"Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
                     "experiment_id": experiment_id,
@@ -450,14 +454,14 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/register_event",
+            "/api/v1/schemas/event/register",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "client_id": "test_client",
@@ -480,14 +484,14 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.post(
-            "/register_visit",
+            "/api/v1/schemas/visit/register",
             headers={"Authorization": "Bearer " + access_token},
             json={
                 "client_id": "test_client",
@@ -512,7 +516,6 @@ class TestServer(TestCase):
         self.assertCountEqual(first=result, second=expected_result)
 
     def _create_event(self, variation_1, variation_2):
-        from optimization_platform.src.agents.event_agent import EventAgent
         timestamp = 1590673060
         variation_id_1 = variation_1["variation_id"]
         variation_id_2 = variation_2["variation_id"]
@@ -553,7 +556,6 @@ class TestServer(TestCase):
                                              creation_time=timestamp + 60)
 
     def _create_variation(self):
-        from optimization_platform.src.agents.variation_agent import VariationAgent
         variation_1 = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=app.rds_data_store,
                                                                                       client_id="test_client",
                                                                                       experiment_id="test_experiment_id",
@@ -573,14 +575,14 @@ class TestServer(TestCase):
         self._create_event(variation_1, variation_2)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_session_count_for_dashboard",
+            "/api/v1/schemas/report/session-count",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
@@ -603,14 +605,14 @@ class TestServer(TestCase):
         self._create_event(variation_1, variation_2)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_visitor_count_for_dashboard",
+            "/api/v1/schemas/report/visitor-count",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
@@ -633,14 +635,14 @@ class TestServer(TestCase):
         self._create_event(variation_1, variation_2)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_conversion_rate_for_dashboard",
+            "/api/v1/schemas/report/conversion-rate",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
@@ -663,14 +665,14 @@ class TestServer(TestCase):
         self._create_event(variation_1, variation_2)
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_conversion_table_for_dashboard",
+            "/api/v1/schemas/report/conversion-table",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
@@ -693,14 +695,14 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_experiment_summary",
+            "/api/v1/schemas/report/experiment-summary",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"experiment_id": "test_experiment_id"}
@@ -718,7 +720,6 @@ class TestServer(TestCase):
 
     def _create_visit_event(self):
         timestamp = 1590673060
-        from optimization_platform.src.agents.visit_agent import VisitAgent
         VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
                                              session_id="test_session_id_1", event_name="home", creation_time=timestamp,
                                              url="url_1")
@@ -765,14 +766,14 @@ class TestServer(TestCase):
         self._create_visit_event()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_shop_funnel_analytics_for_dashboard",
+            "/api/v1/schemas/report/shop-funnel",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client"}
@@ -794,14 +795,14 @@ class TestServer(TestCase):
         self._create_visit_event()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_product_conversion_analytics_for_dashboard",
+            "/api/v1/schemas/report/product-conversion",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client"}
@@ -826,14 +827,14 @@ class TestServer(TestCase):
         self._create_visit_event()
 
         response = client.post(
-            "/token",
+            "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/get_landing_page_analytics_for_dashboard",
+            "/api/v1/schemas/report/landing-page",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client"}

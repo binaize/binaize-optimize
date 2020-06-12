@@ -43,7 +43,7 @@ def get_logger(logger_name, log_level):
         'loggers': {
             logger_name: {
                 'level': log_level,
-                'handlers': ['console', 'file', 's3']
+                'handlers': ['file', 's3']
             }
         },
         'disable_existing_loggers': False
@@ -52,11 +52,6 @@ def get_logger(logger_name, log_level):
         logger_config["handlers"].pop("s3", None)
         handler_list = logger_config["loggers"][logger_name]["handlers"]
         handler_list.remove("s3")
-        logger_config["loggers"][logger_name]["handlers"] = handler_list
-    else:
-        logger_config["handlers"].pop("console", None)
-        handler_list = logger_config["loggers"][logger_name]["handlers"]
-        handler_list.remove("console")
         logger_config["loggers"][logger_name]["handlers"] = handler_list
 
     logging.config.dictConfig(config=logger_config)

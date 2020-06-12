@@ -59,7 +59,7 @@ class TestProductAgent(TestCase):
             self.rds_data_store.run_create_table_sql(fp.read())
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
-    def test_sync_products(self,x):
+    def test_sync_orders(self,x):
         ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
                                    full_name="test_full_name",
                                    company_name="test_company_name", hashed_password="test_hashed_password",

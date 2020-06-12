@@ -125,7 +125,7 @@ async def home_page():
     return response
 
 
-@app.post("/sign_up", response_model=ResponseMessage)
+@app.post("/api/v1/schemas/client/sign_up", response_model=ResponseMessage)
 async def sign_up_new_client(new_client: NewClient):
     user = get_client(app.rds_data_store, client_id=new_client.client_id)
     response = ResponseMessage()
@@ -145,7 +145,7 @@ async def sign_up_new_client(new_client: NewClient):
     return response
 
 
-@app.post("/token", response_model=Token)
+@app.post("/api/v1/schemas/client/token", response_model=Token)
 async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_client(app.rds_data_store, form_data.username, form_data.password)
     if not user:
@@ -161,7 +161,7 @@ async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depe
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/get_client_details", response_model=ResponseMessage)
+@app.get("/api/v1/schemas/client/details", response_model=ResponseMessage)
 async def get_client_details(*, current_client: LoggedinClient = Depends(
     get_current_active_client)):
     response = ResponseMessage()
@@ -170,7 +170,7 @@ async def get_client_details(*, current_client: LoggedinClient = Depends(
     return response
 
 
-@app.post("/add_shopify_credentials", response_model=ResponseMessage)
+@app.post("/api/v1/schemas/client/add-credential", response_model=ResponseMessage)
 async def add_shopify_credentials_to_logged_in_client(*, current_client: LoggedinClient = Depends(
     get_current_active_client),
                                                       shopify_credentials: ShopifyCredential):
@@ -187,7 +187,7 @@ async def add_shopify_credentials_to_logged_in_client(*, current_client: Loggedi
     return response
 
 
-@app.post("/add_experiment", response_model=Experiment)
+@app.post("/api/v1/schemas/experiment/create", response_model=Experiment)
 async def add_experiment(*, current_client: ShopifyClient = Depends(get_current_active_client),
                          new_experiment: BaseExperiment):
     creation_time = DateUtils.get_timestamp_now()
@@ -203,14 +203,14 @@ async def add_experiment(*, current_client: ShopifyClient = Depends(get_current_
     return experiment
 
 
-@app.get("/list_experiments", response_model=List[Experiment])
+@app.get("/api/v1/schemas/experiment/list", response_model=List[Experiment])
 async def list_experiments(*, current_client: ShopifyClient = Depends(get_current_active_client)):
     experiment_ids = ExperimentAgent.get_experiments_for_client_id(data_store=app.rds_data_store,
                                                                    client_id=current_client.client_id)
     return experiment_ids
 
 
-@app.post("/add_variation", response_model=Variation)
+@app.post("/api/v1/schemas/variation/create", response_model=Variation)
 async def add_variation(*, current_client: ShopifyClient = Depends(get_current_active_client),
                         new_variation: NewVariation):
     variation = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=app.rds_data_store,
@@ -221,7 +221,7 @@ async def add_variation(*, current_client: ShopifyClient = Depends(get_current_a
     return variation
 
 
-@app.get("/get_variation_id_to_redirect", response_model=Variation)
+@app.get("/api/v1/schemas/variation/redirection", response_model=Variation)
 async def get_variation_id_to_redirect(*, client_id: str, experiment_id: str, session_id: str):
     variation = VariationAgent.get_variation_id_to_recommend(data_store=app.rds_data_store,
                                                              client_id=client_id,
@@ -237,7 +237,7 @@ async def get_variation_id_to_redirect(*, client_id: str, experiment_id: str, se
     return variation
 
 
-@app.post("/register_event", response_model=ResponseMessage)
+@app.post("/api/v1/schemas/event/register", response_model=ResponseMessage)
 async def register_event(*, event: Event):
     creation_time = DateUtils.get_timestamp_now()
     EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=event.client_id,
@@ -252,7 +252,7 @@ async def register_event(*, event: Event):
     return response
 
 
-@app.post("/register_visit", response_model=ResponseMessage)
+@app.post("/api/v1/schemas/visit/register", response_model=ResponseMessage)
 async def register_visit(*, visit: Visit):
     creation_time = DateUtils.get_timestamp_now()
     VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id=visit.client_id,
@@ -266,7 +266,7 @@ async def register_visit(*, visit: Visit):
     return response
 
 
-@app.get("/get_session_count_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/session-count", response_model=dict)
 async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                           experiment_id: str):
     result = DashboardAgent.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
@@ -276,7 +276,7 @@ async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Dep
     return result
 
 
-@app.get("/get_visitor_count_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/visitor-count", response_model=dict)
 async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                           experiment_id: str):
     result = DashboardAgent.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
@@ -286,7 +286,7 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
     return result
 
 
-@app.get("/get_conversion_rate_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/conversion-rate", response_model=dict)
 async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                             experiment_id: str):
     result = DashboardAgent.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
@@ -296,7 +296,7 @@ async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = D
     return result
 
 
-@app.get("/get_conversion_table_for_dashboard", response_model=List[dict])
+@app.get("/api/v1/schemas/report/conversion-table", response_model=List[dict])
 async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                              experiment_id: str):
     result = DashboardAgent.get_conversion_rate_of_experiment(data_store=app.rds_data_store,
@@ -306,7 +306,7 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
     return result
 
 
-@app.get("/get_experiment_summary", response_model=dict)
+@app.get("/api/v1/schemas/report/experiment-summary", response_model=dict)
 async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                  experiment_id: str):
     result = dict()
@@ -317,7 +317,7 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
     return result
 
 
-@app.get("/get_shop_funnel_analytics_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/shop-funnel", response_model=dict)
 async def get_shop_funnel_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client)
                                                   ):
     result = DashboardAgent.get_shop_funnel_analytics(data_store=app.rds_data_store,
@@ -326,7 +326,7 @@ async def get_shop_funnel_analytics_for_dashboard(*, current_client: ShopifyClie
     return result
 
 
-@app.get("/get_product_conversion_analytics_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/product-conversion", response_model=dict)
 async def get_product_conversion_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(
     get_current_active_client)
                                                          ):
@@ -336,7 +336,7 @@ async def get_product_conversion_analytics_for_dashboard(*, current_client: Shop
     return result
 
 
-@app.get("/get_landing_page_analytics_for_dashboard", response_model=dict)
+@app.get("/api/v1/schemas/report/landing-page", response_model=dict)
 async def get_landing_page_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client)
                                                    ):
     result = DashboardAgent.get_landing_page_analytics(data_store=app.rds_data_store,
