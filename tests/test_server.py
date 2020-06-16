@@ -44,11 +44,9 @@ class TestServer(TestCase):
         expected_status_code = 200
         self.assertEqual(first=status_code, second=expected_status_code)
         response_json = response.json()
-        expected_response_json = {'status': 200,
-                                  'message': {'title': 'Binaize API', 'description': 'apis for the binaize service',
-                                              'version': '2.5.0'}
-                                  }
+        expected_response_json = {'message': 'Apis for Binaize Optim', 'status': 200}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     def _sign_up_new_client(self):
         response = client.post(
@@ -79,8 +77,10 @@ class TestServer(TestCase):
         expected_response_json = {"status": "409", "message": "Client_id test_client is already registered."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
+
     def test_sign_up_new_client(self):
         self._sign_up_new_client()
+
 
     def test_login_and_get_access_token(self):
         response = client.post(
@@ -117,6 +117,7 @@ class TestServer(TestCase):
         status_code = response.status_code
         expected_status_code = 401
         self.assertEqual(first=status_code, second=expected_status_code)
+
 
     def test_get_client_details(self):
         """ one active and one disabled client signed up"""
@@ -210,6 +211,7 @@ class TestServer(TestCase):
         expected_response_json = {"detail": "Could not validate credentials"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
+
     def test_add_shopify_credentials_to_logged_in_client(self):
         self._sign_up_new_client()
 
@@ -238,6 +240,7 @@ class TestServer(TestCase):
         expected_response_json = {"status": "200",
                                   "message": "Addition of Shopify Credentials for client_id test_client is successful."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_add_experiment(self):
@@ -272,6 +275,7 @@ class TestServer(TestCase):
                                   'creation_time': '2020-05-30T07:30:00+00:00',
                                   'last_updation_time': '2020-05-30T07:30:00+00:00'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_list_experiments(self):
@@ -341,6 +345,7 @@ class TestServer(TestCase):
                                    'last_updation_time': '30-May-2020'}]
         self.assertCountEqual(first=response_json, second=expected_response_json)
 
+
     def test_add_variation(self):
         self._sign_up_new_client()
         response = client.post(
@@ -376,6 +381,7 @@ class TestServer(TestCase):
         expected_response_json = {"experiment_id": experiment_id,
                                   "client_id": "test_client"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_variation_id_to_redirect(self):
@@ -449,6 +455,7 @@ class TestServer(TestCase):
                            'test_session_id', 'served', '2020-05-30T13:00:00+05:30']
         self.assertCountEqual(first=result, second=expected_result)
 
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_register_event(self):
         self._sign_up_new_client()
@@ -478,6 +485,7 @@ class TestServer(TestCase):
         expected_response_json = {'status': '200',
                                   'message': 'Event registration for client_id test_client is successful.'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_register_visit(self):
@@ -515,6 +523,7 @@ class TestServer(TestCase):
                            'test_event_name', '2020-05-30T13:00:00+05:30', 'test_url']
         self.assertCountEqual(first=result, second=expected_result)
 
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_register_cookie(self):
         self._sign_up_new_client()
@@ -532,7 +541,7 @@ class TestServer(TestCase):
             json={
                 "client_id": "test_client",
                 "session_id": "test_session_id",
-                "shopify_x": "test_shopify_x",
+                "shopify_s": "test_shopify_s",
                 "cart_token": "test_cart_token"
             }
         )
@@ -544,12 +553,13 @@ class TestServer(TestCase):
                                   'message': 'Cookie registration for client_id test_client is successful.'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
-        result = app.rds_data_store.run_select_sql("select * from cookie")
+        result = app.rds_data_store.run_select_sql("select * from cookies")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
-        expected_result = ['test_client', 'test_session_id', 'test_shopify_x', 'test_cart_token',
+        expected_result = ['test_client', 'test_session_id', 'test_shopify_s', 'test_cart_token',
                            '2020-05-30T13:00:00+05:30']
         self.assertCountEqual(first=result, second=expected_result)
+
 
     def _create_event(self, variation_1, variation_2):
         timestamp = 1590673060
@@ -591,6 +601,7 @@ class TestServer(TestCase):
                                              event_name="clicked",
                                              creation_time=timestamp + 60)
 
+
     def _create_variation(self):
         variation_1 = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=app.rds_data_store,
                                                                                       client_id="test_client",
@@ -603,6 +614,7 @@ class TestServer(TestCase):
                                                                                       variation_name="test_variation_name_2",
                                                                                       traffic_percentage=50)
         return variation_1, variation_2
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_session_count_for_dashboard(self):
@@ -634,6 +646,7 @@ class TestServer(TestCase):
                                   'session_count': {'test_variation_name_1': [1], 'test_variation_name_2': [3]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_visitor_count_for_dashboard(self):
         self._sign_up_new_client()
@@ -664,6 +677,7 @@ class TestServer(TestCase):
                                   'visitor_count': {'test_variation_name_1': [1], 'test_variation_name_2': [2]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_conversion_rate_for_dashboard(self):
         self._sign_up_new_client()
@@ -693,6 +707,7 @@ class TestServer(TestCase):
         expected_response_json = {'date': ['May 28'],
                                   'conversion': {'test_variation_name_1': [1.0], 'test_variation_name_2': [0.5]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_conversion_table_for_dashboard(self):
@@ -727,6 +742,7 @@ class TestServer(TestCase):
              'num_session': 3, 'num_visitor': 2, 'visitor_converted': 1, 'conversion': 0.5}]
         self.assertCountEqual(first=response_json, second=expected_response_json)
 
+
     def test_get_experiment_summary(self):
         self._sign_up_new_client()
 
@@ -753,6 +769,7 @@ class TestServer(TestCase):
                                   'conclusion': 'There is NOT enough evidence to conclude the experiment (It is NOT yet statistically significant).',
                                   'recommendation': 'Recommendation: CONTINUE the Experiment.'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     def _create_visit_event(self):
         timestamp = 1590673060
@@ -796,6 +813,7 @@ class TestServer(TestCase):
                                              creation_time=timestamp + 90,
                                              url="url_10")
 
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_shop_funnel_analytics_for_dashboard(self):
         self._sign_up_new_client()
@@ -824,6 +842,7 @@ class TestServer(TestCase):
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [3, 2, 1, 1, 2, 0], 'percentage': [75.0, 50.0, 25.0, 25.0, 50.0, 0.0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_product_conversion_analytics_for_dashboard(self):
@@ -856,6 +875,7 @@ class TestServer(TestCase):
                                    'convertion_count': [20, 12, 37, 29, 9, 13, 11],
                                    'convertion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
 
     @patch('datetime.datetime', new=datetime_mock)
     def test_get_landing_page_analytics_for_dashboard(self):

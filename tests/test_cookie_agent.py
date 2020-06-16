@@ -27,15 +27,15 @@ class TestCookieAgent(TestCase):
         with open("rds_tables.sql", "r") as fp:
             self.rds_data_store.run_create_table_sql(fp.read())
 
-    def test_register_event_for_client(self):
+    def test_register_cookie_for_client(self):
         CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                               session_id="test_session_id", shopify_x="test_shopify_x",
+                                               session_id="test_session_id", shopify_s="test_shopify_s",
                                                cart_token="test_cart_token",
                                                creation_time=1590570923)
-        result = self.rds_data_store.run_select_sql("select * from cookie ")
+        result = self.rds_data_store.run_select_sql("select * from cookies")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
-        expected_result = ['test_client_id', 'test_session_id', 'test_shopify_x', 'test_cart_token',
+        expected_result = ['test_client_id', 'test_session_id', 'test_shopify_s', 'test_cart_token',
                            '2020-05-27T14:45:23+05:30']
 
         self.assertListEqual(list1=expected_result, list2=result)

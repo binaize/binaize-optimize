@@ -5,13 +5,14 @@ import requests
 from optimization_platform.src.agents.client_agent import ClientAgent
 from utils.data_store.rds_data_store import IteratorFile
 from utils.date_utils import DateUtils
+from config import TABLE_PRODUCTS
 
 
 class ProductAgent(object):
 
     @classmethod
     def sync_products(cls, data_store, client_id):
-        table = "products"
+        table = TABLE_PRODUCTS
         columns = ['client_id', 'product_id', "product_title", "product_handle", "variant_id", "variant_title",
                    "variant_price", "updated_at"]
 

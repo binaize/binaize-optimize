@@ -148,24 +148,24 @@ create
 index if not exists orders_updated_at_idx on orders (updated_at);
 
 
-drop table if exists cookie;
+drop table if exists cookies;
 
-create table if not exists cookie
+create table if not exists cookies
 (
     client_id     varchar(50) not null,
     session_id    varchar(100),
-    shopify_x     varchar(100),
+    shopify_s     varchar(100),
     cart_token    varchar(100),
     creation_time timestamptz not null
 );
 
 create
-index if not exists cookie_client_id_idx on cookie (client_id);
+index if not exists cookies_client_id_idx on cookies (client_id);
 create
-index if not exists cookie_session_id_idx on cookie (session_id);
+index if not exists cookies_session_id_idx on cookies (session_id);
 create
-index if not exists cookie_shopify_x_idx on cookie (shopify_x);
+index if not exists cookies_shopify_s_idx on cookies (shopify_s);
 create
-index if not exists cookie_cart_token_idx on cookie (cart_token);
+index if not exists cookies_cart_token_idx on cookies (cart_token);
 create
-index if not exists cookie_creation_time_idx on cookie (creation_time);
+index if not exists cookies_creation_time_idx on cookies (creation_time);

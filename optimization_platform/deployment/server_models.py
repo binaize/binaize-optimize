@@ -81,5 +81,5 @@ class Visit(BaseModel):
 class Cookie(BaseModel):
     client_id: str
     session_id: str
-    shopify_x: str
+    shopify_s: str
     cart_token: str

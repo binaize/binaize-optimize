@@ -5,13 +5,14 @@ import requests
 from optimization_platform.src.agents.client_agent import ClientAgent
 from utils.data_store.rds_data_store import IteratorFile
 from utils.date_utils import DateUtils
+from config import TABLE_ORDERS
 
 
 class OrderAgent(object):
 
     @classmethod
     def sync_orders(cls, data_store, client_id):
-        table = "orders"
+        table = TABLE_ORDERS
         columns = ["client_id", "order_id", "email_id", "cart_token", "product_id",
                    "variant_id", "variant_quantity", "variant_price", "updated_at", "payment_status"]
         sql = "select max(updated_at) from {table} where client_id = '{client_id}'".format(table=table,
