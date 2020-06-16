@@ -76,3 +76,10 @@ class Visit(BaseModel):
     session_id: str
     event_name: str
     url: str
+
+
+class Cookie(BaseModel):
+    client_id: str
+    session_id: str
+    shopify_x: str
+    cart_token: str

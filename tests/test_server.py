@@ -515,6 +515,42 @@ class TestServer(TestCase):
                            'test_event_name', '2020-05-30T13:00:00+05:30', 'test_url']
         self.assertCountEqual(first=result, second=expected_result)
 
+    @patch('datetime.datetime', new=datetime_mock)
+    def test_register_cookie(self):
+        self._sign_up_new_client()
+
+        response = client.post(
+            "/api/v1/schemas/client/token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
+        )
+        access_token = response.json()["access_token"]
+
+        response = client.post(
+            "/api/v1/schemas/cookie/register",
+            headers={"Authorization": "Bearer " + access_token},
+            json={
+                "client_id": "test_client",
+                "session_id": "test_session_id",
+                "shopify_x": "test_shopify_x",
+                "cart_token": "test_cart_token"
+            }
+        )
+        status_code = response.status_code
+        expected_status_code = 200
+        self.assertEqual(first=status_code, second=expected_status_code)
+        response_json = response.json()
+        expected_response_json = {'status': '200',
+                                  'message': 'Cookie registration for client_id test_client is successful.'}
+        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
+        result = app.rds_data_store.run_select_sql("select * from cookie")
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_client', 'test_session_id', 'test_shopify_x', 'test_cart_token',
+                           '2020-05-30T13:00:00+05:30']
+        self.assertCountEqual(first=result, second=expected_result)
+
     def _create_event(self, variation_1, variation_2):
         timestamp = 1590673060
         variation_id_1 = variation_1["variation_id"]

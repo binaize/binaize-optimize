@@ -13,6 +13,7 @@ from passlib.context import CryptContext
 from config import *
 from optimization_platform.deployment.server_models import *
 from optimization_platform.src.agents.client_agent import ClientAgent
+from optimization_platform.src.agents.cookie_agent import CookieAgent
 from optimization_platform.src.agents.dashboard_agent import DashboardAgent
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
@@ -56,7 +57,7 @@ app.rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/schemas/client/token")
 
 
 def verify_password(plain_password, hashed_password):
@@ -145,7 +146,7 @@ async def sign_up_new_client(new_client: NewClient):
     return response
 
 
-@app.post("/token", response_model=Token)
+@app.post("/api/v1/schemas/client/token", response_model=Token)
 async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_client(app.rds_data_store, form_data.username, form_data.password)
     if not user:
@@ -262,6 +263,21 @@ async def register_visit(*, visit: Visit):
     response = ResponseMessage()
     response.message = "Visit registration for client_id {client_id} and event name {event_name} is successful.".format(
         client_id=visit.client_id, event_name=visit.event_name)
+    response.status = status.HTTP_200_OK
+    return response
+
+
+@app.post("/api/v1/schemas/cookie/register", response_model=ResponseMessage)
+async def register_cookie(*, cookie: Cookie):
+    creation_time = DateUtils.get_timestamp_now()
+    CookieAgent.register_cookie_for_client(data_store=app.rds_data_store, client_id=cookie.client_id,
+                                           session_id=cookie.session_id,
+                                           shopify_x=cookie.shopify_x, cart_token=cookie.cart_token,
+                                           creation_time=creation_time)
+
+    response = ResponseMessage()
+    response.message = "Cookie registration for client_id {client_id} is successful.".format(
+        client_id=cookie.client_id)
     response.status = status.HTTP_200_OK
     return response
 
