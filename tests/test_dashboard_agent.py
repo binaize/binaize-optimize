@@ -345,3 +345,19 @@ class TestDashboardAgent(TestCase):
                            'landing_conversion': {'convertion_percentage': [4.32, 5.34, 2.28]}}
 
         self.assertDictEqual(d1=result, d2=expected_result)
+
+    def test_get_summary_of_experiment(self):
+        # AWS_RDS_HOS = os.getenv("AWS_RDS_HOST", "dev-binaize-rds.cvw6evbrn1mq.us-east-1.rds.amazonaws.com")
+        # AWS_RDS_POR = os.getenv("AWS_RDS_PORT", "5432")
+        # AWS_RDS_DBNAM = os.getenv("AWS_RDS_DBNAME", "binaize")
+        # AWS_RDS_USE = os.getenv("AWS_RDS_USER", "binaize")
+        # AWS_RDS_PASSWOR = os.getenv("AWS_RDS_PASSWORD", "DfC0LOpKZXZ52ZCR9dDP")
+        # data_store = RDSDataStore(host=AWS_RDS_HOS,
+        #                               port=AWS_RDS_POR,
+        #                               dbname=AWS_RDS_DBNAM,
+        #                               user=AWS_RDS_USE,
+        #                               password=AWS_RDS_PASSWOR)
+        # result = DashboardAgent.get_summary_of_experiment(data_store=data_store, client_id="client",
+        #                                                   experiment_id="ad28997c8b1e4ecc8a4241e77810af42")
+
+        pass

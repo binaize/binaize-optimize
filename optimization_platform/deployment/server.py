@@ -457,11 +457,11 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = dict()
-    result["status"] = "Variation Blue is winning. It is 6% better than the others."
-    result[
-        "conclusion"] = "There is NOT enough evidence to conclude the experiment (It is NOT yet statistically significant)."
-    result["recommendation"] = "Recommendation: CONTINUE the Experiment."
+
+    result = DashboardAgent.get_summary_of_experiment(data_store=app.rds_data_store,
+                                                      client_id=current_client.client_id,
+                                                      experiment_id=experiment_id)
+
     return result
 
 

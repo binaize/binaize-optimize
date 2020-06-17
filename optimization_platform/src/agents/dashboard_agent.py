@@ -421,3 +421,68 @@ class DashboardAgent(object):
             }
         }
         return result
+
+    @classmethod
+    def get_summary_of_experiment(cls, data_store, client_id, experiment_id):
+        yo = cls.get_conversion_rate_of_experiment(data_store=data_store, client_id=client_id,
+                                                   experiment_id=experiment_id)
+        df = pd.DataFrame(yo, columns=["variation_name", "variation_id", "num_session", "num_visitor",
+                                       "visitor_converted",
+                                       "conversion"])
+        sql = \
+            """
+                select
+                    max(creation_time),
+                    min(creation_time)
+                from
+                    events 
+                where
+                    client_id = '{client_id}' 
+                    and experiment_id = '{experiment_id}'
+            """.format(client_id=client_id, experiment_id=experiment_id)
+        records = data_store.run_custom_sql(sql)
+        delta = records[0][0] - records[0][1]
+        variation_names = df["variation_name"]
+        visitor_converted = df["visitor_converted"]
+        visitor_count = df["num_visitor"]
+        num_days = delta.days
+
+        from optimization_platform.src.optim.abtest import ABTest
+        ab = ABTest(arm_name_list=variation_names, conversion_count_list=visitor_converted,
+                    session_count_list=visitor_count, num_days=num_days)
+        best_variation = ab.get_best_arm()
+        confidence = ab.get_best_arm_confidence()
+        confidence_percentage = round(confidence * 100, 2)
+        betterness_score = ab.get_betterness_score()
+        betterness_percentage = round(betterness_score * 100, 2)
+        remaining_sample_size = ab.get_estimated_sample_size()
+        remaining_time = ab.get_remaining_time()
+        remaining_days = int(remaining_time) + 1
+
+        status = "{variation} is winning. It is {betterness_percentage}% better than the others.".format(
+            variation=best_variation,
+            betterness_percentage=betterness_percentage)
+        """
+- """
+        conclusion = "There is NOT enough evidence to conclude the experiment " \
+                     "(It is NOT yet statistically significant)." \
+                     "To be statistically confident, we need {remaining_sample_size} more visitors." \
+                     "Based on recent visitor trend, experiment should run for another {remaining_days} days.".format(
+            remaining_sample_size=remaining_sample_size, remaining_days=remaining_days)
+        recommendation = "Recommendation: CONTINUE the Experiment."
+        if remaining_sample_size < 0:
+            conclusion = "There is ENOUGH evidence to conclude the experiment. " \
+                         "There is NO CLEAR WINNER. We are {confidence_percentage}% confident that {variation} " \
+                         "is the best.".format(confidence_percentage=confidence_percentage, variation=best_variation)
+            recommendation = "Recommendation: CONCLUDE the Experiment."
+        if confidence > 0.95:
+            conclusion = "There is ENOUGH evidence to conclude the experiment. " \
+                         "We have a winner. We are {confidence_percentage}% confident that {variation} is the best.".format(
+                confidence_percentage=confidence_percentage, variation=best_variation)
+            recommendation = "Recommendation: CONCLUDE the Experiment."
+
+        result = dict()
+        result["status"] = status
+        result["conclusion"] = conclusion
+        result["recommendation"] = recommendation
+        return result
