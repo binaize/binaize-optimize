@@ -4,7 +4,6 @@ from utils.data_store.rds_data_store import RDSDataStore
 from utils.date_utils import DateUtils
 
 
-# noinspection SqlResolve
 class DashboardAgent(object):
     @classmethod
     def get_session_count_per_variation_over_time(cls, data_store: RDSDataStore, client_id, experiment_id):
@@ -355,71 +354,36 @@ class DashboardAgent(object):
             result["pages"] = df["pages"].tolist()
             temp_dict["count"] = df["count"].tolist()
             temp_dict["percentage"] = df["percentage"].tolist()
-        result["shop_funnel"] = temp_dict
+            result["shop_funnel"] = temp_dict
+            result["summary"] = "This is a shop funnel summary"
+            result["conclusion"] = "This is shop funnel conclusion"
         return result
 
     @classmethod
     def get_product_conversion_analytics(cls, data_store, client_id):
-        result = {
-            "products": [
-                "Tissot T Race",
-                "Tissot T Classic",
-                "Tissot T Sport",
-                "Tissot 1853",
-                "Ordinary Watch",
-                "Titan Classic Watch",
-                "IWC Watch"
-            ],
-            "product_conversion": {
-                "visitor_count": [
-                    1156,
-                    900,
-                    600,
-                    1456,
-                    800,
-                    500,
-                    760
-                ],
-                "convertion_count": [
-                    20,
-                    12,
-                    37,
-                    29,
-                    9,
-                    13,
-                    11
-
-                ],
-                "convertion_percentage": [
-                    1.78,
-                    1.33,
-                    6.12,
-                    1.99,
-                    1.12,
-                    2.41,
-                    1.44
-
-                ]
-            }
-        }
+        result = dict()
+        result["products"] = ["Tissot T Race", "Tissot T Classic", "Tissot T Sport", "Tissot 1853", "Ordinary Watch",
+                              "Titan Classic Watch", "IWC Watch"]
+        temp_dict = dict()
+        temp_dict["visitor_count"] = [1156, 900, 600, 1456, 800, 500, 760],
+        temp_dict["conversion_count"] = [20, 12, 37, 29, 9, 13, 11]
+        temp_dict["conversion_percentage"] = [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]
+        result["product_conversion"] = temp_dict
+        result["summary"] = "This is a product conversion summary"
+        result["conclusion"] = "This is product conversion conclusion"
         return result
 
     @classmethod
     def get_landing_page_analytics(cls, data_store, client_id):
-        result = {
-            "pages": [
-                "Home Page",
-                "Product Page",
-                "Blog Page"
-            ],
-            "landing_conversion": {
-                "convertion_percentage": [
-                    4.32,
-                    5.34,
-                    2.28
-                ]
-            }
-        }
+        result = dict()
+        result["pages"] = ["Home Page", "Product Page", "Blog Page"]
+        temp_dict = dict()
+        temp_dict["visitor_count"] = [11560, 9000, 6000],
+        temp_dict["conversion_count"] = [200, 120, 370]
+        temp_dict["conversion_percentage"] = [4.32, 5.34, 8.28]
+        result["landing_conversion"] = temp_dict
+        result["summary"] = "This is a landing conversion summary"
+        result["conclusion"] = "This is landing conversion conclusion"
         return result
 
     @classmethod
@@ -462,8 +426,7 @@ class DashboardAgent(object):
         status = "{variation} is winning. It is {betterness_percentage}% better than the others.".format(
             variation=best_variation,
             betterness_percentage=betterness_percentage)
-        """
-- """
+
         conclusion = "There is NOT enough evidence to conclude the experiment " \
                      "(It is NOT yet statistically significant)." \
                      "To be statistically confident, we need {remaining_sample_size} more visitors." \

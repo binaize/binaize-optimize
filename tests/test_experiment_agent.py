@@ -43,6 +43,17 @@ class TestExperimentAgent(TestCase):
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
+        self.rds_data_store.run_select_sql("drop table experiments")
+        status = ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
+                                                                 client_id="test_client_id",
+                                                                 experiment_name="test_experiment_name",
+                                                                 page_type="test_page_type",
+                                                                 experiment_type="test_experiment_type", status=False,
+                                                                 creation_time=1590570923,
+                                                                 last_updation_time=1590570923)
+        expected_status = None
+        self.assertEqual(first=status, second=expected_status)
+
     def test_get_experiments_for_client_id(self):
         ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
                                                         client_id="test_client_id",

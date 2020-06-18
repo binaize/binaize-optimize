@@ -22,9 +22,10 @@ class VariationAgent(object):
         values = [variation[key] for key in columns]
         value = str(tuple(values))
 
-        sql = """INSERT INTO {table} ({column}) VALUES {value}"""
-        query = sql.format(table=table, column=column, value=value)
-        data_store.run_insert_into_sql(query=query)
+        sql = """INSERT INTO {table} ({column}) VALUES {value}""".format(table=table, column=column, value=value)
+        status = data_store.run_insert_into_sql(query=sql)
+        if status is None:
+            variation = None
         return variation
 
     @staticmethod
@@ -34,14 +35,12 @@ class VariationAgent(object):
         where = "client_id='{client_id}' and experiment_id='{experiment_id}'".format(client_id=client_id,
                                                                                      experiment_id=experiment_id)
         column = ",".join(columns)
-        sql = """ SELECT {column} from {table} where {where}"""
-        query = sql.format(column=column, table=table, where=where)
-        mobile_records = data_store.run_select_sql(query=query)
+        sql = """ SELECT {column} from {table} where {where}""".format(column=column, table=table, where=where)
+        mobile_records = data_store.run_select_sql(query=sql)
         df = None
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = columns
-
         variations = None
         if df is not None:
             variations = df["variation_id"].tolist()
@@ -57,10 +56,9 @@ class VariationAgent(object):
             experiment_id=experiment_id, session_id=session_id)
 
         column = ",".join(columns)
-        sql = """ SELECT {column} from {table} where {where}"""
-        query = sql.format(column=column, table=table, where=where)
+        sql = """ SELECT {column} from {table} where {where}""".format(column=column, table=table, where=where)
 
-        mobile_records = data_store.run_select_sql(query=query)
+        mobile_records = data_store.run_select_sql(query=sql)
         df = None
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)

@@ -221,9 +221,7 @@ class TestServer(TestCase):
         response = client.post(
             "/api/v1/schemas/client/add-credential",
             headers={"Authorization": "Bearer " + access_token},
-            json={"shopify_app_api_key": "test_shopify_app_api_key",
-                  "shopify_app_password": "test_shopify_app_password",
-                  "shopify_app_eg_url": "test_shopify_app_eg_url",
+            json={"shopify_app_eg_url": "test_shopify_app_eg_url",
                   "shopify_app_shared_secret": "test_shopify_app_shared_secret"}
         )
 
@@ -821,7 +819,8 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [3, 2, 1, 1, 2, 0], 'percentage': [75.0, 50.0, 25.0, 25.0, 50.0, 0.0]}}
+            'shop_funnel': {'count': [3, 2, 1, 1, 2, 0], 'percentage': [75.0, 50.0, 25.0, 25.0, 50.0, 0.0]},
+            'summary': 'This is a shop funnel summary', 'conclusion': 'This is shop funnel conclusion'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -851,9 +850,10 @@ class TestServer(TestCase):
         expected_response_json = {
             'products': ['Tissot T Race', 'Tissot T Classic', 'Tissot T Sport', 'Tissot 1853', 'Ordinary Watch',
                          'Titan Classic Watch', 'IWC Watch'],
-            'product_conversion': {'visitor_count': [1156, 900, 600, 1456, 800, 500, 760],
-                                   'convertion_count': [20, 12, 37, 29, 9, 13, 11],
-                                   'convertion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]}}
+            'product_conversion': {'visitor_count': [[1156, 900, 600, 1456, 800, 500, 760]],
+                                   'conversion_count': [20, 12, 37, 29, 9, 13, 11],
+                                   'conversion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]},
+            'summary': 'This is a product conversion summary', 'conclusion': 'This is product conversion conclusion'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -881,5 +881,9 @@ class TestServer(TestCase):
 
         response_json = response.json()
         expected_response_json = {'pages': ['Home Page', 'Product Page', 'Blog Page'],
-                                  'landing_conversion': {'convertion_percentage': [4.32, 5.34, 2.28]}}
+                                  'landing_conversion': {'visitor_count': [[11560, 9000, 6000]],
+                                                         'conversion_count': [200, 120, 370],
+                                                         'conversion_percentage': [4.32, 5.34, 8.28]},
+                                  'summary': 'This is a landing conversion summary',
+                                  'conclusion': 'This is landing conversion conclusion'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)

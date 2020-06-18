@@ -130,7 +130,7 @@ async def _get_current_client(token: str = Depends(oauth2_scheme)):
 
 async def get_current_active_client(current_client: BaseClient = Depends(_get_current_client)):
     if current_client.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_client
 
 
@@ -218,16 +218,12 @@ async def add_shopify_credentials_to_logged_in_client(*, current_client: Loggedi
     """
         Get details of a logged in client:
         - **access_token**: access token issued by the server to the logged in client
-        - **shopify_app_api_key**: api key of the shopify private app
-        - **shopify_app_password**: password of the shopify private app
         - **shopify_app_eg_url**: example url of the shopify private app
         - **shopify_app_shared_secret**: shared_secret of the shopify private app
     """
 
     ClientAgent.add_shopify_credentials_to_existing_client(data_store=app.rds_data_store,
                                                            client_id=current_client.client_id,
-                                                           shopify_app_api_key=shopify_credentials.shopify_app_api_key,
-                                                           shopify_app_password=shopify_credentials.shopify_app_password,
                                                            shopify_app_eg_url=shopify_credentials.shopify_app_eg_url,
                                                            shopify_app_shared_secret=shopify_credentials.shopify_app_shared_secret)
     response = ResponseMessage()
@@ -328,7 +324,7 @@ async def register_event(*, event: Event):
     """
 
     creation_time = DateUtils.get_timestamp_now()
-    EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=event.client_id,
+    result = EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=event.client_id,
                                          experiment_id=event.experiment_id,
                                          session_id=event.session_id, variation_id=event.variation_id,
                                          event_name=event.event_name, creation_time=creation_time)
@@ -337,6 +333,11 @@ async def register_event(*, event: Event):
     response.message = "Event registration for client_id {client_id} is successful.".format(
         client_id=event.client_id)
     response.status = status.HTTP_200_OK
+    if result is None:
+        response.message = "Event registration for client_id {client_id} failed.".format(
+            client_id=event.client_id)
+        response.status = status.HTTP_404_NOT_FOUND
+
     return response
 
 

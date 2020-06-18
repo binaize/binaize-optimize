@@ -21,4 +21,5 @@ class EventAgent(object):
 
         sql = """INSERT INTO {table} ({column}) VALUES {value}"""
         query = sql.format(table=table, column=column, value=value)
-        data_store.run_insert_into_sql(query=query)
+        status = data_store.run_insert_into_sql(query=query)
+        return status

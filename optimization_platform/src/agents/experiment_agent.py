@@ -25,9 +25,10 @@ class ExperimentAgent(object):
         values = [experiment[key] for key in columns]
         value = str(tuple(values))
 
-        sql = """INSERT INTO {table} ({column}) VALUES {value}"""
-        query = sql.format(table=table, column=column, value=value)
-        data_store.run_insert_into_sql(query=query)
+        sql = """INSERT INTO {table} ({column}) VALUES {value}""".format(table=table, column=column, value=value)
+        status = data_store.run_insert_into_sql(query=sql)
+        if status is None:
+            experiment = None
         return experiment
 
     @classmethod
@@ -38,16 +39,14 @@ class ExperimentAgent(object):
                    "last_updation_time"]
         where = "client_id='{client_id}'".format(client_id=client_id)
         column = ",".join(columns)
-        sql = """ SELECT {column} from {table} where {where}"""
-        query = sql.format(column=column, table=table, where=where)
-        mobile_records = data_store.run_select_sql(query=query)
+        sql = """ SELECT {column} from {table} where {where}""".format(column=column, table=table, where=where)
+        mobile_records = data_store.run_select_sql(query=sql)
         df = None
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = columns
             df["creation_time"] = df["creation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
             df["last_updation_time"] = df["last_updation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
-
         experiments = None
         if df is not None:
             experiments = df.to_dict(orient="records")

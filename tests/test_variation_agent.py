@@ -28,20 +28,25 @@ class TestVariationAgent(TestCase):
             self.rds_data_store.run_create_table_sql(fp.read())
 
     def test_create_variation_for_client_id_and_experiment_id(self):
-        VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,
-                                                                        client_id="test_client_id",
-                                                                        experiment_id="test_experiment_id",
-                                                                        variation_name="test_variation_name",
-                                                                        traffic_percentage=100)
-        result = self.rds_data_store.run_custom_sql("""
-                                                        select 
-                                                            client_id, experiment_id, variation_name, 
-                                                            traffic_percentage, s3_bucket_name, 
-                                                            s3_html_location 
-                                                        from variations
-                                                    """)
-        expected_result = [('test_client_id', 'test_experiment_id', 'test_variation_name', 100, None, None)]
-        self.assertListEqual(list1=expected_result, list2=result)
+        result = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,
+                                                                                 client_id="test_client_id",
+                                                                                 experiment_id="test_experiment_id",
+                                                                                 variation_name="test_variation_name",
+                                                                                 traffic_percentage=100)
+
+        result.pop('variation_id', None)
+        expected_result = {'client_id': 'test_client_id', 'experiment_id': 'test_experiment_id',
+                           'variation_name': 'test_variation_name',
+                           'traffic_percentage': 100}
+        self.assertDictEqual(d1=expected_result, d2=result)
+        self.rds_data_store.run_select_sql("drop table variations")
+        status = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,
+                                                                                 client_id="test_client_id",
+                                                                                 experiment_id="test_experiment_id",
+                                                                                 variation_name="test_variation_name",
+                                                                                 traffic_percentage=100)
+        expected_status = None
+        self.assertEqual(first=status, second=expected_status)
 
     def test_get_variation_ids_for_client_id_and_experiment_id(self):
         result = VariationAgent.get_variation_ids_for_client_id_and_experiment_id(data_store=self.rds_data_store,
@@ -81,7 +86,7 @@ class TestVariationAgent(TestCase):
             """
             INSERT INTO variations
             values('test_variation_id', 'test_variation_name', 'test_client_id', 'test_experiment_id',
-                    80, 's3_bucket_name', 's3_html_location')
+                    80)
             """)
         result = VariationAgent.get_variation_id_to_recommend(data_store=self.rds_data_store,
                                                               client_id="test_client_id",

@@ -28,42 +28,43 @@ class TestClientAgent(TestCase):
             self.rds_data_store.run_create_table_sql(fp.read())
 
     def test_add_new_client(self):
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                   full_name="test_full_name",
-                                   company_name="test_company_name", hashed_password="test_hashed_password",
-                                   disabled=False)
+        status = ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                            full_name="test_full_name",
+                                            company_name="test_company_name", hashed_password="test_hashed_password",
+                                            disabled=False)
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_custom_sql("select * from clients")
-        expected_result = [(
-            'test_client_id', 'test_full_name', 'test_company_name', 'test_hashed_password', False, None,
-            None, None, None)]
+        expected_result = [('test_client_id', 'test_full_name', 'test_company_name', 'test_hashed_password', False, None, None)]
         self.assertListEqual(list1=expected_result, list2=result)
 
     def test_get_client_details_for_client_id(self):
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                   full_name="test_full_name",
-                                   company_name="test_company_name", hashed_password="test_hashed_password",
-                                   disabled=False)
+        status = ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                            full_name="test_full_name",
+                                            company_name="test_company_name", hashed_password="test_hashed_password",
+                                            disabled=False)
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
+
         result = ClientAgent.get_client_details_for_client_id(data_store=self.rds_data_store,
                                                               client_id="test_client_id")
         expected_result = {'client_id': 'test_client_id', 'full_name': 'test_full_name',
                            'company_name': 'test_company_name', 'hashed_password': 'test_hashed_password',
-                           'disabled': False, 'shopify_app_api_key': None, 'shopify_app_password': None,
-                           'shopify_app_eg_url': None, 'shopify_app_shared_secret': None}
+                           'disabled': False, 'shopify_app_eg_url': None, 'shopify_app_shared_secret': None}
         self.assertDictEqual(d1=result, d2=expected_result)
 
     def test_add_shopify_credentials_to_existing_client(self):
         self.test_add_new_client()
-        ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
-                                                               client_id="test_client_id",
-                                                               shopify_app_api_key=9,
-                                                               shopify_app_password="test_shopify_app_password",
-                                                               shopify_app_eg_url="test_shopify_app_eg_url",
-                                                               shopify_app_shared_secret="test_shopify_app_shared_secret")
+        status = ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
+                                                                        client_id="test_client_id",
+                                                                        shopify_app_eg_url="test_shopify_app_eg_url",
+                                                                        shopify_app_shared_secret="test_shopify_app_shared_secret")
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_custom_sql("select * from clients")
         expected_result = [(
             'test_client_id', 'test_full_name', 'test_company_name', 'test_hashed_password', False,
-            "9",
-            "test_shopify_app_password", "test_shopify_app_eg_url", "test_shopify_app_shared_secret")]
+            "test_shopify_app_eg_url", "test_shopify_app_shared_secret")]
         self.assertListEqual(list1=expected_result, list2=result)
 
     def test_get_all_client_ids(self):
@@ -77,6 +78,4 @@ class TestClientAgent(TestCase):
                                    disabled=False)
         result = ClientAgent.get_all_client_ids(data_store=self.rds_data_store)
         expected_result = ['test_client_id_1', 'test_client_id_2']
-        self.assertCountEqual(first=result,second=expected_result)
-
-
+        self.assertCountEqual(first=result, second=expected_result)

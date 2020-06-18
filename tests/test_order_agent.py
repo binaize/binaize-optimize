@@ -66,8 +66,6 @@ class TestProductAgent(TestCase):
                                    disabled=False)
         ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               shopify_app_api_key="test_shopify_app_api_key",
-                                                               shopify_app_password="test_shopify_app_password",
                                                                shopify_app_eg_url="test_shopify_app_eg_url",
                                                                shopify_app_shared_secret="test_shopify_app_shared_secret")
         result = OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)

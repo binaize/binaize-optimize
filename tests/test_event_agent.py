@@ -28,11 +28,13 @@ class TestEventAgent(TestCase):
             self.rds_data_store.run_create_table_sql(fp.read())
 
     def test_register_event_for_client(self):
-        EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
-                                             session_id="test_session_id", variation_id="test_variation_id",
-                                             event_name="test_event_name",
-                                             creation_time=1590570923)
+        status = EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                                      experiment_id="test_experiment_id",
+                                                      session_id="test_session_id", variation_id="test_variation_id",
+                                                      event_name="test_event_name",
+                                                      creation_time=1590570923)
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_select_sql("select * from events ")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
@@ -40,3 +42,12 @@ class TestEventAgent(TestCase):
                            'test_event_name', '2020-05-27T14:45:23+05:30']
 
         self.assertListEqual(list1=expected_result, list2=result)
+        self.rds_data_store.run_select_sql("drop table events ")
+        status = EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                                      experiment_id="test_experiment_id",
+                                                      session_id="test_session_id", variation_id="test_variation_id",
+                                                      event_name="test_event_name",
+                                                      creation_time=1590570923)
+        expected_status = None
+        self.assertEqual(first=status, second=expected_status)
+

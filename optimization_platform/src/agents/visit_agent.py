@@ -18,4 +18,5 @@ class VisitAgent(object):
         value = str(tuple(values))
 
         sql = """insert into {table} ({column}) values {value}""".format(table=table, column=column, value=value)
-        data_store.run_insert_into_sql(query=sql)
+        status = data_store.run_insert_into_sql(query=sql)
+        return status

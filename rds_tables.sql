@@ -30,8 +30,6 @@ create table if not exists clients
     company_name              varchar(100) not null,
     hashed_password           varchar(100) not null,
     disabled                  boolean      not null,
-    shopify_app_api_key       varchar(100),
-    shopify_app_password      varchar(100),
     shopify_app_eg_url        varchar(200),
     shopify_app_shared_secret varchar(100)
 );
@@ -47,9 +45,7 @@ create table if not exists variations
     variation_name     varchar(100) not null,
     client_id          varchar(50)  not null,
     experiment_id      varchar(100) not null,
-    traffic_percentage int,
-    s3_bucket_name     varchar(50),
-    s3_html_location   varchar(200)
+    traffic_percentage int
 );
 
 create

@@ -18,19 +18,27 @@ class RDSDataStore(object):
                                      password=self.password)
 
     def _run_sql_to_get_data(self, query):
-        cursor = self.conn.cursor()
-        cursor.execute(query)
-        self.conn.commit()
-        mobile_records = cursor.fetchall()
-        cursor.close()
-        return mobile_records
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(query)
+            self.conn.commit()
+            mobile_records = cursor.fetchall()
+            cursor.close()
+            return mobile_records
+        except Exception:
+            self.conn.rollback()
+            return None
 
     def _run_sql_to_push_data(self, query):
-        cursor = self.conn.cursor()
-        cursor.execute(query)
-        self.conn.commit()
-        cursor.close()
-        return None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(query)
+            self.conn.commit()
+            cursor.close()
+            return True
+        except Exception:
+            self.conn.rollback()
+            return None
 
     def run_select_sql(self, query):
         mobile_records = self._run_sql_to_get_data(query=query)
@@ -50,17 +58,26 @@ class RDSDataStore(object):
         return self._run_sql_to_push_data(query=query)
 
     def run_batch_insert_sql(self, file, table, columns):
-        cursor = self.conn.cursor()
-        cursor.copy_from(file=file, table=table, columns=columns)
-        self.conn.commit()
-        cursor.close()
-        return None
+        try:
+            cursor = self.conn.cursor()
+            cursor.copy_from(file=file, table=table, columns=columns)
+            self.conn.commit()
+            cursor.close()
+            return True
+        except Exception:
+            self.conn.rollback()
+            return None
 
     def run_batch_delete_sql(self, query, data_list):
-        cursor = self.conn.cursor()
-        sql = cursor.mogrify(query, data_list)
-        cursor.execute(sql)
-        self.conn.commit()
+        try:
+            cursor = self.conn.cursor()
+            sql = cursor.mogrify(query, data_list)
+            cursor.execute(sql)
+            self.conn.commit()
+            return True
+        except Exception:
+            self.conn.rollback()
+            return None
 
 
 class IteratorFile(io.TextIOBase):
@@ -88,4 +105,3 @@ class IteratorFile(io.TextIOBase):
             self._f.truncate(0)
             self._f.write(remainder)
             return data
-

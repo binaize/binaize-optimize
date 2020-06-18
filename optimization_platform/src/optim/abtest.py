@@ -55,5 +55,4 @@ class ABTest(AbstractOptim):
     def get_estimated_sample_size(self):
         return self._estimated_sample_size
 
-    def select_arm(self):
-        pass
+

@@ -28,7 +28,8 @@ class TestRDSDataStore(TestCase):
 
     def test_run_create_table_sql(self):
         status = self.rds_data_store.run_create_table_sql("CREATE TABLE hello(id int, value varchar(256))")
-        self.assertEqual(status, None)
+        expected_status = True
+        self.assertEqual(status, status)
 
     def test_run_select_sql(self):
         self.rds_data_store.run_create_table_sql("CREATE TABLE hello(id int, value varchar(256))")
@@ -40,14 +41,14 @@ class TestRDSDataStore(TestCase):
     def test_run_insert_into_sql(self):
         self.rds_data_store.run_create_table_sql("CREATE TABLE hello(id int, value varchar(256))")
         result = self.rds_data_store.run_insert_into_sql("INSERT INTO hello values(1, 'hello'), (2, 'ciao')")
-        expected_result = None
+        expected_result = True
         self.assertEqual(first=result, second=expected_result)
 
     def test_run_update_sql(self):
         self.rds_data_store.run_create_table_sql("CREATE TABLE hello(id int, value varchar(256))")
         self.rds_data_store.run_insert_into_sql("INSERT INTO hello values(1, 'hello'), (2, 'ciao')")
         result = self.rds_data_store.run_update_sql("UPDATE hello SET value='yoo' where id=2")
-        expected_result = None
+        expected_result = True
         self.assertEqual(first=result, second=expected_result)
         result = self.rds_data_store.run_select_sql('SELECT * FROM hello ORDER BY id')
         expected_result = [(1, 'hello'), (2, 'yoo')]

@@ -28,10 +28,12 @@ class TestCookieAgent(TestCase):
             self.rds_data_store.run_create_table_sql(fp.read())
 
     def test_register_cookie_for_client(self):
-        CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+        status = CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                                session_id="test_session_id", shopify_s="test_shopify_s",
                                                cart_token="test_cart_token",
                                                creation_time=1590570923)
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_select_sql("select * from cookies")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
