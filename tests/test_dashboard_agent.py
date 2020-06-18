@@ -334,7 +334,7 @@ class TestDashboardAgent(TestCase):
         expected_result = {
             'products': ['Tissot T Race', 'Tissot T Classic', 'Tissot T Sport', 'Tissot 1853', 'Ordinary Watch',
                          'Titan Classic Watch', 'IWC Watch'],
-            'product_conversion': {'visitor_count': ([1156, 900, 600, 1456, 800, 500, 760],),
+            'product_conversion': {'visitor_count': [1156, 900, 600, 1456, 800, 500, 760],
                                    'conversion_count': [20, 12, 37, 29, 9, 13, 11],
                                    'conversion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]},
             'summary': 'This is a product conversion summary', 'conclusion': 'This is product conversion conclusion'}
@@ -345,7 +345,7 @@ class TestDashboardAgent(TestCase):
         result = DashboardAgent.get_landing_page_analytics(data_store=self.rds_data_store,
                                                            client_id="test_client_id")
         expected_result = {'pages': ['Home Page', 'Product Page', 'Blog Page'],
-                           'landing_conversion': {'visitor_count': ([11560, 9000, 6000],),
+                           'landing_conversion': {'visitor_count': [11560, 9000, 6000],
                                                   'conversion_count': [200, 120, 370],
                                                   'conversion_percentage': [4.32, 5.34, 8.28]},
                            'summary': 'This is a landing conversion summary',

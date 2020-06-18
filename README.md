@@ -49,7 +49,7 @@ OK
 bash initialize_rds.sh
 ```
 
-## To deploy in EC2
+## To deploy in EC2 DEV cluster
 
 ```bash
 ssh -i "binaize-optimize.pem" ubuntu@dev.api.binaize.com
@@ -60,6 +60,20 @@ git clone https://github.com/binaize/binaize-optimize.git
 cd binaize-optimize
 git checkout development
 scp -i "binaize-optimize.pem" ./optim.env ubuntu@dev.api.binaize.com:~/binaize-optimize/
+nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans > ~/optim.out&
+```
+
+## To deploy in EC2 PROD cluster
+
+```bash
+ssh -i "binaize-optimize.pem" ubuntu@api.binaize.com
+sudo apt update
+sudo apt -y install docker.io
+sudo apt -y install docker-compose
+git clone https://github.com/binaize/binaize-optimize.git
+cd binaize-optimize
+git checkout development
+scp -i "binaize-optimize.pem" ./optim.env ubuntu@api.binaize.com:~/binaize-optimize/
 nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans > ~/optim.out&
 ```
 

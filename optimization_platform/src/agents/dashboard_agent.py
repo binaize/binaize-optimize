@@ -365,7 +365,7 @@ class DashboardAgent(object):
         result["products"] = ["Tissot T Race", "Tissot T Classic", "Tissot T Sport", "Tissot 1853", "Ordinary Watch",
                               "Titan Classic Watch", "IWC Watch"]
         temp_dict = dict()
-        temp_dict["visitor_count"] = [1156, 900, 600, 1456, 800, 500, 760],
+        temp_dict["visitor_count"] = [1156, 900, 600, 1456, 800, 500, 760]
         temp_dict["conversion_count"] = [20, 12, 37, 29, 9, 13, 11]
         temp_dict["conversion_percentage"] = [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]
         result["product_conversion"] = temp_dict
@@ -378,7 +378,7 @@ class DashboardAgent(object):
         result = dict()
         result["pages"] = ["Home Page", "Product Page", "Blog Page"]
         temp_dict = dict()
-        temp_dict["visitor_count"] = [11560, 9000, 6000],
+        temp_dict["visitor_count"] = [11560, 9000, 6000]
         temp_dict["conversion_count"] = [200, 120, 370]
         temp_dict["conversion_percentage"] = [4.32, 5.34, 8.28]
         result["landing_conversion"] = temp_dict
