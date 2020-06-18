@@ -329,17 +329,16 @@ class DashboardAgent(object):
                     client_id = '{client_id}' and
                     event_name = 'cart')
                 union
-                (select '5' as id, 'Checkout Page' as event,count(distinct(session_id)) as blahblah
-                    from visits
+                (select '5' as id, 'Checkout Page' as event,count(distinct(order_id)) as blahblah
+                    from orders
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'checkout')
+                    client_id = '{client_id}')
                 union
-                (select '6' as id, 'Purchase' as event,count(distinct(session_id))/3 as blahblah
-                    from visits
+                (select '6' as id, 'Purchase' as event,count(distinct(order_id)) as blahblah
+                    from orders
                 where 
                     client_id = '{client_id}' and
-                    event_name = 'checkout')
+                    payment_status = True)
 
             """.format(client_id=client_id)
         mobile_records = data_store.run_custom_sql(sql)
@@ -349,14 +348,21 @@ class DashboardAgent(object):
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = ["id", "pages", "count"]
             df = df.sort_values(['id'])
-            df["percentage"] = df["count"] * 100 / (max(df["count"]) + 1)
+            df["percentage"] = df["count"] * 100 / (max(df["count"]) + 0.01)
             df["percentage"] = df["percentage"].map(lambda x: round(x, 2))
             result["pages"] = df["pages"].tolist()
             temp_dict["count"] = df["count"].tolist()
             temp_dict["percentage"] = df["percentage"].tolist()
             result["shop_funnel"] = temp_dict
-            result["summary"] = "This is a shop funnel summary"
-            result["conclusion"] = "This is shop funnel conclusion"
+            diff_list = list()
+            for a in zip(df["percentage"], df["percentage"][1:]):
+                diff_list.append(a[0] - a[1])
+            max_idx = diff_list.index(max(diff_list))
+            result["summary"] = "{page_type} has maximum churn of {drop}%".format(page_type=result["pages"][max_idx],
+                                                                                  drop=round(diff_list[max_idx], 2))
+            result["conclusion"] = "Experiment with different creatives/copies for {page_type}".format(
+                page_type=result["pages"][max_idx])
+
         return result
 
     @classmethod
