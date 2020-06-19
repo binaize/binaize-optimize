@@ -24,7 +24,7 @@ python3 -W ignore:ResourceWarning -m unittest
 #python3 -W ignore:ResourceWarning -m unittest tests/test_s3_data_store.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_rds_data_store.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_client_agent.py
-#python3 -W ignore:ResourceWarning -m unittest tests/test_dashboard_agent.py
+#python3 -W ignore:ResourceWarning -m unittest tests/test_conversion_analytics.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_event_agent.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_experiment_agent.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_variation_agent.py

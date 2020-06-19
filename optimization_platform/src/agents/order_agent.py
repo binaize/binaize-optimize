@@ -14,7 +14,7 @@ class OrderAgent(object):
     def sync_orders(cls, data_store, client_id):
         table = TABLE_ORDERS
         columns = ["client_id", "order_id", "email_id", "cart_token", "product_id",
-                   "variant_id", "variant_quantity", "variant_price", "updated_at", "payment_status"]
+                   "variant_id", "variant_quantity", "variant_price", "updated_at", "payment_status", "landing_page"]
         sql = "select max(updated_at) from {table} where client_id = '{client_id}'".format(table=table,
                                                                                            client_id=client_id)
         mobile_records = data_store.run_select_sql(query=sql)
@@ -51,6 +51,7 @@ class OrderAgent(object):
                 variant_dict["variant_price"] = float(item["price"])
                 variant_dict["updated_at"] = order["updated_at"]
                 variant_dict["payment_status"] = True
+                variant_dict["landing_page"] = order["landing_site"]
                 variant_list.append(variant_dict)
             order_id_list.append(order["id"])
 
@@ -75,6 +76,7 @@ class OrderAgent(object):
                 variant_dict["variant_price"] = float(item["price"])
                 variant_dict["updated_at"] = checkout["updated_at"]
                 variant_dict["payment_status"] = False
+                variant_dict["landing_page"] = checkout["landing_site"]
                 variant_list.append(variant_dict)
             order_id_list.append(checkout["id"])
 
@@ -93,7 +95,7 @@ class OrderAgent(object):
                                           variant[columns[2]], variant[columns[3]],
                                           variant[columns[4]], variant[columns[5]],
                                           variant[columns[6]], variant[columns[7]],
-                                          variant[columns[8]], variant[columns[9]])
+                                          variant[columns[8]], variant[columns[9]], variant[columns[10]])
                                  for variant in variant_list))
             data_store.run_batch_insert_sql(file=file, table=table, columns=columns)
 

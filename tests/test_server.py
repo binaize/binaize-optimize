@@ -819,8 +819,9 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [3, 2, 1, 1, 2, 0], 'percentage': [75.0, 50.0, 25.0, 25.0, 50.0, 0.0]},
-            'summary': 'This is a shop funnel summary', 'conclusion': 'This is shop funnel conclusion'}
+            'shop_funnel': {'count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
+            'summary': 'Collection Page has maximum churn of 33.23%',
+            'conclusion': 'Experiment with different creatives/copies for Collection Page'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -847,13 +848,10 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {
-            'products': ['Tissot T Race', 'Tissot T Classic', 'Tissot T Sport', 'Tissot 1853', 'Ordinary Watch',
-                         'Titan Classic Watch', 'IWC Watch'],
-            'product_conversion': {'visitor_count': [1156, 900, 600, 1456, 800, 500, 760],
-                                   'conversion_count': [20, 12, 37, 29, 9, 13, 11],
-                                   'conversion_percentage': [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]},
-            'summary': 'This is a product conversion summary', 'conclusion': 'This is product conversion conclusion'}
+        expected_response_json = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
+                                                                         'conversion_percentage': []},
+                                  'summary': 'There are NOT enough visits registered on the website',
+                                  'conclusion': 'Wait for the customers to interact with your website'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -880,10 +878,8 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'pages': ['Home Page', 'Product Page', 'Blog Page'],
-                                  'landing_conversion': {'visitor_count': [11560, 9000, 6000],
-                                                         'conversion_count': [200, 120, 370],
-                                                         'conversion_percentage': [4.32, 5.34, 8.28]},
-                                  'summary': 'This is a landing conversion summary',
-                                  'conclusion': 'This is landing conversion conclusion'}
+        expected_response_json = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
+                                                                      'conversion_percentage': []},
+                                  'summary': 'There are NOT enough visits registered on the website',
+                                  'conclusion': 'Wait for the customers to interact with your website'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)

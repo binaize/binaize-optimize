@@ -13,7 +13,8 @@ from config import *
 from optimization_platform.deployment.server_models import *
 from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.cookie_agent import CookieAgent
-from optimization_platform.src.agents.dashboard_agent import DashboardAgent
+from optimization_platform.src.analytics.conversion import ConversionAnalytics
+from optimization_platform.src.analytics.experiment import ExperimentAnalytics
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
@@ -325,9 +326,9 @@ async def register_event(*, event: Event):
 
     creation_time = DateUtils.get_timestamp_now()
     result = EventAgent.register_event_for_client(data_store=app.rds_data_store, client_id=event.client_id,
-                                         experiment_id=event.experiment_id,
-                                         session_id=event.session_id, variation_id=event.variation_id,
-                                         event_name=event.event_name, creation_time=creation_time)
+                                                  experiment_id=event.experiment_id,
+                                                  session_id=event.session_id, variation_id=event.variation_id,
+                                                  event_name=event.event_name, creation_time=creation_time)
 
     response = ResponseMessage()
     response.message = "Event registration for client_id {client_id} is successful.".format(
@@ -394,7 +395,7 @@ async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Dep
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = DashboardAgent.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
+    result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
                                                                       client_id=current_client.client_id,
                                                                       experiment_id=experiment_id)
 
@@ -410,7 +411,7 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = DashboardAgent.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
+    result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
                                                                       client_id=current_client.client_id,
                                                                       experiment_id=experiment_id)
 
@@ -426,7 +427,7 @@ async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = D
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = DashboardAgent.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
+    result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
                                                                         client_id=current_client.client_id,
                                                                         experiment_id=experiment_id)
 
@@ -442,7 +443,7 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = DashboardAgent.get_conversion_rate_of_experiment(data_store=app.rds_data_store,
+    result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=app.rds_data_store,
                                                               client_id=current_client.client_id,
                                                               experiment_id=experiment_id)
 
@@ -459,7 +460,7 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
         - **experiment_id**: id of the experiment
     """
 
-    result = DashboardAgent.get_summary_of_experiment(data_store=app.rds_data_store,
+    result = ExperimentAnalytics.get_summary_of_experiment(data_store=app.rds_data_store,
                                                       client_id=current_client.client_id,
                                                       experiment_id=experiment_id)
 
@@ -474,7 +475,7 @@ async def get_shop_funnel_analytics_for_dashboard(*,
         Get shop funnel analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
     """
-    result = DashboardAgent.get_shop_funnel_analytics(data_store=app.rds_data_store,
+    result = ConversionAnalytics.get_shop_funnel_analytics(data_store=app.rds_data_store,
                                                       client_id=current_client.client_id)
 
     return result
@@ -488,7 +489,7 @@ async def get_product_conversion_analytics_for_dashboard(*, current_client: Shop
         Get product conversion analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
     """
-    result = DashboardAgent.get_product_conversion_analytics(data_store=app.rds_data_store,
+    result = ConversionAnalytics.get_product_conversion_analytics(data_store=app.rds_data_store,
                                                              client_id=current_client.client_id)
 
     return result
@@ -502,7 +503,7 @@ async def get_landing_page_analytics_for_dashboard(*, current_client: ShopifyCli
         Get landing page analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
     """
-    result = DashboardAgent.get_landing_page_analytics(data_store=app.rds_data_store,
+    result = ConversionAnalytics.get_landing_page_analytics(data_store=app.rds_data_store,
                                                        client_id=current_client.client_id)
 
     return result

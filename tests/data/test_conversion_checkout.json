@@ -1,0 +1,46 @@
+{
+  "checkouts": [
+    {
+      "id": 21,
+      "cart_token": "cart_token_21",
+      "email": "email_1",
+      "updated_at": "2020-06-02T07:19:22-04:00",
+      "landing_site": "/products/product_handle_3",
+      "line_items": [
+        {
+          "product_id": 2,
+          "quantity": 1,
+          "variant_id": 21,
+          "price": "10.00"
+        },
+        {
+          "product_id": 2,
+          "quantity": 1,
+          "variant_id": 22,
+          "price": "249.00"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "cart_token": "cart_token_22",
+      "email": "email_2",
+      "updated_at": "2020-06-02T07:19:22-04:00",
+      "landing_site": "/",
+      "line_items": [
+        {
+          "product_id": 3,
+          "quantity": 1,
+          "variant_id": 31,
+          "price": "10.00"
+        },
+        {
+          "product_id": 2,
+          "quantity": 1,
+          "variant_id": 21,
+          "price": "249.00"
+        }
+      ]
+    }
+  ]
+}

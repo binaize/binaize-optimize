@@ -1,0 +1,402 @@
+[
+  {
+    "session_id": "test_session_id_1",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_1",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_2",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_2",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_2",
+    "event_name": "product",
+    "url": "/products/product_handle_1"
+  },
+  {
+    "session_id": "test_session_id_2",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_3",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_3",
+    "event_name": "product",
+    "url": "/products/product_handle_2"
+  },
+  {
+    "session_id": "test_session_id_3",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_4",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_4",
+    "event_name": "product",
+    "url": "/products/product_handle_3"
+  },
+  {
+    "session_id": "test_session_id_3",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_4",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_5",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_6",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_7",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_11",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_11",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_12",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_12",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_12",
+    "event_name": "product",
+    "url": "/products/product_handle_1"
+  },
+  {
+    "session_id": "test_session_id_12",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_13",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_13",
+    "event_name": "product",
+    "url": "/products/product_handle_2"
+  },
+  {
+    "session_id": "test_session_id_13",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_14",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_14",
+    "event_name": "product",
+    "url": "/products/product_handle_3"
+  },
+  {
+    "session_id": "test_session_id_13",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_14",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_15",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_16",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_17",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_21",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_21",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_22",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_22",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_22",
+    "event_name": "product",
+    "url": "/products/product_handle_1"
+  },
+  {
+    "session_id": "test_session_id_22",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_23",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_23",
+    "event_name": "product",
+    "url": "/products/product_handle_2"
+  },
+  {
+    "session_id": "test_session_id_23",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_24",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_24",
+    "event_name": "product",
+    "url": "/products/product_handle_3"
+  },
+  {
+    "session_id": "test_session_id_23",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_24",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_25",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_26",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_27",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_31",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_31",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_32",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_32",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_32",
+    "event_name": "product",
+    "url": "/products/product_handle_1"
+  },
+  {
+    "session_id": "test_session_id_32",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_33",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_33",
+    "event_name": "product",
+    "url": "/products/product_handle_2"
+  },
+  {
+    "session_id": "test_session_id_33",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_34",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_34",
+    "event_name": "product",
+    "url": "/products/product_handle_3"
+  },
+  {
+    "session_id": "test_session_id_33",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_34",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_35",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_36",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_37",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_41",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_41",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_42",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_42",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_42",
+    "event_name": "product",
+    "url": "/products/product_handle_1"
+  },
+  {
+    "session_id": "test_session_id_42",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_43",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_43",
+    "event_name": "product",
+    "url": "/products/product_handle_2"
+  },
+  {
+    "session_id": "test_session_id_43",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_44",
+    "event_name": "collection",
+    "url": "/collections/all"
+  },
+  {
+    "session_id": "test_session_id_44",
+    "event_name": "product",
+    "url": "/products/product_handle_3"
+  },
+  {
+    "session_id": "test_session_id_43",
+    "event_name": "cart",
+    "url": "/cart"
+  },
+  {
+    "session_id": "test_session_id_44",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_45",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_46",
+    "event_name": "home",
+    "url": "/"
+  },
+  {
+    "session_id": "test_session_id_47",
+    "event_name": "home",
+    "url": "/"
+  }
+]
