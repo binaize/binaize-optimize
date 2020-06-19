@@ -305,36 +305,36 @@ class DashboardAgent(object):
     def get_shop_funnel_analytics(cls, data_store, client_id):
         sql = \
             """
-                select '1' as id, 'Home Page' as event,count(distinct(session_id)) as blah
+                select '1' as id, 'Home Page' as event,count(distinct(session_id))
                     from visits
                 where 
                     client_id = '{client_id}' and
                     event_name = 'home'
                 union
-                (select '2' as id, 'Collection Page' as event,count(distinct(session_id)) as blahblah
+                (select '2' as id, 'Collection Page' as event,count(distinct(session_id))
                     from visits
                 where 
                     client_id = '{client_id}' and
                     event_name = 'collection')
                 union
-                (select '3' as id, 'Product Page' as event,count(distinct(session_id)) as blahblahd
+                (select '3' as id, 'Product Page' as event,count(distinct(session_id))
                     from visits
                 where 
                     client_id = '{client_id}' and
                     event_name = 'product')
                 union
-                (select '4' as id, 'Cart Page' as event,count(distinct(session_id)) as blahblahdd
+                (select '4' as id, 'Cart Page' as event,count(distinct(session_id))
                     from visits
                 where 
                     client_id = '{client_id}' and
                     event_name = 'cart')
                 union
-                (select '5' as id, 'Checkout Page' as event,count(distinct(order_id)) as blahblah
+                (select '5' as id, 'Checkout Page' as event,count(distinct(order_id))
                     from orders
                 where 
                     client_id = '{client_id}')
                 union
-                (select '6' as id, 'Purchase' as event,count(distinct(order_id)) as blahblah
+                (select '6' as id, 'Purchase' as event,count(distinct(order_id))
                     from orders
                 where 
                     client_id = '{client_id}' and
@@ -367,16 +367,74 @@ class DashboardAgent(object):
 
     @classmethod
     def get_product_conversion_analytics(cls, data_store, client_id):
+
+        sql = \
+            """
+                select url, count(distinct(session_id)) as session_count
+                    from visits
+                where 
+                    client_id = '{client_id}' and
+                    event_name = 'product'
+                group by
+                    url
+            """.format(client_id=client_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        if mobile_records is not None and len(mobile_records) > 0:
+            visits_df = pd.DataFrame.from_records(mobile_records)
+            visits_df.columns = ["url", "visitor_count"]
+            visits_df["product_handle"] = visits_df["url"].map(lambda x: x.split("/")[-1])
+            visits_df.drop(['url'], axis=1, inplace=True)
+        sql = \
+            """
+                select product_title, product_handle, product_id
+                    from products
+                where 
+                    client_id = '{client_id}'
+            """.format(client_id=client_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        if mobile_records is not None and len(mobile_records) > 0:
+            product_df = pd.DataFrame.from_records(mobile_records)
+            product_df.columns = ["product_title", "product_handle", "product_id"]
+
+        sql = \
+            """
+                select product_id, sum(variant_quantity) as conversion_count
+                    from orders
+                where 
+                    client_id = '{client_id}' and 
+                    payment_status = True
+                group by
+                    product_id
+            """.format(client_id=client_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        if mobile_records is not None and len(mobile_records) > 0:
+            orders_df = pd.DataFrame.from_records(mobile_records)
+            orders_df.columns = ["product_id", "conversion_count"]
+
+        visits_product_df = pd.merge(visits_df, product_df,
+                                     how='outer', left_on=["product_handle"], right_on=["product_handle"])
+        df = pd.merge(visits_product_df, orders_df,
+                      how='left', left_on=["product_id"], right_on=["product_id"])
+        df["conversion_count"] = df["conversion_count"].fillna(0).astype(int)
+        df["conversion_percentage"] = df["conversion_count"] *100 / (df["visitor_count"]+0.01)
+        df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: round(x, 2))
+        df = df.sort_values(["product_handle"])
         result = dict()
-        result["products"] = ["Tissot T Race", "Tissot T Classic", "Tissot T Sport", "Tissot 1853", "Ordinary Watch",
-                              "Titan Classic Watch", "IWC Watch"]
+        result["products"] = df["product_title"].tolist()
         temp_dict = dict()
-        temp_dict["visitor_count"] = [1156, 900, 600, 1456, 800, 500, 760]
-        temp_dict["conversion_count"] = [20, 12, 37, 29, 9, 13, 11]
-        temp_dict["conversion_percentage"] = [1.78, 1.33, 6.12, 1.99, 1.12, 2.41, 1.44]
+        temp_dict["visitor_count"] = df["visitor_count"].tolist()
+        temp_dict["conversion_count"] = df["conversion_count"].tolist()
+        temp_dict["conversion_percentage"] = df["conversion_percentage"].tolist()
         result["product_conversion"] = temp_dict
-        result["summary"] = "This is a product conversion summary"
-        result["conclusion"] = "This is product conversion conclusion"
+
+        percentage_list = temp_dict["conversion_percentage"]
+        product_list = result["products"]
+        min_idx = percentage_list.index(min(percentage_list))
+        result["summary"] = "{product} has minimum conversion of {conversion}%".format(product=product_list[min_idx],
+                                                                                       conversion=percentage_list[
+                                                                                           min_idx])
+        result["conclusion"] = "Experiment with different creatives/copies for {product}".format(
+            product=product_list[min_idx])
         return result
 
     @classmethod
