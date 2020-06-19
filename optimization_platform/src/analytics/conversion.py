@@ -218,10 +218,10 @@ class ConversionAnalytics(object):
             orders_df.columns = ["landing_page", "conversion_count"]
 
             def process_landing_page(x):
-                if "collection" in x:
-                    return "collection"
-                elif "product" in x:
+                if "product" in x:
                     return "product"
+                elif "collection" in x:
+                    return "collection"
                 return "home"
 
             orders_df["page_type"] = orders_df["landing_page"].map(process_landing_page)
