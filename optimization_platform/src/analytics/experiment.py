@@ -295,8 +295,9 @@ class ExperimentAnalytics(object):
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
                           "visitor_converted",
-                          "conversion"]
-            df["conversion"] = df["conversion"].map(lambda x: round(x, 2))
+                          "goal_conversion"]
+            df["goal_conversion"] = df["goal_conversion"].map(lambda x: round(x * 100, 2))
+            df["sales_conversion"] = pd.Series([2.45 for i in range(len(df))])
             result = df.to_dict(orient="records")
         return result
 
@@ -337,26 +338,28 @@ class ExperimentAnalytics(object):
         remaining_time = ab.get_remaining_time()
         remaining_days = int(remaining_time) + 1
 
-        status = "{variation} is winning. It is {betterness_percentage}% better than the others.".format(
+        status = "<strong> {variation} </strong> is winning. It is {betterness_percentage}% better than the others.".format(
             variation=best_variation,
             betterness_percentage=betterness_percentage)
 
-        conclusion = "There is NOT enough evidence to conclude the experiment " \
-                     "(It is NOT yet statistically significant)." \
-                     "To be statistically confident, we need {remaining_sample_size} more visitors." \
+        conclusion = "There is <strong> NOT </strong> enough evidence to conclude the experiment " \
+                     "(It is <strong> NOT </strong> yet statistically significant)." \
+                     "To be statistically confident, we need <strong> {remaining_sample_size} </strong> more visitors." \
                      "Based on recent visitor trend, experiment should run for another {remaining_days} days.".format(
             remaining_sample_size=remaining_sample_size, remaining_days=remaining_days)
-        recommendation = "Recommendation: CONTINUE the Experiment."
+        recommendation = "Recommendation: <strong> CONTINUE </strong> the Experiment."
         if remaining_sample_size < 0:
-            conclusion = "There is ENOUGH evidence to conclude the experiment. " \
-                         "There is NO CLEAR WINNER. We are {confidence_percentage}% confident that {variation} " \
+            conclusion = "There is <strong> ENOUGH </strong> evidence to conclude the experiment. " \
+                         "There is <strong> NO CLEAR WINNER </strong>. We are <strong> {confidence_percentage}%" \
+                         " </strong> confident that <strong> {variation} </strong> " \
                          "is the best.".format(confidence_percentage=confidence_percentage, variation=best_variation)
-            recommendation = "Recommendation: CONCLUDE the Experiment."
+            recommendation = "Recommendation: <strong> CONCLUDE </strong> the Experiment."
         if confidence > 0.95:
-            conclusion = "There is ENOUGH evidence to conclude the experiment. " \
-                         "We have a winner. We are {confidence_percentage}% confident that {variation} is the best.".format(
+            conclusion = "There is <strong> ENOUGH </strong> evidence to conclude the experiment. " \
+                         "We have a winner. We are <strong> {confidence_percentage}% </strong> confident " \
+                         "that <strong> {variation} </strong> is the best.".format(
                 confidence_percentage=confidence_percentage, variation=best_variation)
-            recommendation = "Recommendation: CONCLUDE the Experiment."
+            recommendation = "Recommendation: <strong> CONCLUDE </strong> the Experiment."
 
         result = dict()
         result["status"] = status

@@ -23,8 +23,8 @@ class ProductAgent(object):
         max_datetime = mobile_records[0][0]
         if max_datetime is not None:
             max_datetime += datetime.timedelta(microseconds=0)
-            max_datetime_utc = DateUtils.change_timezone(src_datetime=max_datetime, timezone="UTC")
-            updated_at = DateUtils.convert_timestampz_to_iso_string(timestampz=max_datetime_utc)
+            max_datetime_utc = DateUtils.change_timezone(datetime_obj=max_datetime, timezone_str="UTC")
+            updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
 
         client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
         shared_url = client_details["shopify_app_eg_url"]

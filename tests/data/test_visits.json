@@ -5,14 +5,14 @@
     "url": "/"
   },
   {
-    "session_id": "test_session_id_1",
-    "event_name": "collection",
-    "url": "/collections/all"
-  },
-  {
     "session_id": "test_session_id_2",
     "event_name": "home",
     "url": "/"
+  },
+  {
+    "session_id": "test_session_id_1",
+    "event_name": "collection",
+    "url": "/collections/all"
   },
   {
     "session_id": "test_session_id_2",

@@ -159,6 +159,7 @@ async def sign_up_new_client(new_client: NewClient):
         - **password**: password used for signing up by the new client
     """
 
+    creation_time = DateUtils.get_timestamp_now()
     user = get_client(app.rds_data_store, client_id=new_client.client_id)
     response = ResponseMessage()
     response.message = "Client_id {client_id} is already registered.".format(
@@ -169,7 +170,8 @@ async def sign_up_new_client(new_client: NewClient):
         ClientAgent.add_new_client(data_store=app.rds_data_store, client_id=new_client.client_id,
                                    full_name=new_client.full_name,
                                    company_name=new_client.company_name, hashed_password=hashed_password,
-                                   disabled=new_client.disabled)
+                                   disabled=new_client.disabled, shopify_app_eg_url=new_client.shopify_app_eg_url,
+                                   client_timezone=new_client.client_timezone, creation_timestamp=creation_time)
         response.message = "Sign up for new client with client_id {client_id} is successful.".format(
             client_id=new_client.client_id)
         response.status = status.HTTP_200_OK
@@ -199,39 +201,19 @@ async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depe
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/api/v1/schemas/client/details", response_model=BaseClient, tags=["Client"],
+@app.get("/api/v1/schemas/client/details", response_model=Client, tags=["Client"],
          summary="Get details of a logged in client")
-async def get_client_details(*, current_client: LoggedinClient = Depends(
+async def get_client_details(*, current_client: ShopifyClient = Depends(
     get_current_active_client)):
     """
         Get details of a logged in client:
         - **access_token**: access token issued by the server to the logged in client
     """
-    client = BaseClient(client_id=current_client.client_id, full_name=current_client.full_name,
-                        company_name=current_client.company_name, disabled=current_client.disabled)
+    client = Client(client_id=current_client.client_id, full_name=current_client.full_name,
+                    company_name=current_client.company_name, disabled=current_client.disabled,
+                    shopify_app_eg_url=current_client.shopify_app_eg_url,
+                    client_timezone=current_client.client_timezone, creation_time=current_client.creation_time)
     return client
-
-
-@app.post("/api/v1/schemas/client/add-credential", response_model=ResponseMessage, tags=["Client"],
-          summary="Add shopify credentials to logged in client")
-async def add_shopify_credentials_to_logged_in_client(*, current_client: LoggedinClient = Depends(
-    get_current_active_client), shopify_credentials: ShopifyCredential):
-    """
-        Get details of a logged in client:
-        - **access_token**: access token issued by the server to the logged in client
-        - **shopify_app_eg_url**: example url of the shopify private app
-        - **shopify_app_shared_secret**: shared_secret of the shopify private app
-    """
-
-    ClientAgent.add_shopify_credentials_to_existing_client(data_store=app.rds_data_store,
-                                                           client_id=current_client.client_id,
-                                                           shopify_app_eg_url=shopify_credentials.shopify_app_eg_url,
-                                                           shopify_app_shared_secret=shopify_credentials.shopify_app_shared_secret)
-    response = ResponseMessage()
-    response.message = "Addition of Shopify Credentials for client_id {client_id} is successful.".format(
-        client_id=current_client.client_id)
-    response.status = status.HTTP_200_OK
-    return response
 
 
 @app.post("/api/v1/schemas/experiment/create", response_model=Experiment, tags=["Experiment"],
@@ -370,13 +352,11 @@ async def register_cookie(*, cookie: Cookie):
         Register cookie information when a visitor visits the client's website::
         - **client_id**: the e-mail id of the new client
         - **session_id**: shopify_y attribute of shopify cookie
-        - **shopify_s**: shopify_s attribute of shopify cookie
         - **cart_token**: cart_token attribute of shopify cookie
     """
     creation_time = DateUtils.get_timestamp_now()
     CookieAgent.register_cookie_for_client(data_store=app.rds_data_store, client_id=cookie.client_id,
-                                           session_id=cookie.session_id,
-                                           shopify_s=cookie.shopify_s, cart_token=cookie.cart_token,
+                                           session_id=cookie.session_id, cart_token=cookie.cart_token,
                                            creation_time=creation_time)
 
     response = ResponseMessage()
@@ -396,8 +376,8 @@ async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Dep
         - **experiment_id**: id of the experiment
     """
     result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
-                                                                      client_id=current_client.client_id,
-                                                                      experiment_id=experiment_id)
+                                                                           client_id=current_client.client_id,
+                                                                           experiment_id=experiment_id)
 
     return result
 
@@ -412,8 +392,8 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
         - **experiment_id**: id of the experiment
     """
     result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
-                                                                      client_id=current_client.client_id,
-                                                                      experiment_id=experiment_id)
+                                                                           client_id=current_client.client_id,
+                                                                           experiment_id=experiment_id)
 
     return result
 
@@ -428,8 +408,8 @@ async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = D
         - **experiment_id**: id of the experiment
     """
     result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
-                                                                        client_id=current_client.client_id,
-                                                                        experiment_id=experiment_id)
+                                                                             client_id=current_client.client_id,
+                                                                             experiment_id=experiment_id)
 
     return result
 
@@ -444,8 +424,8 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
         - **experiment_id**: id of the experiment
     """
     result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=app.rds_data_store,
-                                                              client_id=current_client.client_id,
-                                                              experiment_id=experiment_id)
+                                                                   client_id=current_client.client_id,
+                                                                   experiment_id=experiment_id)
 
     return result
 
@@ -461,8 +441,8 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
     """
 
     result = ExperimentAnalytics.get_summary_of_experiment(data_store=app.rds_data_store,
-                                                      client_id=current_client.client_id,
-                                                      experiment_id=experiment_id)
+                                                           client_id=current_client.client_id,
+                                                           experiment_id=experiment_id)
 
     return result
 
@@ -470,13 +450,17 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
 @app.get("/api/v1/schemas/report/shop-funnel", response_model=dict, tags=["Report"],
          summary="Get shop funnel analytics")
 async def get_shop_funnel_analytics_for_dashboard(*,
-                                                  current_client: ShopifyClient = Depends(get_current_active_client)):
+                                                  current_client: ShopifyClient = Depends(get_current_active_client),
+                                                  start_date: str, end_date: str):
     """
         Get shop funnel analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
+        - **start_date**: start date in YYYY-MM-DD format
+        - **end_date**: end date in YYYY-MM-DD format
     """
     result = ConversionAnalytics.get_shop_funnel_analytics(data_store=app.rds_data_store,
-                                                      client_id=current_client.client_id)
+                                                           client_id=current_client.client_id,
+                                                           start_date_str=start_date, end_date_str=end_date)
 
     return result
 
@@ -484,26 +468,34 @@ async def get_shop_funnel_analytics_for_dashboard(*,
 @app.get("/api/v1/schemas/report/product-conversion", response_model=dict, tags=["Report"],
          summary="Get product conversion analytics")
 async def get_product_conversion_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(
-    get_current_active_client)):
+    get_current_active_client), start_date: str, end_date: str):
     """
         Get product conversion analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
+        - **start_date**: start date in YYYY-MM-DD format
+        - **end_date**: end date in YYYY-MM-DD format
     """
     result = ConversionAnalytics.get_product_conversion_analytics(data_store=app.rds_data_store,
-                                                             client_id=current_client.client_id)
+                                                                  client_id=current_client.client_id,
+                                                                  start_date_str=start_date, end_date_str=end_date)
 
     return result
 
 
 @app.get("/api/v1/schemas/report/landing-page", response_model=dict, tags=["Report"],
          summary="Get landing page analytics")
-async def get_landing_page_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client)
+async def get_landing_page_analytics_for_dashboard(*,
+                                                   current_client: ShopifyClient = Depends(get_current_active_client),
+                                                   start_date: str, end_date: str
                                                    ):
     """
         Get landing page analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
+        - **start_date**: start date in YYYY-MM-DD format
+        - **end_date**: end date in YYYY-MM-DD format
     """
     result = ConversionAnalytics.get_landing_page_analytics(data_store=app.rds_data_store,
-                                                       client_id=current_client.client_id)
+                                                            client_id=current_client.client_id,
+                                                            start_date_str=start_date, end_date_str=end_date)
 
     return result

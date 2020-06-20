@@ -45,8 +45,8 @@ class ExperimentAgent(object):
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = columns
-            df["creation_time"] = df["creation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
-            df["last_updation_time"] = df["last_updation_time"].map(DateUtils.timestampz_to_dashboard_formatted_string)
+            df["creation_time"] = df["creation_time"].map(DateUtils.convert_datetime_to_experiment_dashboard_date_string)
+            df["last_updation_time"] = df["last_updation_time"].map(DateUtils.convert_datetime_to_experiment_dashboard_date_string)
         experiments = None
         if df is not None:
             experiments = df.to_dict(orient="records")

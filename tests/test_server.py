@@ -52,8 +52,9 @@ class TestServer(TestCase):
             "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
-                  "disabled": False,
-                  "password": "test_password"},
+                  "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
+                  "client_timezone": "test_client_timezone",
+                  "password": "test_password"}
         )
         status_code = response.status_code
         expected_status_code = 200
@@ -66,7 +67,8 @@ class TestServer(TestCase):
             "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
-                  "disabled": False,
+                  "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
+                  "client_timezone": "test_client_timezone",
                   "password": "test_password"}
         )
         status_code = response.status_code
@@ -80,14 +82,14 @@ class TestServer(TestCase):
         self._sign_up_new_client()
 
     def test_login_and_get_access_token(self):
-        response = client.post(
+        client.post(
             "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
-                  "disabled": False,
-                  "password": "test_password"},
+                  "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
+                  "client_timezone": "test_client_timezone",
+                  "password": "test_password"}
         )
-
         response = client.post(
             "/api/v1/schemas/client/token",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
@@ -115,21 +117,24 @@ class TestServer(TestCase):
         expected_status_code = 401
         self.assertEqual(first=status_code, second=expected_status_code)
 
+    @patch('datetime.datetime', new=datetime_mock)
     def test_get_client_details(self):
         """ one active and one disabled client signed up"""
         client.post(
             "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
-                  "disabled": False,
-                  "password": "test_password"},
+                  "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
+                  "client_timezone": "test_client_timezone",
+                  "password": "test_password"}
         )
         client.post(
             "/api/v1/schemas/client/sign_up",
             headers={"accept": "application/json"},
             json={"client_id": "disabled_client", "company_name": "test_company_name", "full_name": "test_full_name",
-                  "disabled": True,
-                  "password": "disabled_password"},
+                  "disabled": True, "shopify_app_eg_url": "test_shopify_app_eg_url",
+                  "client_timezone": "test_client_timezone",
+                  "password": "disabled_password"}
         )
 
         """get access token for the disabled client"""
@@ -177,6 +182,13 @@ class TestServer(TestCase):
         expected_status_code = 200
         self.assertEqual(first=status_code, second=expected_status_code)
 
+        response_json = response.json()
+        expected_response_json = {"client_id": "test_client", "company_name": "test_company_name",
+                                  "full_name": "test_full_name", "disabled": False,
+                                  "shopify_app_eg_url": "test_shopify_app_eg_url",
+                                  "client_timezone": "test_client_timezone", "creation_time": "2020-05-30"}
+        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
         """send an expired access token for active user"""
 
         response = client.post(
@@ -205,33 +217,6 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
         response_json = response.json()
         expected_response_json = {"detail": "Could not validate credentials"}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
-
-    def test_add_shopify_credentials_to_logged_in_client(self):
-        self._sign_up_new_client()
-
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-
-        access_token = response.json()["access_token"]
-
-        response = client.post(
-            "/api/v1/schemas/client/add-credential",
-            headers={"Authorization": "Bearer " + access_token},
-            json={"shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "shopify_app_shared_secret": "test_shopify_app_shared_secret"}
-        )
-
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
-
-        response_json = response.json()
-        expected_response_json = {"status": "200",
-                                  "message": "Addition of Shopify Credentials for client_id test_client is successful."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -542,8 +527,7 @@ class TestServer(TestCase):
         result = app.rds_data_store.run_select_sql("select * from cookies")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
-        expected_result = ['test_client', 'test_session_id', 'test_shopify_s', 'test_cart_token',
-                           '2020-05-30T13:00:00+05:30']
+        expected_result = ['test_client', 'test_session_id', 'test_cart_token', '2020-05-30T13:00:00+05:30']
         self.assertCountEqual(first=result, second=expected_result)
 
     def _create_event(self, variation_1, variation_2):
@@ -715,11 +699,15 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
+        for record in response_json:
+            record.pop("variation_id", None)
         expected_response_json = [
-            {'variation_name': 'test_variation_name_1', 'variation_id': variation_1["variation_id"],
-             'num_session': 1, 'num_visitor': 1, 'visitor_converted': 1, 'conversion': 1.0},
-            {'variation_name': 'test_variation_name_2', 'variation_id': variation_2["variation_id"],
-             'num_session': 3, 'num_visitor': 2, 'visitor_converted': 1, 'conversion': 0.5}]
+            {'variation_name': 'test_variation_name_2',
+             'num_session': 3, 'num_visitor': 2, 'visitor_converted': 1, 'goal_conversion': 50.0,
+             'sales_conversion': 2.45},
+            {'variation_name': 'test_variation_name_1',
+             'num_session': 1, 'num_visitor': 1, 'visitor_converted': 1, 'goal_conversion': 100.0,
+             'sales_conversion': 2.45}]
         self.assertCountEqual(first=response_json, second=expected_response_json)
 
     def test_get_experiment_summary(self):
@@ -746,9 +734,10 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'status': 'test_variation_name_1 is winning. It is 50.0% better than the others.',
-                                  'conclusion': 'There is NOT enough evidence to conclude the experiment (It is NOT yet statistically significant).To be statistically confident, we need 1566 more visitors.Based on recent visitor trend, experiment should run for another 523 days.',
-                                  'recommendation': 'Recommendation: CONTINUE the Experiment.'}
+        expected_response_json = {
+            'status': '<strong> test_variation_name_1 </strong> is winning. It is 50.0% better than the others.',
+            'conclusion': 'There is <strong> NOT </strong> enough evidence to conclude the experiment (It is <strong> NOT </strong> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another 523 days.',
+            'recommendation': 'Recommendation: <strong> CONTINUE </strong> the Experiment.'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     def _create_visit_event(self):
@@ -809,7 +798,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/shop-funnel",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client"}
+            params={"client_id": "test_client", "start_date": "", "end_date": ""}
         )
 
         status_code = response.status_code
@@ -840,7 +829,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/product-conversion",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client"}
+            params={"client_id": "test_client", "start_date": "", "end_date": ""}
         )
 
         status_code = response.status_code
@@ -870,7 +859,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/landing-page",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client"}
+            params={"client_id": "test_client", "start_date": "", "end_date": ""}
         )
 
         status_code = response.status_code

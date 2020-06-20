@@ -4,7 +4,7 @@ import pandas as pd
 class ConversionAnalytics(object):
 
     @classmethod
-    def get_shop_funnel_analytics(cls, data_store, client_id):
+    def get_shop_funnel_analytics(cls, data_store, client_id, start_date_str, end_date_str):
         sql = \
             """
                 select '1' as id, 'Home Page' as event,count(distinct(session_id))
@@ -75,7 +75,7 @@ class ConversionAnalytics(object):
         return result
 
     @classmethod
-    def get_product_conversion_analytics(cls, data_store, client_id):
+    def get_product_conversion_analytics(cls, data_store, client_id, start_date_str, end_date_str):
 
         sql = \
             """
@@ -183,7 +183,7 @@ class ConversionAnalytics(object):
         return result
 
     @classmethod
-    def get_landing_page_analytics(cls, data_store, client_id):
+    def get_landing_page_analytics(cls, data_store, client_id, start_date_str, end_date_str):
 
         sql = \
             """ 
@@ -197,6 +197,7 @@ class ConversionAnalytics(object):
                 group by event_name
             """.format(client_id=client_id)
         mobile_records = data_store.run_custom_sql(sql)
+
         visits_df = None
         if mobile_records is not None and len(mobile_records) > 0:
             visits_df = pd.DataFrame.from_records(mobile_records)
@@ -212,6 +213,7 @@ class ConversionAnalytics(object):
                 group by landing_page
             """.format(client_id=client_id)
         mobile_records = data_store.run_custom_sql(sql)
+
         orders_df = None
         if mobile_records is not None and len(mobile_records) > 0:
             orders_df = pd.DataFrame.from_records(mobile_records)

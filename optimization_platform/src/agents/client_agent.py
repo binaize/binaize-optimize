@@ -1,15 +1,21 @@
 import pandas as pd
 
 from config import *
+from utils.date_utils import DateUtils
 
 
 class ClientAgent(object):
 
     @classmethod
-    def add_new_client(cls, data_store, client_id, full_name, company_name, hashed_password, disabled):
+    def add_new_client(cls, data_store, client_id, full_name, company_name, hashed_password, disabled,
+                       shopify_app_eg_url, client_timezone,
+                       creation_timestamp):
         table = TABLE_CLIENTS
+        creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_timestamp)
         columns_value_dict = {"client_id": client_id, "full_name": full_name, "company_name": company_name,
-                              "hashed_password": hashed_password, "disabled": disabled}
+                              "hashed_password": hashed_password, "disabled": disabled,
+                              "shopify_app_eg_url": shopify_app_eg_url,
+                              "client_timezone": client_timezone, "creation_time": creation_time_utc_str}
 
         columns = list(columns_value_dict.keys())
         column = ",".join(columns)
@@ -24,7 +30,7 @@ class ClientAgent(object):
     def get_client_details_for_client_id(cls, data_store, client_id):
         table = TABLE_CLIENTS
         columns = ["client_id", "full_name", "company_name", "hashed_password", "disabled",
-                   "shopify_app_eg_url", "shopify_app_shared_secret"]
+                   "shopify_app_eg_url", "client_timezone", "creation_time"]
         where = "client_id='{client_id}'".format(client_id=client_id)
 
         column = ",".join(columns)
@@ -37,28 +43,9 @@ class ClientAgent(object):
         client_details = None
         if df is not None:
             client_details = df[columns].to_dict(orient="records")[0]
+            client_details["creation_time"] = DateUtils.convert_datetime_to_conversion_dashboard_date_string(
+                datetime_obj=client_details["creation_time"], timezone_str="UTC")
         return client_details
-
-    @classmethod
-    def add_shopify_credentials_to_existing_client(cls, data_store, client_id,
-                                                   shopify_app_eg_url, shopify_app_shared_secret):
-        table = TABLE_CLIENTS
-
-        columns_value_dict = {"shopify_app_eg_url": shopify_app_eg_url,
-                              "shopify_app_shared_secret": shopify_app_shared_secret}
-
-        where = "client_id='{client_id}'".format(client_id=client_id)
-
-        set_string_list = list()
-        for column, value in columns_value_dict.items():
-            temp = "{column}='{value}'".format(column=column, value=value)
-            set_string_list.append(temp)
-        set_string = ",".join(set_string_list)
-
-        sql = """ UPDATE {table} SET {set_string} where {where}""".format(set_string=set_string, table=table,
-                                                                          where=where)
-        status = data_store.run_update_sql(query=sql)
-        return status
 
     @classmethod
     def get_all_client_ids(cls, data_store):

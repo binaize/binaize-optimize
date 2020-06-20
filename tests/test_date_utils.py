@@ -41,9 +41,23 @@ class TestDateUtils(TestCase):
                            ('2020-05-20T18:30:00+00:00', '2020-05-21T07:30:00+00:00', 'May 21')]
         self.assertListEqual(list1=result, list2=expected_result)
 
-    def test_timestampz_to_string(self):
+    def test_convert_datetime_to_dashboard_formatted_string(self):
         timestampz = datetime.datetime(2020, 5, 27, 9, 15, 23,
                                        tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=330, name=None))
-        result = DateUtils.timestampz_to_dashboard_formatted_string(timestampz=timestampz)
+        result = DateUtils.convert_datetime_to_experiment_dashboard_date_string(datetime_obj=timestampz)
         expected_result = '27-May-2020'
+        self.assertEqual(first=result, second=expected_result)
+
+    def test_convert_dashboard_date_string_to_iso_string(self):
+        date_string = '2020-06-20'
+        result = DateUtils.convert_dashboard_date_string_to_iso_string(date_string, "UTC")
+        expected_result = '2020-06-20T00:00:00+00:00'
+        self.assertEqual(first=result, second=expected_result)
+
+    def test_convert_datetime_to_conversion_dashboard_date_string(self):
+        datetime_obj = datetime.datetime(2020, 5, 27, 9, 15, 23,
+                                         tzinfo=psycopg2.tz.FixedOffsetTimezone(offset=330, name=None))
+        result = DateUtils.convert_datetime_to_conversion_dashboard_date_string(datetime_obj=datetime_obj,
+                                                                                timezone_str="America/Grenada")
+        expected_result = '2020-05-26'
         self.assertEqual(first=result, second=expected_result)

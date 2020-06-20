@@ -31,3 +31,4 @@ python3 -W ignore:ResourceWarning -m unittest
 #python3 -W ignore:ResourceWarning -m unittest tests/test_order_agent.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_product_agent.py
 #python3 -W ignore:ResourceWarning -m unittest tests/test_server.py
+#python3 -W ignore:ResourceWarning -m unittest tests/test_conversion_analytics.py

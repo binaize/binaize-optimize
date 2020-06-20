@@ -76,28 +76,32 @@ class TestConversionAnalytics(TestCase):
                                                  creation_time=timestamp + i,
                                                  url=visit["url"])
 
+    def _add_new_client(self, client_id, full_name, company_name, hashed_password, disabled, shopify_app_eg_url,
+                        client_timezone):
+        timestamp = 1590673060
+        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id=client_id,
+                                   full_name=full_name,
+                                   company_name=company_name, hashed_password=hashed_password,
+                                   disabled=disabled, client_timezone=client_timezone,
+                                   shopify_app_eg_url=shopify_app_eg_url,
+                                   creation_timestamp=timestamp)
+
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def _create_products(self, x):
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                   full_name="test_full_name",
-                                   company_name="test_company_name", hashed_password="test_hashed_password",
-                                   disabled=False)
-        ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
-                                                               client_id="test_client_id",
-                                                               shopify_app_eg_url="test_shopify_app_eg_url",
-                                                               shopify_app_shared_secret="test_shopify_app_shared_secret")
+        self._add_new_client(client_id="test_client_id",
+                             full_name="test_full_name",
+                             company_name="test_company_name", hashed_password="test_hashed_password",
+                             disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
+                             client_timezone="test_client_timezone")
         ProductAgent.sync_products(client_id="test_client_id", data_store=self.rds_data_store)
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def _create_orders(self, x):
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                   full_name="test_full_name",
-                                   company_name="test_company_name", hashed_password="test_hashed_password",
-                                   disabled=False)
-        ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
-                                                               client_id="test_client_id",
-                                                               shopify_app_eg_url="test_shopify_app_eg_url",
-                                                               shopify_app_shared_secret="test_shopify_app_shared_secret")
+        self._add_new_client(client_id="test_client_id",
+                             full_name="test_full_name",
+                             company_name="test_company_name", hashed_password="test_hashed_password",
+                             disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
+                             client_timezone="test_client_timezone")
         OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
 
     @mock.patch('datetime.datetime', new=datetime_mock)
@@ -105,7 +109,8 @@ class TestConversionAnalytics(TestCase):
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
-                                                               client_id="test_client_id")
+                                                               client_id="test_client_id", start_date_str="",
+                                                               end_date_str="")
 
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
@@ -118,7 +123,8 @@ class TestConversionAnalytics(TestCase):
         """visits and orders table are empty but products table has data"""
         self._create_products()
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
-                                                               client_id="test_client_id")
+                                                               client_id="test_client_id", start_date_str="",
+                                                               end_date_str="")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
@@ -131,7 +137,8 @@ class TestConversionAnalytics(TestCase):
         self._create_orders()
 
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
-                                                               client_id="test_client_id")
+                                                               client_id="test_client_id", start_date_str="",
+                                                               end_date_str="")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
@@ -145,7 +152,8 @@ class TestConversionAnalytics(TestCase):
         self._create_visit_event()
 
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
-                                                               client_id="test_client_id")
+                                                               client_id="test_client_id", start_date_str="",
+                                                               end_date_str="")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [30, 20, 15, 10, 7, 5], 'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
@@ -159,7 +167,8 @@ class TestConversionAnalytics(TestCase):
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
-                                                                      client_id="test_client_id")
+                                                                      client_id="test_client_id", start_date_str="",
+                                                                      end_date_str="")
 
         expected_result = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                   'conversion_percentage': []},
@@ -171,7 +180,8 @@ class TestConversionAnalytics(TestCase):
         """visits and orders table are empty but products table has data"""
         self._create_products()
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
-                                                                      client_id="test_client_id")
+                                                                      client_id="test_client_id", start_date_str="",
+                                                                      end_date_str="")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
@@ -184,7 +194,8 @@ class TestConversionAnalytics(TestCase):
         self._create_orders()
 
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
-                                                                      client_id="test_client_id")
+                                                                      client_id="test_client_id", start_date_str="",
+                                                                      end_date_str="")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 99.99]},
@@ -198,7 +209,8 @@ class TestConversionAnalytics(TestCase):
         self._create_visit_event()
 
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
-                                                                      client_id="test_client_id")
+                                                                      client_id="test_client_id", start_date_str="",
+                                                                      end_date_str="")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 39.92]},
@@ -211,7 +223,8 @@ class TestConversionAnalytics(TestCase):
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
-                                                                client_id="test_client_id")
+                                                                client_id="test_client_id", start_date_str="",
+                                                                end_date_str="")
 
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
@@ -223,7 +236,8 @@ class TestConversionAnalytics(TestCase):
         """visits and orders table are empty but products table has data"""
         self._create_products()
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
-                                                                client_id="test_client_id")
+                                                                client_id="test_client_id", start_date_str="",
+                                                                end_date_str="")
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
                            'summary': 'There are NOT enough visits registered on the website',
@@ -235,7 +249,8 @@ class TestConversionAnalytics(TestCase):
         self._create_orders()
 
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
-                                                                client_id="test_client_id")
+                                                                client_id="test_client_id", start_date_str="",
+                                                                end_date_str="")
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
                            'summary': 'There are NOT enough visits registered on the website',
@@ -248,11 +263,12 @@ class TestConversionAnalytics(TestCase):
         self._create_visit_event()
 
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
-                                                                client_id="test_client_id")
+                                                                client_id="test_client_id", start_date_str="",
+                                                                end_date_str="")
         expected_result = {'pages': ['Collections Page', 'Home Page', 'Product Page'],
-                           'landing_conversion': {'visitor_count': [7, 22, 6], 'conversion_count': [2, 6, 2],
-                                                  'conversion_percentage': [28.53, 27.26, 33.28]},
-                           'summary': 'Home Page has minimum conversion of 27.26%',
-                           'conclusion': 'Experiment with different creatives/copies for Home Page'}
+                           'landing_conversion': {'visitor_count': [8, 21, 6], 'conversion_count': [2, 6, 2],
+                                                  'conversion_percentage': [24.97, 28.56, 33.28]},
+                           'summary': 'Collections Page has minimum conversion of 24.97%',
+                           'conclusion': 'Experiment with different creatives/copies for Collections Page'}
 
         self.assertDictEqual(d1=result, d2=expected_result)

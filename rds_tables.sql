@@ -25,13 +25,14 @@ drop table if exists clients;
 
 create table if not exists clients
 (
-    client_id                 varchar(100) not null primary key,
-    full_name                 varchar(100) not null,
-    company_name              varchar(100) not null,
-    hashed_password           varchar(100) not null,
-    disabled                  boolean      not null,
-    shopify_app_eg_url        varchar(200),
-    shopify_app_shared_secret varchar(100)
+    client_id          varchar(100) not null primary key,
+    full_name          varchar(100) not null,
+    company_name       varchar(100) not null,
+    hashed_password    varchar(100) not null,
+    disabled           boolean      not null,
+    shopify_app_eg_url varchar(300),
+    client_timezone    varchar(50),
+    creation_time      timestamptz  not null
 );
 
 
@@ -151,7 +152,6 @@ create table if not exists cookies
 (
     client_id     varchar(50) not null,
     session_id    varchar(100),
-    shopify_s     varchar(100),
     cart_token    varchar(100),
     creation_time timestamptz not null
 );
@@ -160,8 +160,6 @@ create
 index if not exists cookies_client_id_idx on cookies (client_id);
 create
 index if not exists cookies_session_id_idx on cookies (session_id);
-create
-index if not exists cookies_shopify_s_idx on cookies (shopify_s);
 create
 index if not exists cookies_cart_token_idx on cookies (cart_token);
 create

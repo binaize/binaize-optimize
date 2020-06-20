@@ -11,23 +11,27 @@ class BaseClient(BaseModel):
     company_name: str
     full_name: str
     disabled: bool
+    shopify_app_eg_url: str
+    client_timezone: str
 
 
 class NewClient(BaseClient):
     password: str
 
 
-class ShopifyCredential(BaseModel):
-    shopify_app_eg_url: str = None
-    shopify_app_shared_secret: str = None
-
-
-class LoggedinClient(BaseClient):
+class ShopifyClient(BaseClient):
     hashed_password: str
+    creation_time: str
 
 
-class ShopifyClient(LoggedinClient, ShopifyCredential):
-    pass
+class Client(BaseModel):
+    client_id: str
+    company_name: str
+    full_name: str
+    disabled: bool
+    shopify_app_eg_url: str
+    client_timezone: str
+    creation_time: str
 
 
 class ResponseMessage(BaseModel):
@@ -79,5 +83,4 @@ class Visit(BaseModel):
 class Cookie(BaseModel):
     client_id: str
     session_id: str
-    shopify_s: str
     cart_token: str

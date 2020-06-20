@@ -56,24 +56,31 @@ class TestProductAgent(TestCase):
         with open("rds_tables.sql", "r") as fp:
             self.rds_data_store.run_create_table_sql(fp.read())
 
+    def _add_new_client(self, client_id, full_name, company_name, hashed_password, disabled, shopify_app_eg_url,
+                        client_timezone):
+        timestamp = 1590673060
+        status = ClientAgent.add_new_client(data_store=self.rds_data_store, client_id=client_id,
+                                            full_name=full_name,
+                                            company_name=company_name, hashed_password=hashed_password,
+                                            disabled=disabled, client_timezone=client_timezone,
+                                            shopify_app_eg_url=shopify_app_eg_url,
+                                            creation_timestamp=timestamp)
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
+        return status
+
     @mock.patch('requests.get', side_effect=mocked_requests_get)
-    def test_shit(self, x):
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id_1",
-                                   full_name="test_full_name_1",
-                                   company_name="test_company_name_1", hashed_password="test_hashed_password_1",
-                                   disabled=False)
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id="test_client_id_2",
-                                   full_name="test_full_name_2",
-                                   company_name="test_company_name_2", hashed_password="test_hashed_password_2",
-                                   disabled=False)
-        ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
-                                                               client_id="test_client_id_1",
-                                                               shopify_app_eg_url="test_shopify_app_eg_url",
-                                                               shopify_app_shared_secret="test_shopify_app_shared_secret")
-        ClientAgent.add_shopify_credentials_to_existing_client(data_store=self.rds_data_store,
-                                                               client_id="test_client_id_2",
-                                                               shopify_app_eg_url="test_shopify_app_eg_url",
-                                                               shopify_app_shared_secret="test_shopify_app_shared_secret")
+    def test_main(self, x):
+        self._add_new_client(client_id="test_client_id_1",
+                             full_name="test_full_name_1",
+                             company_name="test_company_name_1", hashed_password="test_hashed_password_!",
+                             disabled=False, shopify_app_eg_url="test_shopify_app_eg_url_1",
+                             client_timezone="test_client_timezone_1")
+        self._add_new_client(client_id="test_client_id_2",
+                             full_name="test_full_name_2",
+                             company_name="test_company_name_2", hashed_password="test_hashed_password_2",
+                             disabled=False, shopify_app_eg_url="test_shopify_app_eg_url_2",
+                             client_timezone="test_client_timezone_2")
         main()
 
         result = self.rds_data_store.run_custom_sql("select * from orders")
