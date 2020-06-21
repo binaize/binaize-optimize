@@ -98,7 +98,6 @@ class ConversionAnalytics(object):
                                                                            timezone_str="Asia/Kolkata")
         end_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=end_date_str,
                                                                          timezone_str="Asia/Kolkata")
-
         sql = \
             """
                 select url, count(distinct(session_id)) as session_count
@@ -174,6 +173,7 @@ class ConversionAnalytics(object):
         conclusion = "Wait for the customers to interact with your website"
         if df is not None:
             df["conversion_count"] = df["conversion_count"].fillna(0).astype(int)
+            df["visitor_count"] = df["visitor_count"].fillna(0).astype(int)
             df["conversion_percentage"] = df["conversion_count"] * 100 / (df["visitor_count"] + 0.01)
             df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: round(x, 2))
             df = df.sort_values(["product_handle"])
