@@ -292,13 +292,85 @@ class ExperimentAnalytics(object):
         mobile_records = data_store.run_custom_sql(sql)
         result = {}
         if mobile_records is not None and len(mobile_records) > 0:
-            df = pd.DataFrame.from_records(mobile_records)
-            df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
-                          "visitor_converted",
-                          "goal_conversion"]
-            df["goal_conversion"] = df["goal_conversion"].map(lambda x: round(x * 100, 2))
-            df["sales_conversion"] = pd.Series([2.45 for i in range(len(df))])
-            result = df.to_dict(orient="records")
+            goal_conv_df = pd.DataFrame.from_records(mobile_records)
+            goal_conv_df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
+                                    "visitor_converted",
+                                    "goal_conversion"]
+            goal_conv_df["goal_conversion"] = goal_conv_df["goal_conversion"].map(lambda x: round(x * 100, 2))
+
+            sql = \
+                """ select distinct 
+                        cookie_order_table.session_id,
+                        events_table.variation_id,
+                        cookie_order_table.cart_token,
+                        cookie_order_table.variant_id,
+                        cookie_order_table.variant_quantity 
+                    from
+                    (select
+                            table1.session_id,
+                            table2.cart_token,
+                            table2.variant_id,
+                            table2.variant_quantity
+                        from
+                            (
+                            select
+                                session_id,
+                                cart_token
+                            from
+                                cookies 
+                            where
+                                client_id = '{client_id}' 
+                            )
+                            table1 
+                            inner join
+                                (
+                                select 
+                                    variant_id,
+                                    variant_quantity,
+                                    cart_token
+                                from
+                                    orders 
+                                where
+                                    client_id = '{client_id}'  
+                                    and payment_status = True
+                                )
+                                table2 
+                                on (table1.cart_token = table2.cart_token)) cookie_order_table
+                                left join(
+                                select 
+                                    variation_id,
+                                    session_id
+                                from events
+                                where
+                                    client_id = '{client_id}'
+                                ) events_table
+                                on (cookie_order_table.session_id = events_table.session_id)
+                """.format(client_id=client_id)
+            mobile_records = data_store.run_custom_sql(sql)
+            sales_conv_df = None
+            if mobile_records is not None and len(mobile_records) > 0:
+                sales_conv_df = pd.DataFrame.from_records(mobile_records)
+                sales_conv_df.columns = ["session_id", "variation_id", "cart_token", "variant_id",
+                                         "variant_quantity"]
+                sales_conv_df = sales_conv_df.groupby('variation_id').agg({
+                    'variant_quantity': [('sales_conversion_count', lambda x: x.sum())]
+                })
+                sales_conv_df.columns = sales_conv_df.columns.droplevel()
+                sales_conv_df["variation_id"] = sales_conv_df.index
+                sales_conv_df.reset_index(inplace=True, drop=True)
+
+            if sales_conv_df is None:
+                goal_conv_df["sales_conversion"] = pd.Series([0.00 for i in range(len(goal_conv_df))])
+            else:
+                goal_conv_df = pd.merge(goal_conv_df, sales_conv_df, how="left", on="variation_id")
+                goal_conv_df.fillna(value=0.0, inplace=True)
+                goal_conv_df["sales_conversion"] = goal_conv_df["sales_conversion_count"] * 100 / goal_conv_df[
+                    "num_visitor"]
+                goal_conv_df["sales_conversion"] = goal_conv_df["sales_conversion"].map(
+                    lambda x: min(100.00, x))
+                goal_conv_df.drop(columns=["sales_conversion_count"], inplace=True)
+
+            result = goal_conv_df.to_dict(orient="records")
         return result
 
     @classmethod
