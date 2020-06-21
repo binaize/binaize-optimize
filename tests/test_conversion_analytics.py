@@ -117,7 +117,7 @@ class TestConversionAnalytics(TestCase):
 
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            'shop_funnel': {'visitor_count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
             'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
             'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
@@ -131,7 +131,7 @@ class TestConversionAnalytics(TestCase):
                                                                end_date_str=end_date_str)
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+            'shop_funnel': {'visitor_count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
             'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
             'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
@@ -146,7 +146,7 @@ class TestConversionAnalytics(TestCase):
                                                                end_date_str=end_date_str)
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
+            'shop_funnel': {'visitor_count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
             'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
             'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
@@ -162,7 +162,7 @@ class TestConversionAnalytics(TestCase):
                                                                end_date_str=end_date_str)
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'count': [30, 20, 15, 10, 7, 5], 'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
+            'shop_funnel': {'visitor_count': [30, 20, 15, 10, 7, 5], 'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
             'summary': '<strong> SUMMARY </strong> Home Page has maximum churn of 33.33%',
             'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for Home Page'}
 

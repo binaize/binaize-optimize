@@ -73,10 +73,10 @@ class ConversionAnalytics(object):
             df["percentage"] = df["count"] * 100 / (max(df["count"]) + 0.01)
             df["percentage"] = df["percentage"].map(lambda x: min(100.00, round(x, 2)))
             result["pages"] = df["pages"].tolist()
-            temp_dict["count"] = df["count"].tolist()
+            visitor_count = df["count"].tolist()
+            temp_dict["visitor_count"] = visitor_count
             temp_dict["percentage"] = df["percentage"].tolist()
             result["shop_funnel"] = temp_dict
-            visitor_count = df["count"].tolist()
             if sum(visitor_count[:4]) > 0:
                 diff_list = list()
                 for a in zip(df["percentage"], df["percentage"][1:]):
