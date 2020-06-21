@@ -210,7 +210,7 @@ class ExperimentAnalytics(object):
             clicked_df = conversion_df[conversion_df["event_name"] == "clicked"].copy()
             conversion_df = pd.merge(served_df, clicked_df, on=["variation_id", "date", "variation_name"])
             conversion_df["conversion"] = conversion_df["num_session_y"] / conversion_df["num_session_x"]
-            conversion_df["conversion"] = conversion_df["conversion"].map(lambda x: round(x * 100, 2))
+            conversion_df["conversion"] = conversion_df["conversion"].map(lambda x: min(100.00, round(x * 100, 2)))
             variation_ids = conversion_df["variation_name"].unique()
             variation_dict = dict()
             for variation_id in variation_ids:
@@ -296,7 +296,8 @@ class ExperimentAnalytics(object):
             goal_conv_df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
                                     "visitor_converted",
                                     "goal_conversion"]
-            goal_conv_df["goal_conversion"] = goal_conv_df["goal_conversion"].map(lambda x: round(x * 100, 2))
+            goal_conv_df["goal_conversion"] = goal_conv_df["goal_conversion"].map(
+                lambda x: min(100.00, round(x * 100, 2)))
 
             sql = \
                 """ select distinct 

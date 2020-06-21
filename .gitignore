@@ -14,3 +14,4 @@ initialize*
 test.py
 htmlcov
 .coverage
+debug.py

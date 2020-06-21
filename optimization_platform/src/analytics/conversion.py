@@ -71,7 +71,7 @@ class ConversionAnalytics(object):
             df.columns = ["id", "pages", "count"]
             df = df.sort_values(['id'])
             df["percentage"] = df["count"] * 100 / (max(df["count"]) + 0.01)
-            df["percentage"] = df["percentage"].map(lambda x: round(x, 2))
+            df["percentage"] = df["percentage"].map(lambda x: min(100.00, round(x, 2)))
             result["pages"] = df["pages"].tolist()
             temp_dict["count"] = df["count"].tolist()
             temp_dict["percentage"] = df["percentage"].tolist()
@@ -279,7 +279,7 @@ class ConversionAnalytics(object):
             visitor_count = df["visitor_count"].tolist()
             conversion_count = df["conversion_count"].tolist()
             df["conversion_percentage"] = df["conversion_count"] * 100 / (df["visitor_count"] + 0.01)
-            conversion_percentage = df["conversion_percentage"].map(lambda x: round(x, 2)).tolist()
+            conversion_percentage = df["conversion_percentage"].map(lambda x: min(100, round(x, 2))).tolist()
             min_idx = conversion_percentage.index(min(conversion_percentage))
             summary = "<strong> SUMMARY </strong> {product} has minimum conversion of {conversion}%".format(
                 product=pages[min_idx],
