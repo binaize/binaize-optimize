@@ -61,11 +61,20 @@ class DateUtils(object):
         datetime_obj = datetime.datetime.strptime(date_string, '%Y-%m-%d')
         timezone = pytz.timezone(timezone_str)
         datetime_tz = timezone.localize(datetime_obj)
-        utc_str = cls.convert_datetime_to_iso_string(datetime_tz)
-        return utc_str
+        iso_str = cls.convert_datetime_to_iso_string(datetime_tz)
+        return iso_str
 
     @classmethod
     def convert_datetime_to_conversion_dashboard_date_string(cls, datetime_obj, timezone_str):
         datetime_tz = cls.change_timezone(datetime_obj=datetime_obj, timezone_str=timezone_str)
         datetime_str = datetime_tz.strftime("%Y-%m-%d")
         return datetime_str
+
+    @classmethod
+    def convert_conversion_datestring_to_iso_string(cls, datetime_str, timezone_str):
+        datetime_obj = datetime.datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S')
+        timezone = pytz.timezone(timezone_str)
+        datetime_tz = timezone.localize(datetime_obj)
+        datetime_utc = cls.change_timezone(datetime_obj=datetime_tz,timezone_str="UTC")
+        iso_str = cls.convert_datetime_to_iso_string(datetime_utc)
+        return iso_str

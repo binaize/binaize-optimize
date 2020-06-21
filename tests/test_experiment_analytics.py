@@ -202,7 +202,7 @@ class TestExperimentAnalytics(TestCase):
                                                                                  client_id="test_client_id",
                                                                                  experiment_id="test_experiment_id")
         expected_result = {'date': ['May 28'],
-                           'conversion': {'test_variation_name_1': [1.0], 'test_variation_name_2': [0.5]}}
+                           'conversion': {'test_variation_name_1': [100.0], 'test_variation_name_2': [50.0]}}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """events and variations table both has data"""

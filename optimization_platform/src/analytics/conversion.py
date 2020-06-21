@@ -1,48 +1,66 @@
 import pandas as pd
 
+from utils.date_utils import DateUtils
+
 
 class ConversionAnalytics(object):
 
     @classmethod
     def get_shop_funnel_analytics(cls, data_store, client_id, start_date_str, end_date_str):
+        start_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=start_date_str,
+                                                                           timezone_str="Asia/Kolkata")
+        end_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=end_date_str,
+                                                                         timezone_str="Asia/Kolkata")
         sql = \
             """
                 select '1' as id, 'Home Page' as event,count(distinct(session_id))
                     from visits
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'home'
+                    client_id = '{client_id}'
+                    and event_name = 'home'
+                    and creation_time > '{start_date}' 
+                    and creation_time < '{end_date}' 
                 union
                 (select '2' as id, 'Collection Page' as event,count(distinct(session_id))
                     from visits
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'collection')
+                    client_id = '{client_id}'
+                    and event_name = 'collection'
+                    and creation_time > '{start_date}' 
+                    and creation_time < '{end_date}')
                 union
                 (select '3' as id, 'Product Page' as event,count(distinct(session_id))
                     from visits
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'product')
+                    client_id = '{client_id}'
+                    and event_name = 'product'
+                    and creation_time > '{start_date}' 
+                    and creation_time < '{end_date}')
                 union
                 (select '4' as id, 'Cart Page' as event,count(distinct(session_id))
                     from visits
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'cart')
+                    client_id = '{client_id}'
+                    and event_name = 'cart'
+                    and creation_time > '{start_date}' 
+                    and creation_time < '{end_date}')
                 union
                 (select '5' as id, 'Checkout Page' as event,count(distinct(order_id))
                     from orders
                 where 
-                    client_id = '{client_id}')
+                    client_id = '{client_id}'
+                    and updated_at > '{start_date}' 
+                    and updated_at < '{end_date}')
                 union
                 (select '6' as id, 'Purchase' as event,count(distinct(order_id))
                     from orders
                 where 
-                    client_id = '{client_id}' and
-                    payment_status = True)
+                    client_id = '{client_id}'
+                    and payment_status = True
+                    and updated_at > '{start_date}' 
+                    and updated_at < '{end_date}')
 
-            """.format(client_id=client_id)
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
         result = {}
         temp_dict = dict()
@@ -76,17 +94,23 @@ class ConversionAnalytics(object):
 
     @classmethod
     def get_product_conversion_analytics(cls, data_store, client_id, start_date_str, end_date_str):
+        start_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=start_date_str,
+                                                                           timezone_str="Asia/Kolkata")
+        end_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=end_date_str,
+                                                                         timezone_str="Asia/Kolkata")
 
         sql = \
             """
                 select url, count(distinct(session_id)) as session_count
                     from visits
                 where 
-                    client_id = '{client_id}' and
-                    event_name = 'product'
+                    client_id = '{client_id}'
+                    and event_name = 'product'
+                    and creation_time > '{start_date}' 
+                    and creation_time < '{end_date}'
                 group by
                     url
-            """.format(client_id=client_id)
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
         visits_df = None
         if mobile_records is not None and len(mobile_records) > 0:
@@ -100,7 +124,9 @@ class ConversionAnalytics(object):
                     from products
                 where 
                     client_id = '{client_id}'
-            """.format(client_id=client_id)
+                    and updated_at > '{start_date}' 
+                    and updated_at < '{end_date}'
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
         products_df = None
         if mobile_records is not None and len(mobile_records) > 0:
@@ -113,11 +139,13 @@ class ConversionAnalytics(object):
                 select product_id, sum(variant_quantity) as conversion_count
                     from orders
                 where 
-                    client_id = '{client_id}' and 
-                    payment_status = True
+                    client_id = '{client_id}' 
+                    and payment_status = True
+                    and updated_at > '{start_date}' 
+                    and updated_at < '{end_date}'
                 group by
                     product_id
-            """.format(client_id=client_id)
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
         orders_df = None
         if mobile_records is not None and len(mobile_records) > 0:
@@ -184,6 +212,10 @@ class ConversionAnalytics(object):
 
     @classmethod
     def get_landing_page_analytics(cls, data_store, client_id, start_date_str, end_date_str):
+        start_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=start_date_str,
+                                                                           timezone_str="Asia/Kolkata")
+        end_date = DateUtils.convert_conversion_datestring_to_iso_string(datetime_str=end_date_str,
+                                                                         timezone_str="Asia/Kolkata")
 
         sql = \
             """ 
@@ -192,10 +224,12 @@ class ConversionAnalytics(object):
                     select distinct on (session_id) session_id, url, event_name
                         from visits
                     where 
-                        client_id = '{client_id}' and
-                    event_name in ('collection','home','product')) t
+                        client_id = '{client_id}'
+                        and event_name in ('collection','home','product')
+                        and creation_time > '{start_date}' 
+                        and creation_time < '{end_date}') t
                 group by event_name
-            """.format(client_id=client_id)
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
 
         visits_df = None
@@ -208,10 +242,12 @@ class ConversionAnalytics(object):
                 select landing_page, count(*)
                     FROM orders
                 where 
-                    client_id = '{client_id}' and 
-                    payment_status = True
+                    client_id = '{client_id}' 
+                    and payment_status = True
+                    and updated_at > '{start_date}' 
+                    and updated_at < '{end_date}'
                 group by landing_page
-            """.format(client_id=client_id)
+            """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
 
         orders_df = None

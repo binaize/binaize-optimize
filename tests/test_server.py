@@ -670,7 +670,7 @@ class TestServer(TestCase):
 
         response_json = response.json()
         expected_response_json = {'date': ['May 28'],
-                                  'conversion': {'test_variation_name_1': [1.0], 'test_variation_name_2': [0.5]}}
+                                  'conversion': {'test_variation_name_1': [100.0], 'test_variation_name_2': [50.0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -798,7 +798,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/shop-funnel",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "", "end_date": ""}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
         )
 
         status_code = response.status_code
@@ -829,7 +829,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/product-conversion",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "", "end_date": ""}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
         )
 
         status_code = response.status_code
@@ -859,7 +859,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/landing-page",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "", "end_date": ""}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
         )
 
         status_code = response.status_code
