@@ -63,7 +63,7 @@ class TestDateUtils(TestCase):
         self.assertEqual(first=result, second=expected_result)
 
     def test_convert_conversion_datestring_to_iso_string(self):
-        date_string = '2020-06-20T12:44:47'
+        date_string = '2020-06-20T12-44-47'
         result = DateUtils.convert_conversion_datestring_to_iso_string(date_string, "Asia/Kolkata")
         expected_result = '2020-06-20T07:14:47+00:00'
         self.assertEqual(first=result, second=expected_result)

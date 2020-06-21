@@ -106,8 +106,8 @@ class TestConversionAnalytics(TestCase):
 
     # @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_shop_funnel_analytics(self):
-        start_date_str = "2020-05-28T00:00:01"
-        end_date_str = "2020-06-28T23:59:59"
+        start_date_str = "2020-05-28T00-00-01"
+        end_date_str = "2020-06-28T23-59-59"
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
@@ -170,8 +170,8 @@ class TestConversionAnalytics(TestCase):
 
     @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_product_conversion_analytics(self):
-        start_date_str = "2020-05-28T00:00:01"
-        end_date_str = "2020-06-28T23:59:59"
+        start_date_str = "2020-05-28T00-00-01"
+        end_date_str = "2020-06-28T23-59-59"
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
@@ -232,8 +232,8 @@ class TestConversionAnalytics(TestCase):
         self.assertDictEqual(d1=result, d2=expected_result)
 
     def test_get_landing_page_analytics(self):
-        start_date_str = "2019-05-27T00:00:01"
-        end_date_str = "2021-07-28T23:59:59"
+        start_date_str = "2019-05-27T00-00-01"
+        end_date_str = "2021-07-28T23-59-59"
         """visits,products and orders table are empty"""
 
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,

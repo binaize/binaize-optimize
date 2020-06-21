@@ -798,7 +798,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/shop-funnel",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
         )
 
         status_code = response.status_code
@@ -829,7 +829,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/product-conversion",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
         )
 
         status_code = response.status_code
@@ -859,7 +859,7 @@ class TestServer(TestCase):
             "/api/v1/schemas/report/landing-page",
             headers={
                 "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00:00:01", "end_date": "2021-07-28T23:59:59"}
+            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
         )
 
         status_code = response.status_code

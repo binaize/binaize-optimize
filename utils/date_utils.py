@@ -72,7 +72,7 @@ class DateUtils(object):
 
     @classmethod
     def convert_conversion_datestring_to_iso_string(cls, datetime_str, timezone_str):
-        datetime_obj = datetime.datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S')
+        datetime_obj = datetime.datetime.strptime(datetime_str, '%Y-%m-%dT%H-%M-%S')
         timezone = pytz.timezone(timezone_str)
         datetime_tz = timezone.localize(datetime_obj)
         datetime_utc = cls.change_timezone(datetime_obj=datetime_tz,timezone_str="UTC")

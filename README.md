@@ -94,13 +94,10 @@ cp binaize-optimize/optim-prod.env binaize-optimize/optim.env
 # For first time deployment
 
 ```bash
-nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans > ~/optim.out&
+nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans >> ~/optim.out&
 ```
 
 # For re-deployment
 ```bash
-nohup sudo docker-compose -f docker-compose-optim.yaml up --build --remove-orphans optim-server optim-scheduler> ~/optim.out&
+nohup sudo docker-compose -f docker-compose-optim.yaml restart optim-server optim-scheduler >> ~/optim.out&
 ```
-
-
-
