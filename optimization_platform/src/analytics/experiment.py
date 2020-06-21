@@ -343,9 +343,10 @@ class ExperimentAnalytics(object):
                                 from events
                                 where
                                     client_id = '{client_id}'
+                                    and experiment_id = '{experiment_id}'
                                 ) events_table
                                 on (cookie_order_table.session_id = events_table.session_id)
-                """.format(client_id=client_id)
+                """.format(client_id=client_id, experiment_id=experiment_id)
             mobile_records = data_store.run_custom_sql(sql)
             sales_conv_df = None
             if mobile_records is not None and len(mobile_records) > 0:
