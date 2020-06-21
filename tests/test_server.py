@@ -809,8 +809,8 @@ class TestServer(TestCase):
         expected_response_json = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
-            'summary': 'Collection Page has maximum churn of 33.23%',
-            'conclusion': 'Experiment with different creatives/copies for Collection Page'}
+            'summary': '<strong> SUMMARY </strong> Collection Page has maximum churn of 33.23%',
+            'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for Collection Page'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -839,8 +839,8 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                          'conversion_percentage': []},
-                                  'summary': 'There are NOT enough visits registered on the website',
-                                  'conclusion': 'Wait for the customers to interact with your website'}
+                                  'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                                  'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -869,6 +869,6 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                       'conversion_percentage': []},
-                                  'summary': 'There are NOT enough visits registered on the website',
-                                  'conclusion': 'Wait for the customers to interact with your website'}
+                                  'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                                  'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)

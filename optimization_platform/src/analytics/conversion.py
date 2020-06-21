@@ -64,8 +64,8 @@ class ConversionAnalytics(object):
         mobile_records = data_store.run_custom_sql(sql)
         result = {}
         temp_dict = dict()
-        summary = "There are NOT enough visits registered on the website"
-        conclusion = "Wait for the customers to interact with your website"
+        summary = "<strong> SUMMARY </strong> There are NOT enough visits registered on the website"
+        conclusion = "<strong> CONCLUSION </strong> Wait for the customers to interact with your website"
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = ["id", "pages", "count"]
@@ -82,10 +82,10 @@ class ConversionAnalytics(object):
                 for a in zip(df["percentage"], df["percentage"][1:]):
                     diff_list.append(a[0] - a[1])
                 max_idx = diff_list.index(max(diff_list))
-                summary = "{page_type} has maximum churn of {drop}%".format(
+                summary = "<strong> SUMMARY </strong> {page_type} has maximum churn of {drop}%".format(
                     page_type=result["pages"][max_idx],
                     drop=round(diff_list[max_idx], 2))
-                conclusion = "Experiment with different creatives/copies for {page_type}".format(
+                conclusion = "<strong> CONCLUSION </strong> Experiment with different creatives/copies for {page_type}".format(
                     page_type=result["pages"][max_idx])
             result["summary"] = summary
             result["conclusion"] = conclusion
@@ -169,8 +169,8 @@ class ConversionAnalytics(object):
         visitor_count = list()
         conversion_count = list()
         percentage_list = list()
-        summary = "There are NOT enough visits registered on the website"
-        conclusion = "Wait for the customers to interact with your website"
+        summary = "<strong> SUMMARY </strong> There are NOT enough visits registered on the website"
+        conclusion = "<strong> CONCLUSION </strong> Wait for the customers to interact with your website"
         if df is not None:
             df["conversion_count"] = df["conversion_count"].fillna(0).astype(int)
             df["visitor_count"] = df["visitor_count"].fillna(0).astype(int)
@@ -190,11 +190,11 @@ class ConversionAnalytics(object):
             product_list = products
             min_idx = percentage_list.index(min(percentage_list))
             if min(percentage_list) < 99.99 and sum(percentage_list) > 0.0:
-                summary = "{product} has minimum conversion of {conversion}%".format(
+                summary = "<strong> SUMMARY </strong> {product} has minimum conversion of {conversion}%".format(
                     product=product_list[min_idx],
                     conversion=percentage_list[
                         min_idx])
-                conclusion = "Experiment with different creatives/copies for {product}".format(
+                conclusion = "<strong> CONCLUSION </strong> Experiment with different creatives/copies for {product}".format(
                     product=product_list[min_idx])
         result = dict()
         result["products"] = products
@@ -271,8 +271,8 @@ class ConversionAnalytics(object):
         visitor_count = list()
         conversion_count = list()
         conversion_percentage = list()
-        summary = "There are NOT enough visits registered on the website"
-        conclusion = "Wait for the customers to interact with your website"
+        summary = "<strong> SUMMARY </strong> There are NOT enough visits registered on the website"
+        conclusion = "<strong> CONCLUSION </strong> Wait for the customers to interact with your website"
         result = dict()
         if df is not None:
             pages = [event_dict[val] for val in df["event_name"].tolist()]
@@ -281,11 +281,11 @@ class ConversionAnalytics(object):
             df["conversion_percentage"] = df["conversion_count"] * 100 / (df["visitor_count"] + 0.01)
             conversion_percentage = df["conversion_percentage"].map(lambda x: round(x, 2)).tolist()
             min_idx = conversion_percentage.index(min(conversion_percentage))
-            summary = "{product} has minimum conversion of {conversion}%".format(
+            summary = "<strong> SUMMARY </strong> {product} has minimum conversion of {conversion}%".format(
                 product=pages[min_idx],
                 conversion=conversion_percentage[
                     min_idx])
-            conclusion = "Experiment with different creatives/copies for {product}".format(
+            conclusion = "<strong> CONCLUSION </strong> Experiment with different creatives/copies for {product}".format(
                 product=pages[min_idx])
         result["pages"] = pages
         temp_dict = dict()

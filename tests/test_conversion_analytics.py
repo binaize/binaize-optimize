@@ -118,8 +118,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
-            'summary': 'There are NOT enough visits registered on the website',
-            'conclusion': 'Wait for the customers to interact with your website'}
+            'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+            'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -132,8 +132,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
-            'summary': 'There are NOT enough visits registered on the website',
-            'conclusion': 'Wait for the customers to interact with your website'}
+            'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+            'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -147,8 +147,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
-            'summary': 'There are NOT enough visits registered on the website',
-            'conclusion': 'Wait for the customers to interact with your website'}
+            'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+            'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -163,8 +163,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'count': [30, 20, 15, 10, 7, 5], 'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
-            'summary': 'Home Page has maximum churn of 33.33%',
-            'conclusion': 'Experiment with different creatives/copies for Home Page'}
+            'summary': '<strong> SUMMARY </strong> Home Page has maximum churn of 33.33%',
+            'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for Home Page'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -181,8 +181,8 @@ class TestConversionAnalytics(TestCase):
 
         expected_result = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                   'conversion_percentage': []},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -195,8 +195,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -210,8 +210,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 99.99]},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -226,8 +226,8 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 39.92]},
-                           'summary': 'product_title_3 has minimum conversion of 39.92%',
-                           'conclusion': 'Experiment with different creatives/copies for product_title_3'}
+                           'summary': '<strong> SUMMARY </strong> product_title_3 has minimum conversion of 39.92%',
+                           'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for product_title_3'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -243,8 +243,8 @@ class TestConversionAnalytics(TestCase):
 
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -256,8 +256,8 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str)
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -270,8 +270,8 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str)
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
-                           'summary': 'There are NOT enough visits registered on the website',
-                           'conclusion': 'Wait for the customers to interact with your website'}
+                           'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
+                           'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -286,7 +286,7 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'pages': ['Collections Page', 'Home Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [8, 21, 6], 'conversion_count': [2, 6, 2],
                                                   'conversion_percentage': [24.97, 28.56, 33.28]},
-                           'summary': 'Collections Page has minimum conversion of 24.97%',
-                           'conclusion': 'Experiment with different creatives/copies for Collections Page'}
+                           'summary': '<strong> SUMMARY </strong> Collections Page has minimum conversion of 24.97%',
+                           'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for Collections Page'}
 
         self.assertDictEqual(d1=result, d2=expected_result)
