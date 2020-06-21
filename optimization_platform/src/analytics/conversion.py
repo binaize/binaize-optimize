@@ -124,8 +124,6 @@ class ConversionAnalytics(object):
                     from products
                 where 
                     client_id = '{client_id}'
-                    and updated_at > '{start_date}' 
-                    and updated_at < '{end_date}'
             """.format(client_id=client_id, start_date=start_date, end_date=end_date)
         mobile_records = data_store.run_custom_sql(sql)
         products_df = None
