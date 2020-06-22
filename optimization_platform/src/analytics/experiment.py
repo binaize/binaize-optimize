@@ -294,7 +294,7 @@ class ExperimentAnalytics(object):
         if mobile_records is not None and len(mobile_records) > 0:
             goal_conv_df = pd.DataFrame.from_records(mobile_records)
             goal_conv_df.columns = ["variation_name", "variation_id", "num_session", "num_visitor",
-                                    "visitor_converted",
+                                    "goal_conversion_count",
                                     "goal_conversion"]
             goal_conv_df["goal_conversion"] = goal_conv_df["goal_conversion"].map(
                 lambda x: min(100.00, round(x * 100, 2)))
@@ -363,14 +363,15 @@ class ExperimentAnalytics(object):
 
             if sales_conv_df is None:
                 goal_conv_df["sales_conversion"] = pd.Series([0.00 for i in range(len(goal_conv_df))])
+                goal_conv_df["sales_conversion_count"] = pd.Series([0 for i in range(len(goal_conv_df))])
             else:
                 goal_conv_df = pd.merge(goal_conv_df, sales_conv_df, how="left", on="variation_id")
                 goal_conv_df.fillna(value=0.0, inplace=True)
+                goal_conv_df["sales_conversion_count"] = goal_conv_df["sales_conversion_count"].astype(int)
                 goal_conv_df["sales_conversion"] = goal_conv_df["sales_conversion_count"] * 100 / goal_conv_df[
                     "num_visitor"]
                 goal_conv_df["sales_conversion"] = goal_conv_df["sales_conversion"].map(
-                    lambda x: min(100.00, x))
-                goal_conv_df.drop(columns=["sales_conversion_count"], inplace=True)
+                    lambda x: min(100.00, round(x, 2)))
 
             result = goal_conv_df.to_dict(orient="records")
         return result
@@ -380,8 +381,8 @@ class ExperimentAnalytics(object):
         yo = cls.get_conversion_rate_of_experiment(data_store=data_store, client_id=client_id,
                                                    experiment_id=experiment_id)
         df = pd.DataFrame(yo, columns=["variation_name", "variation_id", "num_session", "num_visitor",
-                                       "visitor_converted",
-                                       "conversion"])
+                                       "goal_conversion_count","goal_conversion","sales_conversion_count",
+                                       "sales_conversion"])
         sql = \
             """
                 select
@@ -396,7 +397,7 @@ class ExperimentAnalytics(object):
         records = data_store.run_custom_sql(sql)
         delta = records[0][0] - records[0][1]
         variation_names = df["variation_name"]
-        visitor_converted = df["visitor_converted"]
+        visitor_converted = df["goal_conversion_count"]
         visitor_count = df["num_visitor"]
         num_days = delta.days
 
