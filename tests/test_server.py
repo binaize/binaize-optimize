@@ -733,9 +733,9 @@ class TestServer(TestCase):
 
         response_json = response.json()
         expected_response_json = {
-            'status': '<strong> test_variation_name_1 </strong> is winning. It is 50.0% better than the others.',
-            'conclusion': 'There is <strong> NOT </strong> enough evidence to conclude the experiment (It is <strong> NOT </strong> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another 523 days.',
-            'recommendation': 'Recommendation: <strong> CONTINUE </strong> the Experiment.'}
+            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 50.0% </strong></span> better than the others.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 523 </strong> days.",
+            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     def _create_visit_event(self):

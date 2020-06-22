@@ -398,6 +398,12 @@ class ExperimentAnalytics(object):
                     and experiment_id = '{experiment_id}'
             """.format(client_id=client_id, experiment_id=experiment_id)
         records = data_store.run_custom_sql(sql)
+        if records[0][0] is None or records[0][0] is None:
+            result = dict()
+            result["status"] = "<strong> SUMMARY : </strong> Not enough visitors on the website."
+            result["conclusion"] = "<strong> STATUS : </strong> Not enough visitors on the website."
+            result["recommendation"] = "<strong> RECOMMENDATION : </strong> <strong> CONTINUE </strong> the Experiment."
+            return result
         delta = records[0][0] - records[0][1]
         variation_names = df["variation_name"]
         visitor_converted = df["goal_conversion_count"]
@@ -416,28 +422,37 @@ class ExperimentAnalytics(object):
         remaining_time = ab.get_remaining_time()
         remaining_days = int(remaining_time) + 1
 
-        status = "<strong> {variation} </strong> is winning. It is {betterness_percentage}% better than the others.".format(
+        status = "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> {variation} </strong></span> is winning." \
+                 " It is <span style = 'color: blue; font-size: 16px;'><strong> {betterness_percentage}% </strong></span> better than the others.".format(
             variation=best_variation,
             betterness_percentage=betterness_percentage)
 
-        conclusion = "There is <strong> NOT </strong> enough evidence to conclude the experiment " \
-                     "(It is <strong> NOT </strong> yet statistically significant)." \
+        conclusion = "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span>" \
+                     " evidence to conclude the experiment " \
+                     "(It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet" \
+                     " statistically significant)." \
                      "To be statistically confident, we need <strong> {remaining_sample_size} </strong> more visitors." \
-                     "Based on recent visitor trend, experiment should run for another {remaining_days} days.".format(
+                     "Based on recent visitor trend, experiment should run for another <strong> {remaining_days} </strong> days.".format(
             remaining_sample_size=remaining_sample_size, remaining_days=remaining_days)
-        recommendation = "Recommendation: <strong> CONTINUE </strong> the Experiment."
+        recommendation = "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."
         if remaining_sample_size < 0:
-            conclusion = "There is <strong> ENOUGH </strong> evidence to conclude the experiment. " \
-                         "There is <strong> NO CLEAR WINNER </strong>. We are <strong> {confidence_percentage}%" \
-                         " </strong> confident that <strong> {variation} </strong> " \
+            conclusion = "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'><strong> ENOUGH </strong></span>" \
+                         " evidence to conclude the experiment. " \
+                         "There is <span style = 'color: red; font-size: 16px;'><strong> NO CLEAR WINNER </strong></span>. " \
+                         "We are <span style = 'color: red; font-size: 16px;'><strong> {confidence_percentage}%" \
+                         " </strong></span> confident that <span style = 'color: blue; font-size: 16px;'><strong> {variation} </strong></span> " \
                          "is the best.".format(confidence_percentage=confidence_percentage, variation=best_variation)
-            recommendation = "Recommendation: <strong> CONCLUDE </strong> the Experiment."
+            recommendation = "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."
         if confidence > 0.95:
-            conclusion = "There is <strong> ENOUGH </strong> evidence to conclude the experiment. " \
-                         "We have a winner. We are <strong> {confidence_percentage}% </strong> confident " \
-                         "that <strong> {variation} </strong> is the best.".format(
+            conclusion = "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'> <strong> ENOUGH </strong></span>" \
+                         " evidence to conclude the experiment. " \
+                         "We have a <span style = 'color: green; font-size: 16px;'><strong> WINNER </strong></span>. " \
+                         "We are <span style = 'color: green; font-size: 16px;'><strong> {confidence_percentage}% </strong></span> confident " \
+                         "that <span style = 'color: blue; font-size: 16px;'><strong> {variation} </strong></span> is the best.".format(
                 confidence_percentage=confidence_percentage, variation=best_variation)
-            recommendation = "Recommendation: <strong> CONCLUDE </strong> the Experiment."
+            recommendation = "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."
+
+            # <span style = 'color: #388e3c; font-size: 16px;'> SUMMARY </span>
 
         result = dict()
         result["status"] = status
