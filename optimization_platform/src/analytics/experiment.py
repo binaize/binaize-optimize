@@ -405,14 +405,22 @@ class ExperimentAnalytics(object):
             result["recommendation"] = "<strong> RECOMMENDATION : </strong> <strong> CONTINUE </strong> the Experiment."
             return result
         delta = records[0][0] - records[0][1]
-        variation_names = df["variation_name"]
-        visitor_converted = df["goal_conversion_count"]
-        visitor_count = df["num_visitor"]
+        variation_names = df["variation_name"].tolist()
+        visitor_converted = df["goal_conversion_count"].tolist()
+        visitor_count = df["num_visitor"].tolist()
         num_days = delta.days
+
+        if len(variation_names) == 0:
+            result = dict()
+            result["status"] = "<strong> SUMMARY : </strong> Not enough visitors on the website."
+            result["conclusion"] = "<strong> STATUS : </strong> Not enough visitors on the website."
+            result["recommendation"] = "<strong> RECOMMENDATION : </strong> <strong> CONTINUE </strong> the Experiment."
+            return result
 
         from optimization_platform.src.optim.abtest import ABTest
         ab = ABTest(arm_name_list=variation_names, conversion_count_list=visitor_converted,
                     session_count_list=visitor_count, num_days=num_days)
+
         best_variation = ab.get_best_arm()
         confidence = ab.get_best_arm_confidence()
         confidence_percentage = round(confidence * 100, 2)
