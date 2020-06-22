@@ -261,6 +261,14 @@ class ConversionAnalytics(object):
                 return "home"
 
             orders_df["page_type"] = orders_df["landing_page"].map(process_landing_page)
+            orders_df.drop(['landing_page'], axis=1, inplace=True)
+
+            orders_df = orders_df.groupby('page_type').agg({
+                'conversion_count': [('conversion_count', lambda x: x.sum())]
+            })
+            orders_df.columns = orders_df.columns.droplevel()
+            orders_df["page_type"] = orders_df.index
+            orders_df.reset_index(inplace=True, drop=True)
 
         df = None
         if orders_df is not None and visits_df is not None:
