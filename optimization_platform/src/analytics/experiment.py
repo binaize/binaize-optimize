@@ -398,11 +398,12 @@ class ExperimentAnalytics(object):
                     and experiment_id = '{experiment_id}'
             """.format(client_id=client_id, experiment_id=experiment_id)
         records = data_store.run_custom_sql(sql)
+        result = dict()
+        result["status"] = "<strong> SUMMARY : </strong> Not enough visitors on the website."
+        result["conclusion"] = "<strong> STATUS : </strong> Not enough visitors on the website."
+        result[
+            "recommendation"] = "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."
         if records[0][0] is None or records[0][0] is None:
-            result = dict()
-            result["status"] = "<strong> SUMMARY : </strong> Not enough visitors on the website."
-            result["conclusion"] = "<strong> STATUS : </strong> Not enough visitors on the website."
-            result["recommendation"] = "<strong> RECOMMENDATION : </strong> <strong> CONTINUE </strong> the Experiment."
             return result
         delta = records[0][0] - records[0][1]
         variation_names = df["variation_name"].tolist()
@@ -410,11 +411,7 @@ class ExperimentAnalytics(object):
         visitor_count = df["num_visitor"].tolist()
         num_days = delta.days
 
-        if len(variation_names) == 0:
-            result = dict()
-            result["status"] = "<strong> SUMMARY : </strong> Not enough visitors on the website."
-            result["conclusion"] = "<strong> STATUS : </strong> Not enough visitors on the website."
-            result["recommendation"] = "<strong> RECOMMENDATION : </strong> <strong> CONTINUE </strong> the Experiment."
+        if len(variation_names) <= 1:
             return result
 
         from optimization_platform.src.optim.abtest import ABTest
@@ -462,7 +459,6 @@ class ExperimentAnalytics(object):
 
             # <span style = 'color: #388e3c; font-size: 16px;'> SUMMARY </span>
 
-        result = dict()
         result["status"] = status
         result["conclusion"] = conclusion
         result["recommendation"] = recommendation
