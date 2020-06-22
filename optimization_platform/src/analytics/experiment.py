@@ -215,10 +215,13 @@ class ExperimentAnalytics(object):
             variation_dict = dict()
             for variation_id in variation_ids:
                 d = conversion_df[conversion_df["variation_name"] == variation_id]
+                temp_df = pd.DataFrame({"date": df["date"].unique().tolist()})
+                d = pd.merge(d, temp_df, how="right", on=["date"])
+                d["conversion"] = d["conversion"].fillna(0.0)
                 session_count = d["conversion"].tolist()
                 variation_dict[variation_id] = session_count
-            result["date"] = d["date"].tolist()
-            result["conversion"] = variation_dict
+                result["date"] = d["date"].tolist()
+                result["conversion"] = variation_dict
         return result
 
     @classmethod
@@ -381,7 +384,7 @@ class ExperimentAnalytics(object):
         yo = cls.get_conversion_rate_of_experiment(data_store=data_store, client_id=client_id,
                                                    experiment_id=experiment_id)
         df = pd.DataFrame(yo, columns=["variation_name", "variation_id", "num_session", "num_visitor",
-                                       "goal_conversion_count","goal_conversion","sales_conversion_count",
+                                       "goal_conversion_count", "goal_conversion", "sales_conversion_count",
                                        "sales_conversion"])
         sql = \
             """
