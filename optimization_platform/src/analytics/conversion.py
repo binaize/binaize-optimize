@@ -85,7 +85,8 @@ class ConversionAnalytics(object):
                     diff_list.append(a[0] - a[1])
                 max_idx = diff_list.index(max(diff_list))
                 summary = "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong>" \
-                          " {page_type} </strong></span> has maximum churn of {drop}%".format(
+                          " {page_type} </strong></span> has maximum churn of <span style = 'color: blue; font-size: 16px;'><strong> " \
+                          "{drop}% </strong></span>".format(
                     page_type=result["pages"][max_idx],
                     drop=round(diff_list[max_idx], 2))
                 conclusion = "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for " \
