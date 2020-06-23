@@ -168,7 +168,7 @@ class TestConversionAnalytics(TestCase):
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [30, 20, 15, 10, 7, 5],
                             'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
-            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has maximum churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.33% </strong></span>",
+            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.33% </strong></span>",
             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
 
         self.assertDictEqual(d1=result, d2=expected_result)
@@ -218,7 +218,7 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [100, 100, 100]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has minimum conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"}
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -234,7 +234,7 @@ class TestConversionAnalytics(TestCase):
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [100.0, 100.0, 39.92]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has minimum conversion of <span style = 'color: blue; font-size: 16px;'><strong> 39.92% </strong></span>",
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 39.92% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span>"}
 
         self.assertDictEqual(d1=result, d2=expected_result)

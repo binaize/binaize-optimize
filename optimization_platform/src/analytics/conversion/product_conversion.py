@@ -120,7 +120,7 @@ def get_product_conversion_analytics(data_store, client_id, start_date_str, end_
     min_idx = percentage_list.index(min(percentage_list))
     min_product = products[min_idx]
     min_percentage = percentage_list[min_idx]
-    conclusion, summary = get_description_for_enough_visitors(conclusion, min_percentage, min_product, summary)
+    conclusion, summary = get_description_for_enough_visitors(min_percentage, min_product)
     result = construct_result(conclusion, conversion_count, percentage_list, products, summary, visitor_count)
     return result
 
@@ -138,9 +138,9 @@ def construct_result(conclusion, conversion_count, percentage_list, products, su
     return result
 
 
-def get_description_for_enough_visitors(conclusion, min_percentage, min_product, summary):
+def get_description_for_enough_visitors(min_percentage, min_product):
     summary = "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> {product}" \
-              " </strong></span> has minimum conversion of <span style = 'color: blue; font-size: 16px;'><strong>" \
+              " </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong>" \
               " {conversion}% </strong></span>".format(
         product=min_product,
         conversion=min_percentage)

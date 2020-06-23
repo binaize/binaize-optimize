@@ -807,7 +807,7 @@ class TestServer(TestCase):
         expected_response_json = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
-            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span> has maximum churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.23% </strong></span>",
+            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.23% </strong></span>",
             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span>"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
