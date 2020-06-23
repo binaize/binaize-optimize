@@ -49,9 +49,22 @@ def get_products_df(client_id, data_store, end_date, start_date):
 
 
 def get_orders_df(client_id, data_store, end_date, start_date):
+    # sql = \
+    #     """
+    #         select product_id, sum(variant_quantity) as conversion_count
+    #             from orders
+    #         where
+    #             client_id = '{client_id}'
+    #             and payment_status = True
+    #             and updated_at > '{start_date}'
+    #             and updated_at < '{end_date}'
+    #         group by
+    #             product_id
+    #     """.format(client_id=client_id, start_date=start_date, end_date=end_date)
+
     sql = \
         """
-            select product_id, sum(variant_quantity) as conversion_count
+            select product_id, count(distinct(order_id)) as conversion_count
                 from orders
             where 
                 client_id = '{client_id}' 
@@ -61,6 +74,7 @@ def get_orders_df(client_id, data_store, end_date, start_date):
             group by
                 product_id
         """.format(client_id=client_id, start_date=start_date, end_date=end_date)
+
     mobile_records = data_store.run_custom_sql(sql)
     orders_df = None
     if mobile_records is not None and len(mobile_records) > 0:

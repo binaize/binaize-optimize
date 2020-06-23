@@ -216,7 +216,7 @@ class TestConversionAnalytics(TestCase):
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
-                           'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
+                           'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [5, 4, 1],
                                                   'conversion_percentage': [100, 100, 100]},
                            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"}
@@ -232,11 +232,10 @@ class TestConversionAnalytics(TestCase):
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
-                           'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
-                                                  'conversion_percentage': [100.0, 100.0, 39.92]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 39.92% </strong></span>",
+                           'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [5, 4, 1],
+                                                  'conversion_percentage': [99.8, 79.84, 19.96]},
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 19.96% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span>"}
-
         self.assertDictEqual(d1=result, d2=expected_result)
 
     def test_get_landing_page_analytics(self):
