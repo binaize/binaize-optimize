@@ -94,7 +94,7 @@ def get_product_conversion_analytics(data_store, client_id, start_date_str, end_
         visits_product_df["visitor_count"] = 0
     else:
         visits_product_df = pd.merge(products_df, visits_df,
-                                     how='outer', left_on=["product_handle"], right_on=["product_handle"])
+                                     how='left', left_on=["product_handle"], right_on=["product_handle"])
         visits_product_df["visitor_count"] = visits_product_df["visitor_count"].fillna(0).astype(int)
 
     df = visits_product_df

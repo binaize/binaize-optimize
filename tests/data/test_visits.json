@@ -20,7 +20,7 @@
     "url": "/collections/all"
   },
   {
-    "session_id": "test_session_id_2",
+    "session_id": "test_session_id_222",
     "event_name": "product",
     "url": "/products/product_handle_1"
   },
@@ -35,7 +35,7 @@
     "url": "/collections/all"
   },
   {
-    "session_id": "test_session_id_3",
+    "session_id": "test_session_id_333",
     "event_name": "product",
     "url": "/products/product_handle_2"
   },
@@ -50,7 +50,7 @@
     "url": "/collections/all"
   },
   {
-    "session_id": "test_session_id_4",
+    "session_id": "test_session_id_4444",
     "event_name": "product",
     "url": "/products/product_handle_3"
   },

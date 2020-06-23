@@ -94,6 +94,9 @@ create
 index if not exists visits_event_name_idx on visits (event_name);
 create
 index if not exists visits_creation_time_idx on visits (creation_time);
+create
+index if not exists visits_session_idx on visits (session_id);
+
 
 
 drop table if exists products;

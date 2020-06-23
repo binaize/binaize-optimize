@@ -865,8 +865,9 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
-                                                                      'conversion_percentage': []},
-                                  'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
-                                  'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
+        expected_response_json = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+                                  'landing_conversion': {'visitor_count': [3, 2, 0], 'conversion_count': [0, 0, 0],
+                                                         'conversion_percentage': [0.0, 0.0, 0.0]},
+                                  'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",
+                                  'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
