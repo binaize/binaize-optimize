@@ -20,7 +20,11 @@ def main():
     logger.info("sync orders job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
     for client_id in client_ids:
         logger.info("sync orders job for client id = {client_id} started".format(client_id=client_id))
-        OrderAgent.sync_orders(data_store=rds_data_store, client_id=client_id)
+        try:
+            OrderAgent.sync_orders(data_store=rds_data_store, client_id=client_id)
+            logger.info("sync orders job for client id = {client_id} succeeded".format(client_id=client_id))
+        except Exception:
+            logger.info("sync orders job for client id = {client_id} failed".format(client_id=client_id))
         logger.info("sync orders job for client id = {client_id} ended".format(client_id=client_id))
     logger.info("sync orders job for client ids = {client_ids} ended".format(client_ids=",".join(client_ids)))
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))

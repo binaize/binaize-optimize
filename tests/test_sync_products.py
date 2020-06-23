@@ -62,7 +62,7 @@ class TestProductAgent(TestCase):
         return status
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
-    def test_shit(self, x):
+    def test_main(self, x):
         self._add_new_client(client_id="test_client_id_1",
                              full_name="test_full_name_1",
                              company_name="test_company_name_1", hashed_password="test_hashed_password_!",
