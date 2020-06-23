@@ -217,10 +217,9 @@ class TestConversionAnalytics(TestCase):
                                                                       timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
-                                                  'conversion_percentage': [99.99, 99.99, 99.99]},
-                           'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
-                           'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
-
+                                                  'conversion_percentage': [100, 100, 100]},
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has minimum conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
+                           'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """all tables have data"""
@@ -234,7 +233,7 @@ class TestConversionAnalytics(TestCase):
                                                                       timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
-                                                  'conversion_percentage': [99.99, 99.99, 39.92]},
+                                                  'conversion_percentage': [100.0, 100.0, 39.92]},
                            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has minimum conversion of <span style = 'color: blue; font-size: 16px;'><strong> 39.92% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span>"}
 
