@@ -249,7 +249,7 @@ class TestConversionAnalytics(TestCase):
                                                                 start_date_str=start_date_str,
                                                                 end_date_str=end_date_str, timezone_str="Asia/Kolkata")
 
-        expected_result = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+        expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
@@ -263,7 +263,7 @@ class TestConversionAnalytics(TestCase):
                                                                 start_date_str=start_date_str,
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+        expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
@@ -278,7 +278,7 @@ class TestConversionAnalytics(TestCase):
                                                                 start_date_str=start_date_str,
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+        expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [6, 2, 2],
                                                   'conversion_percentage': [100, 100, 100]},
                            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
@@ -295,9 +295,9 @@ class TestConversionAnalytics(TestCase):
                                                                 start_date_str=start_date_str,
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+        expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [25, 10, 3], 'conversion_count': [6, 2, 2],
                                                   'conversion_percentage': [23.99, 19.98, 66.45]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Product Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 19.98% </strong></span>",
-                           'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Product Page </strong></span>"}
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collections Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 19.98% </strong></span>",
+                           'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collections Page </strong></span>"}
         self.assertDictEqual(d1=result, d2=expected_result)

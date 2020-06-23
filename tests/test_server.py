@@ -865,7 +865,7 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'pages': ['Home Page', 'Product Page', 'Collections Page'],
+        expected_response_json = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
                                   'landing_conversion': {'visitor_count': [3, 2, 0], 'conversion_count': [0, 0, 0],
                                                          'conversion_percentage': [0.0, 0.0, 0.0]},
                                   'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",

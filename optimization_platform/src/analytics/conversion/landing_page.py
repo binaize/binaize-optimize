@@ -78,7 +78,7 @@ def get_landing_page_analytics(data_store, client_id, start_date_str, end_date_s
 
     page_df = pd.DataFrame({"id": [1, 2, 3],
                             "page_type": ["home", "collection", "product"],
-                            "page_name": ["Home Page", "Product Page", "Collections Page"]})
+                            "page_name": ["Home Page", "Collections Page", "Product Page"]})
 
     conclusion, summary = get_description_for_data_not_enough()
 
