@@ -807,8 +807,8 @@ class TestServer(TestCase):
         expected_response_json = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
-            'summary': '<strong> SUMMARY </strong> Collection Page has maximum churn of 33.23%',
-            'conclusion': '<strong> CONCLUSION </strong> Experiment with different creatives/copies for Collection Page'}
+            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span> has maximum churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.23% </strong></span>",
+            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span>"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -837,8 +837,8 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                          'conversion_percentage': []},
-                                  'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
-                                  'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
+                                  'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+                                  'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -867,6 +867,6 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                       'conversion_percentage': []},
-                                  'summary': '<strong> SUMMARY </strong> There are NOT enough visits registered on the website',
-                                  'conclusion': '<strong> CONCLUSION </strong> Wait for the customers to interact with your website'}
+                                  'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+                                  'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
