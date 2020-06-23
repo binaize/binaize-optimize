@@ -22,7 +22,7 @@ def get_orders_df(client_id, data_store, end_date, start_date):
         orders_df.columns = ["landing_page", "conversion_count"]
 
         def process_landing_page(x):
-            if "product" in x:
+            if "product" in x or "checkout" in x:
                 return "product"
             elif "collection" in x:
                 return "collection"
