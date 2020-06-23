@@ -13,8 +13,8 @@ from config import *
 from optimization_platform.deployment.server_models import *
 from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.cookie_agent import CookieAgent
-from optimization_platform.src.analytics.conversion import ConversionAnalytics
-from optimization_platform.src.analytics.experiment import ExperimentAnalytics
+from optimization_platform.src.analytics.conversion.conversion_analytics import ConversionAnalytics
+from optimization_platform.src.analytics.experiment.experiment_analytics import ExperimentAnalytics
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
@@ -460,7 +460,8 @@ async def get_shop_funnel_analytics_for_dashboard(*,
     """
     result = ConversionAnalytics.get_shop_funnel_analytics(data_store=app.rds_data_store,
                                                            client_id=current_client.client_id,
-                                                           start_date_str=start_date, end_date_str=end_date)
+                                                           start_date_str=start_date, end_date_str=end_date,
+                                                           timezone_str=current_client.client_timezone)
 
     return result
 
@@ -477,7 +478,8 @@ async def get_product_conversion_analytics_for_dashboard(*, current_client: Shop
     """
     result = ConversionAnalytics.get_product_conversion_analytics(data_store=app.rds_data_store,
                                                                   client_id=current_client.client_id,
-                                                                  start_date_str=start_date, end_date_str=end_date)
+                                                                  start_date_str=start_date, end_date_str=end_date,
+                                                                  timezone_str=current_client.client_timezone)
 
     return result
 
@@ -496,6 +498,7 @@ async def get_landing_page_analytics_for_dashboard(*,
     """
     result = ConversionAnalytics.get_landing_page_analytics(data_store=app.rds_data_store,
                                                             client_id=current_client.client_id,
-                                                            start_date_str=start_date, end_date_str=end_date)
+                                                            start_date_str=start_date, end_date_str=end_date,
+                                                            timezone_str=current_client.client_timezone)
 
     return result

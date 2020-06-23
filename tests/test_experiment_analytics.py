@@ -8,7 +8,7 @@ import testing.postgresql
 import json
 
 from config import *
-from optimization_platform.src.analytics.experiment import ExperimentAnalytics
+from optimization_platform.src.analytics.experiment.experiment_analytics import ExperimentAnalytics
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
 from optimization_platform.src.agents.order_agent import OrderAgent

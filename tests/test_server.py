@@ -53,7 +53,7 @@ class TestServer(TestCase):
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "client_timezone": "test_client_timezone",
+                  "client_timezone": "Asia/Kolkata",
                   "password": "test_password"}
         )
         status_code = response.status_code
@@ -68,7 +68,7 @@ class TestServer(TestCase):
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "client_timezone": "test_client_timezone",
+                  "client_timezone": "Asia/Kolkata",
                   "password": "test_password"}
         )
         status_code = response.status_code
@@ -87,7 +87,7 @@ class TestServer(TestCase):
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "client_timezone": "test_client_timezone",
+                  "client_timezone": "Asia/Kolkata",
                   "password": "test_password"}
         )
         response = client.post(
@@ -125,7 +125,7 @@ class TestServer(TestCase):
             headers={"accept": "application/json"},
             json={"client_id": "test_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": False, "shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "client_timezone": "test_client_timezone",
+                  "client_timezone": "Asia/Kolkata",
                   "password": "test_password"}
         )
         client.post(
@@ -133,7 +133,7 @@ class TestServer(TestCase):
             headers={"accept": "application/json"},
             json={"client_id": "disabled_client", "company_name": "test_company_name", "full_name": "test_full_name",
                   "disabled": True, "shopify_app_eg_url": "test_shopify_app_eg_url",
-                  "client_timezone": "test_client_timezone",
+                  "client_timezone": "Asia/Kolkata",
                   "password": "disabled_password"}
         )
 
@@ -186,7 +186,7 @@ class TestServer(TestCase):
         expected_response_json = {"client_id": "test_client", "company_name": "test_company_name",
                                   "full_name": "test_full_name", "disabled": False,
                                   "shopify_app_eg_url": "test_shopify_app_eg_url",
-                                  "client_timezone": "test_client_timezone", "creation_time": "2020-05-30"}
+                                  "client_timezone": "Asia/Kolkata", "creation_time": "2020-05-30"}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
         """send an expired access token for active user"""

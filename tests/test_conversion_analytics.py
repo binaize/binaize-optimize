@@ -12,7 +12,7 @@ from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.order_agent import OrderAgent
 from optimization_platform.src.agents.product_agent import ProductAgent
 from optimization_platform.src.agents.visit_agent import VisitAgent
-from optimization_platform.src.analytics.conversion import ConversionAnalytics
+from optimization_platform.src.analytics.conversion.conversion_analytics import ConversionAnalytics
 from utils.data_store.rds_data_store import RDSDataStore
 
 pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=int(AWS_RDS_PORT))
@@ -113,7 +113,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
                                                                start_date_str=start_date_str,
-                                                               end_date_str=end_date_str)
+                                                               end_date_str=end_date_str,
+                                                               timezone_str="Asia/Kolkata")
 
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
@@ -128,7 +129,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
                                                                start_date_str=start_date_str,
-                                                               end_date_str=end_date_str)
+                                                               end_date_str=end_date_str,
+                                                               timezone_str="Asia/Kolkata")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [0, 0, 0, 0, 0, 0], 'percentage': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
@@ -143,7 +145,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
                                                                start_date_str=start_date_str,
-                                                               end_date_str=end_date_str)
+                                                               end_date_str=end_date_str,
+                                                               timezone_str="Asia/Kolkata")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
@@ -159,7 +162,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
                                                                start_date_str=start_date_str,
-                                                               end_date_str=end_date_str)
+                                                               end_date_str=end_date_str,
+                                                               timezone_str="Asia/Kolkata")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [30, 20, 15, 10, 7, 5],
@@ -178,7 +182,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
                                                                       client_id="test_client_id",
                                                                       start_date_str=start_date_str,
-                                                                      end_date_str=end_date_str)
+                                                                      end_date_str=end_date_str,
+                                                                      timezone_str="Asia/Kolkata")
 
         expected_result = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                   'conversion_percentage': []},
@@ -192,7 +197,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
                                                                       client_id="test_client_id",
                                                                       start_date_str=start_date_str,
-                                                                      end_date_str=end_date_str)
+                                                                      end_date_str=end_date_str,
+                                                                      timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
@@ -207,7 +213,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
                                                                       client_id="test_client_id",
                                                                       start_date_str=start_date_str,
-                                                                      end_date_str=end_date_str)
+                                                                      end_date_str=end_date_str,
+                                                                      timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 99.99]},
@@ -223,7 +230,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_product_conversion_analytics(data_store=self.rds_data_store,
                                                                       client_id="test_client_id",
                                                                       start_date_str=start_date_str,
-                                                                      end_date_str=end_date_str)
+                                                                      end_date_str=end_date_str,
+                                                                      timezone_str="Asia/Kolkata")
         expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
                            'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [10, 8, 2],
                                                   'conversion_percentage': [99.99, 99.99, 39.92]},
@@ -240,7 +248,7 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
                                                                 client_id="test_client_id",
                                                                 start_date_str=start_date_str,
-                                                                end_date_str=end_date_str)
+                                                                end_date_str=end_date_str, timezone_str="Asia/Kolkata")
 
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
@@ -254,7 +262,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
                                                                 client_id="test_client_id",
                                                                 start_date_str=start_date_str,
-                                                                end_date_str=end_date_str)
+                                                                end_date_str=end_date_str,
+                                                                timezone_str="Asia/Kolkata")
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
@@ -268,7 +277,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
                                                                 client_id="test_client_id",
                                                                 start_date_str=start_date_str,
-                                                                end_date_str=end_date_str)
+                                                                end_date_str=end_date_str,
+                                                                timezone_str="Asia/Kolkata")
         expected_result = {'pages': [], 'landing_conversion': {'visitor_count': [], 'conversion_count': [],
                                                                'conversion_percentage': []},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
@@ -283,7 +293,8 @@ class TestConversionAnalytics(TestCase):
         result = ConversionAnalytics.get_landing_page_analytics(data_store=self.rds_data_store,
                                                                 client_id="test_client_id",
                                                                 start_date_str=start_date_str,
-                                                                end_date_str=end_date_str)
+                                                                end_date_str=end_date_str,
+                                                                timezone_str="Asia/Kolkata")
         expected_result = {'pages': ['Collections Page', 'Home Page', 'Product Page'],
                            'landing_conversion': {'visitor_count': [8, 21, 6], 'conversion_count': [2, 6, 2],
                                                   'conversion_percentage': [24.97, 28.56, 33.28]},
