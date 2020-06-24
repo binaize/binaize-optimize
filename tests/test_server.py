@@ -609,8 +609,9 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'date': ['May 28'],
-                                  'session_count': {'test_variation_name_1': [1], 'test_variation_name_2': [3]}}
+        expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
+                                  'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                                                    'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -639,8 +640,9 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'date': ['May 28'],
-                                  'visitor_count': {'test_variation_name_1': [1], 'test_variation_name_2': [2]}}
+        expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
+                                  'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                                                    'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -669,8 +671,9 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {'date': ['May 28'],
-                                  'conversion': {'test_variation_name_1': [100.0], 'test_variation_name_2': [50.0]}}
+        expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
+                                  'conversion': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 99.01, 0.0, 0.0],
+                                                 'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 49.75, 0.0, 0.0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)
@@ -702,10 +705,10 @@ class TestServer(TestCase):
         for record in response_json:
             record.pop("variation_id", None)
         expected_response_json = [
-            {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
-             'goal_conversion': 50.0, 'sales_conversion': 0.0, 'sales_conversion_count': 0},
             {'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
-             'goal_conversion': 100.0, 'sales_conversion': 0.0, 'sales_conversion_count': 0}]
+             'sales_conversion_count': 0, 'goal_conversion': 99.01, 'sales_conversion': 0.0},
+            {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
+             'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
         self.assertCountEqual(first=response_json, second=expected_response_json)
 
     def test_get_experiment_summary(self):
@@ -734,140 +737,144 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {
             'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 50.0% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 523 </strong> days.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 22 </strong> days.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
-    def _create_visit_event(self):
-        timestamp = 1590673060
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_1", event_name="home", creation_time=timestamp,
-                                             url="url_1")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_2", event_name="collection",
-                                             creation_time=timestamp + 10,
-                                             url="url_2")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_2", event_name="product",
-                                             creation_time=timestamp + 20,
-                                             url="url_3")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_4", event_name="cart",
-                                             creation_time=timestamp + 30,
-                                             url="url_4")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_5", event_name="checkout",
-                                             creation_time=timestamp + 40,
-                                             url="url_5")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_6", event_name="checkout",
-                                             creation_time=timestamp + 50,
-                                             url="url_6")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_7", event_name="home",
-                                             creation_time=timestamp + 60,
-                                             url="url_7")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_8", event_name="home",
-                                             creation_time=timestamp + 70,
-                                             url="url_8")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_9", event_name="collection",
-                                             creation_time=timestamp + 80,
-                                             url="url_9")
-        VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
-                                             session_id="test_session_id_10", event_name="prooduct",
-                                             creation_time=timestamp + 90,
-                                             url="url_10")
 
-    @patch('datetime.datetime', new=datetime_mock)
-    def test_get_shop_funnel_analytics_for_dashboard(self):
-        self._sign_up_new_client()
-        self._create_visit_event()
+def _create_visit_event(self):
+    timestamp = 1590673060
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_1", event_name="home", creation_time=timestamp,
+                                         url="url_1")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_2", event_name="collection",
+                                         creation_time=timestamp + 10,
+                                         url="url_2")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_2", event_name="product",
+                                         creation_time=timestamp + 20,
+                                         url="url_3")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_4", event_name="cart",
+                                         creation_time=timestamp + 30,
+                                         url="url_4")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_5", event_name="checkout",
+                                         creation_time=timestamp + 40,
+                                         url="url_5")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_6", event_name="checkout",
+                                         creation_time=timestamp + 50,
+                                         url="url_6")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_7", event_name="home",
+                                         creation_time=timestamp + 60,
+                                         url="url_7")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_8", event_name="home",
+                                         creation_time=timestamp + 70,
+                                         url="url_8")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_9", event_name="collection",
+                                         creation_time=timestamp + 80,
+                                         url="url_9")
+    VisitAgent.register_visit_for_client(data_store=app.rds_data_store, client_id="test_client",
+                                         session_id="test_session_id_10", event_name="prooduct",
+                                         creation_time=timestamp + 90,
+                                         url="url_10")
 
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-        access_token = response.json()["access_token"]
 
-        response = client.get(
-            "/api/v1/schemas/report/shop-funnel",
-            headers={
-                "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
-        )
+@patch('datetime.datetime', new=datetime_mock)
+def test_get_shop_funnel_analytics_for_dashboard(self):
+    self._sign_up_new_client()
+    self._create_visit_event()
 
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
+    response = client.post(
+        "/api/v1/schemas/client/token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
+    )
+    access_token = response.json()["access_token"]
 
-        response_json = response.json()
-        expected_response_json = {
-            'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'visitor_count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
-            'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.23% </strong></span>",
-            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span>"}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+    response = client.get(
+        "/api/v1/schemas/report/shop-funnel",
+        headers={
+            "Authorization": "Bearer " + access_token},
+        params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
+    )
 
-    @patch('datetime.datetime', new=datetime_mock)
-    def test_get_product_conversion_analytics_for_dashboard(self):
-        self._sign_up_new_client()
-        self._create_visit_event()
+    status_code = response.status_code
+    expected_status_code = 200
+    self.assertEqual(first=status_code, second=expected_status_code)
 
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-        access_token = response.json()["access_token"]
+    response_json = response.json()
+    expected_response_json = {
+        'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
+        'shop_funnel': {'visitor_count': [3, 2, 1, 1, 0, 0], 'percentage': [99.67, 66.45, 33.22, 33.22, 0.0, 0.0]},
+        'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.23% </strong></span>",
+        'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collection Page </strong></span>"}
+    self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
-        response = client.get(
-            "/api/v1/schemas/report/product-conversion",
-            headers={
-                "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
-        )
 
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
+@patch('datetime.datetime', new=datetime_mock)
+def test_get_product_conversion_analytics_for_dashboard(self):
+    self._sign_up_new_client()
+    self._create_visit_event()
 
-        response_json = response.json()
-        expected_response_json = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
-                                                                         'conversion_percentage': []},
-                                  'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
-                                  'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+    response = client.post(
+        "/api/v1/schemas/client/token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
+    )
+    access_token = response.json()["access_token"]
 
-    @patch('datetime.datetime', new=datetime_mock)
-    def test_get_landing_page_analytics_for_dashboard(self):
-        self._sign_up_new_client()
-        self._create_visit_event()
+    response = client.get(
+        "/api/v1/schemas/report/product-conversion",
+        headers={
+            "Authorization": "Bearer " + access_token},
+        params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
+    )
 
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-        access_token = response.json()["access_token"]
+    status_code = response.status_code
+    expected_status_code = 200
+    self.assertEqual(first=status_code, second=expected_status_code)
 
-        response = client.get(
-            "/api/v1/schemas/report/landing-page",
-            headers={
-                "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
-        )
+    response_json = response.json()
+    expected_response_json = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
+                                                                     'conversion_percentage': []},
+                              'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+                              'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
+    self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
 
-        response_json = response.json()
-        expected_response_json = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
-                                  'landing_conversion': {'visitor_count': [3, 2, 0], 'conversion_count': [0, 0, 0],
-                                                         'conversion_percentage': [0.0, 0.0, 0.0]},
-                                  'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",
-                                  'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+@patch('datetime.datetime', new=datetime_mock)
+def test_get_landing_page_analytics_for_dashboard(self):
+    self._sign_up_new_client()
+    self._create_visit_event()
+
+    response = client.post(
+        "/api/v1/schemas/client/token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
+    )
+    access_token = response.json()["access_token"]
+
+    response = client.get(
+        "/api/v1/schemas/report/landing-page",
+        headers={
+            "Authorization": "Bearer " + access_token},
+        params={"client_id": "test_client", "start_date": "2019-05-27T00-00-00", "end_date": "2021-07-28T23-59-59"}
+    )
+
+    status_code = response.status_code
+    expected_status_code = 200
+    self.assertEqual(first=status_code, second=expected_status_code)
+
+    response_json = response.json()
+    expected_response_json = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
+                              'landing_conversion': {'visitor_count': [3, 2, 0], 'conversion_count': [0, 0, 0],
+                                                     'conversion_percentage': [0.0, 0.0, 0.0]},
+                              'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",
+                              'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
+    self.assertDictEqual(d1=response_json, d2=expected_response_json)

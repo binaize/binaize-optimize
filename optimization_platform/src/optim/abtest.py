@@ -6,7 +6,7 @@ from optimization_platform.src.optim.abstract_optim import AbstractOptim
 
 
 class ABTest(AbstractOptim):
-    def __init__(self, arm_name_list, conversion_count_list, session_count_list, num_days, *args, **kwargs):
+    def __init__(self, arm_name_list, conversion_count_list, session_count_list, num_hour, *args, **kwargs):
         super(ABTest, self).__init__(*args, **kwargs)
         self._arm_name_list = arm_name_list
         self._session_count_list = np.array(session_count_list)
@@ -37,7 +37,7 @@ class ABTest(AbstractOptim):
         estimated_sample_size = chipower.solve_power(EFFECT_SIZE, nobs=None, alpha=ALPHA, power=POWER,
                                                      n_bins=N_BINS)
         self._estimated_sample_size = int(estimated_sample_size * 2) - self._session_count_list.sum()
-        avg_session_per_day = self._session_count_list.sum() / (num_days+1)
+        avg_session_per_day = (self._session_count_list.sum() / (num_hour + 1)) * 24
         self._remaining_time = self._estimated_sample_size / avg_session_per_day
 
     def get_best_arm(self):
@@ -54,5 +54,3 @@ class ABTest(AbstractOptim):
 
     def get_estimated_sample_size(self):
         return self._estimated_sample_size
-
-

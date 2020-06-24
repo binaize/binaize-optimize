@@ -377,7 +377,8 @@ async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Dep
     """
     result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
                                                                            client_id=current_client.client_id,
-                                                                           experiment_id=experiment_id)
+                                                                           experiment_id=experiment_id,
+                                                                           timezone_str=current_client.client_timezone)
 
     return result
 
@@ -393,7 +394,8 @@ async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Dep
     """
     result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
                                                                            client_id=current_client.client_id,
-                                                                           experiment_id=experiment_id)
+                                                                           experiment_id=experiment_id,
+                                                                           timezone_str=current_client.client_timezone)
 
     return result
 
@@ -409,7 +411,8 @@ async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = D
     """
     result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
                                                                              client_id=current_client.client_id,
-                                                                             experiment_id=experiment_id)
+                                                                             experiment_id=experiment_id,
+                                                                             timezone_str=current_client.client_timezone)
 
     return result
 
