@@ -85,7 +85,7 @@ create table if not exists visits
     session_id    varchar(100),
     event_name    varchar(50),
     creation_time timestamptz not null,
-    url           varchar(200)
+    url           varchar(700)
 );
 
 create
@@ -134,7 +134,7 @@ create table if not exists orders
     variant_price    numeric(8, 2),
     updated_at       timestamptz  not null,
     payment_status   boolean,
-    landing_page     varchar(100)
+    landing_page     varchar(700)
 );
 
 create
