@@ -114,7 +114,7 @@ def get_landing_page_analytics(data_store, client_id, start_date_str, end_date_s
     min_idx = conversion_percentage.index(min(conversion_percentage))
     min_page = pages[min_idx]
     min_conversion = conversion_percentage[min_idx]
-    conclusion, summary = get_description_for_enough_visitors(conclusion, min_conversion, min_page, summary)
+    conclusion, summary = get_description_for_enough_visitors(min_conversion, min_page)
 
     result = construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, visitor_count)
     return result
@@ -133,7 +133,7 @@ def construct_result(conclusion, conversion_count, conversion_percentage, pages,
     return result
 
 
-def get_description_for_enough_visitors(conclusion, min_conversion, min_page, summary):
+def get_description_for_enough_visitors(min_conversion, min_page):
     summary = "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> {page} </strong></span>" \
               " has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> " \
               "{conversion}% </strong></span>".format(page=min_page, conversion=min_conversion)

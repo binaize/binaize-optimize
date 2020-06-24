@@ -85,13 +85,13 @@ def get_shop_funnel_analytics(data_store, client_id, start_date_str, end_date_st
     percentage = df["percentage"].tolist()
 
     if sum(visitor_count[:4]) > 0:
-        conclusion, summary = get_description_for_enough_visitors(conclusion, pages, percentage, summary)
+        conclusion, summary = get_description_for_enough_visitors(pages, percentage)
 
     result = construct_result(conclusion, pages, percentage, summary, visitor_count)
     return result
 
 
-def get_description_for_enough_visitors(conclusion, pages, percentage, summary):
+def get_description_for_enough_visitors(pages, percentage):
     diff_list = list()
     for a in zip(percentage, percentage[1:]):
         diff_list.append(a[0] - a[1])
