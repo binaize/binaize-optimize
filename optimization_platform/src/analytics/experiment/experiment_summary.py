@@ -7,6 +7,12 @@ from optimization_platform.src.optim.abtest import ABTest
 def get_summary_of_experiment(data_store, client_id, experiment_id):
     conversion = get_conversion_table_of_experiment(data_store=data_store, client_id=client_id,
                                                     experiment_id=experiment_id)
+
+    if len(conversion) == 0:
+        conclusion, recommendation, status = get_summary_for_data_not_enough()
+        result = construct_result(conclusion, recommendation, status)
+        return result
+
     df = pd.DataFrame(conversion, columns=["variation_name", "variation_id", "num_session", "num_visitor",
                                            "goal_conversion_count", "goal_conversion", "sales_conversion_count",
                                            "sales_conversion"])
