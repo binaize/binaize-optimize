@@ -17,6 +17,11 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
                                            "goal_conversion_count", "goal_conversion", "sales_conversion_count",
                                            "sales_conversion"])
 
+    if df["num_visitor"].sum() == 0:
+        conclusion, recommendation, status = get_summary_for_data_not_enough()
+        result = construct_result(conclusion, recommendation, status)
+        return result
+
     end_time, start_time = get_start_time_and_end_time_of_experiment(client_id, data_store, experiment_id)
     if start_time is None or end_time is None:
         conclusion, recommendation, status = get_summary_for_data_not_enough()
