@@ -37,6 +37,10 @@ def mocked_requests_get(*args, **kwargs):
         def json(self):
             return self.json_data
 
+        @property
+        def headers(self):
+            return {}
+
     if "orders.json" in args[0]:
         with open("tests/data/test_conversion_order.json", "r") as fp:
             data = json.load(fp)

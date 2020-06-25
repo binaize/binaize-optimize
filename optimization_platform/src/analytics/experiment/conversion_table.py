@@ -64,7 +64,7 @@ def get_events_df(data_store, experiment_id, client_id):
     sql = \
         """
         select
-            table1.variation_id,
+            table2.variation_id,
             table2.num_session,
             table2.num_visitor,
             table1.num_conversion
@@ -83,7 +83,7 @@ def get_events_df(data_store, experiment_id, client_id):
                     variation_id
             )
             table1 
-            join
+            full outer join
                 (
                     select
                         variation_id,

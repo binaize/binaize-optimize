@@ -27,13 +27,32 @@ class OrderAgent(object):
 
         client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
         shared_url = client_details["shopify_app_eg_url"]
-        base_url = "/".join(shared_url.split("/")[:-1])
-        order_url = "{base_url}/orders.json".format(base_url=base_url)
+        base_url = "/".join(shared_url.split("/")[:6])
+        order_url = "{base_url}/orders.json?limit=250".format(base_url=base_url)
         if updated_at is not None:
             order_url = "{base_url}/orders.json?updated_at_min={updated_at}".format(base_url=base_url,
                                                                                     updated_at=updated_at)
         r = requests.get(order_url)
         order_list = r.json()["orders"]
+
+        def get_next_url(base_url, header):
+            link_header = header.get('Link')
+            rel_next_tag = 'rel="next"'
+            if link_header is not None and rel_next_tag in link_header:
+                next_field = link_header.split(",")[-1]
+                url = next_field.split(";")[0][1:-1]
+                ext = "/".join(url.split("/")[6:])
+                next_url = "{base_url}/{ext}".format(base_url=base_url, ext=ext)
+                return next_url
+            return None
+
+        while True:
+            header = r.headers
+            order_url = get_next_url(base_url, header)
+            if order_url is None:
+                break
+            r = requests.get(order_url)
+            order_list += r.json()["orders"]
 
         variant_list = list()
         order_id_list = list()
@@ -55,13 +74,33 @@ class OrderAgent(object):
                 variant_list.append(variant_dict)
             order_id_list.append(order["id"])
 
-        base_url = "/".join(shared_url.split("/")[:-1])
-        checkout_url = "{base_url}/checkouts.json".format(base_url=base_url)
+        base_url = "/".join(shared_url.split("/")[:6])
+        checkout_url = "{base_url}/checkouts.json?limit=250".format(base_url=base_url)
         if updated_at is not None:
             checkout_url = "{base_url}/checkouts.json?updated_at_min={updated_at}".format(base_url=base_url,
                                                                                           updated_at=updated_at)
         r = requests.get(checkout_url)
         checkout_list = r.json()["checkouts"]
+
+        def get_next_url(base_url, header):
+            link_header = header.get('Link')
+            rel_next_tag = 'rel="next"'
+            if link_header is not None and rel_next_tag in link_header:
+                next_field = link_header.split(",")[-1]
+                url = next_field.split(";")[0][1:-1]
+                ext = "/".join(url.split("/")[6:])
+                next_url = "{base_url}/{ext}".format(base_url=base_url, ext=ext)
+                return next_url
+            return None
+
+        while True:
+            header = r.headers
+            checkout_url = get_next_url(base_url, header)
+            if checkout_url is None:
+                break
+            r = requests.get(checkout_url)
+            checkout_list += r.json()["checkouts"]
+
         for checkout in checkout_list:
             items = checkout["line_items"]
             for item in items:

@@ -28,13 +28,32 @@ class ProductAgent(object):
 
         client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
         shared_url = client_details["shopify_app_eg_url"]
-        base_url = "/".join(shared_url.split("/")[:-1])
-        product_url = "{base_url}/products.json".format(base_url=base_url)
+        base_url = "/".join(shared_url.split("/")[:6])
+        product_url = "{base_url}/products.json?limit=250".format(base_url=base_url)
         if updated_at is not None:
-            product_url = "{base_url}/products.json?updated_at_min={updated_at}".format(
-                base_url=base_url, updated_at=updated_at)
+            product_url = "{base_url}/products.json?updated_at_min={updated_at}".format(base_url=base_url,
+                                                                                        updated_at=updated_at)
         r = requests.get(product_url)
         product_list = r.json()["products"]
+
+        def get_next_url(base_url, header):
+            link_header = header.get('Link')
+            rel_next_tag = 'rel="next"'
+            if link_header is not None and rel_next_tag in link_header:
+                next_field = link_header.split(",")[-1]
+                url = next_field.split(";")[0][1:-1]
+                ext = "/".join(url.split("/")[6:])
+                next_url = "{base_url}/{ext}".format(base_url=base_url, ext=ext)
+                return next_url
+            return None
+
+        while True:
+            header = r.headers
+            product_url = get_next_url(base_url, header)
+            if product_url is None:
+                break
+            r = requests.get(product_url)
+            product_list += r.json()["products"]
 
         variant_list = list()
         variant_id_list = list()

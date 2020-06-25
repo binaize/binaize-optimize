@@ -18,6 +18,10 @@ def mocked_requests_get(*args, **kwargs):
         def json(self):
             return self.json_data
 
+        @property
+        def headers(self):
+            return {}
+
     if "updated_at_min" in args[0]:
         with open("tests/data/test_product_1.json", "r") as fp:
             data = json.load(fp)
