@@ -35,7 +35,7 @@ def get_visits_df(client_id, data_store, end_date, start_date):
 def get_products_df(client_id, data_store, end_date, start_date):
     sql = \
         """
-            select distinct product_title, product_handle, product_id
+            select distinct product_title, product_handle, product_id, tags
                 from products
             where 
                 client_id = '{client_id}'
@@ -44,7 +44,7 @@ def get_products_df(client_id, data_store, end_date, start_date):
     products_df = None
     if mobile_records is not None and len(mobile_records) > 0:
         products_df = pd.DataFrame.from_records(mobile_records)
-        products_df.columns = ["product_title", "product_handle", "product_id"]
+        products_df.columns = ["product_title", "product_handle", "product_id", "tags"]
     return products_df
 
 
@@ -94,13 +94,13 @@ def get_product_conversion_analytics(data_store, client_id, start_date_str, end_
     orders_df = get_orders_df(client_id, data_store, end_date, start_date)
 
     products = list()
-    visitor_count = list()
+    non_conversion_count = list()
     conversion_count = list()
     percentage_list = list()
     conclusion, summary = get_description_for_data_not_enough()
 
     if products_df is None:
-        result = construct_result(conclusion, conversion_count, percentage_list, products, summary, visitor_count)
+        result = construct_result(conclusion, conversion_count, percentage_list, products, summary, non_conversion_count)
         return result
 
     visits_product_df = products_df
@@ -118,32 +118,57 @@ def get_product_conversion_analytics(data_store, client_id, start_date_str, end_
         df = pd.merge(visits_product_df, orders_df,
                       how='left', left_on=["product_id"], right_on=["product_id"])
         df["conversion_count"] = df["conversion_count"].fillna(0).astype(int)
-    df["conversion_percentage"] = df["conversion_count"] * 100 / (df["visitor_count"] + 0.01)
-    df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: min(100, round(x, 2)))
+
+    df["non_conversion_count"] = df["visitor_count"] - df["conversion_count"]
+    df["non_conversion_count"] = df["non_conversion_count"].map(lambda x: 0 if x < 0 else x)
+    df["visitor_count"] = df["non_conversion_count"] + df["conversion_count"]
+    df["adjusted_visitor_count"] = df["visitor_count"].map(lambda x: x + 0.01 if x == 0 else x)
+    df["conversion_percentage"] = df["conversion_count"] * 100 / (df["adjusted_visitor_count"])
+    df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: round(x, 2))
     df = df.sort_values(["product_handle"])
 
-    products = df["product_title"].tolist()
-    visitor_count = df["visitor_count"].tolist()
-    conversion_count = df["conversion_count"].tolist()
-    percentage_list = df["conversion_percentage"].tolist()
+    df["tags"] = df["tags"].map(lambda x: ["no-tag"] if len(x) == 0 else [s.strip() for s in x.split(",")])
+    # df["tags"] = df["tags"].map(lambda x: ["no-tag"] if len(x) == 0 else x.split(","))
 
-    if orders_df is None and visits_df is None:
-        result = construct_result(conclusion, conversion_count, percentage_list, products, summary, visitor_count)
-        return result
+    import functools
+    import operator
 
-    min_idx = percentage_list.index(min(percentage_list))
-    min_product = products[min_idx]
-    min_percentage = percentage_list[min_idx]
-    conclusion, summary = get_description_for_enough_visitors(min_percentage, min_product)
-    result = construct_result(conclusion, conversion_count, percentage_list, products, summary, visitor_count)
-    return result
+    tag_list = list(set(functools.reduce(operator.concat, df["tags"])))
+    if "no-tag" in tag_list:
+        tag_list.remove("no-tag")
+        tag_list = sorted(tag_list)
+        tag_list = tag_list + ["no-tag"]
+
+    final_result = dict()
+    result_list = list()
+    for tag in tag_list:
+        temp_df = df[df["tags"].map(set([tag]).issubset)]
+        products = temp_df["product_title"].tolist()
+        non_conversion_count = temp_df["non_conversion_count"].tolist()
+        conversion_count = temp_df["conversion_count"].tolist()
+        percentage_list = temp_df["conversion_percentage"].tolist()
+
+        if orders_df is None and visits_df is None:
+            result = construct_result(conclusion, conversion_count, percentage_list, products, summary,
+                                      non_conversion_count)
+        else:
+            min_idx = percentage_list.index(min(percentage_list))
+            min_product = products[min_idx]
+            min_percentage = percentage_list[min_idx]
+            conclusion, summary = get_description_for_enough_visitors(min_percentage, min_product)
+            result = construct_result(conclusion, conversion_count, percentage_list, products, summary,
+                                      non_conversion_count)
+        result_list.append(result)
+    final_result["tags"] = tag_list
+    final_result["results"] = result_list
+    return final_result
 
 
-def construct_result(conclusion, conversion_count, percentage_list, products, summary, visitor_count):
+def construct_result(conclusion, conversion_count, percentage_list, products, summary, non_conversion_count):
     result = dict()
     result["products"] = products
     temp_dict = dict()
-    temp_dict["visitor_count"] = visitor_count
+    temp_dict["non_conversion_count"] = non_conversion_count
     temp_dict["conversion_count"] = conversion_count
     temp_dict["conversion_percentage"] = percentage_list
     result["product_conversion"] = temp_dict

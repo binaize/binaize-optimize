@@ -78,8 +78,9 @@ def get_shop_funnel_analytics(data_store, client_id, start_date_str, end_date_st
         result = construct_result(conclusion, pages, percentage, summary, visitor_count)
         return result
 
-    df["percentage"] = df["count"] * 100 / (max(df["count"]) + 0.01)
-    df["percentage"] = df["percentage"].map(lambda x: min(100.00, round(x, 2)))
+    df["adjusted_count"] = df["count"].map(lambda x: x + 0.01 if x == 0 else x)
+    df["percentage"] = df["count"] * 100 / (max(df["adjusted_count"]))
+    df["percentage"] = df["percentage"].map(lambda x: round(x, 2))
     pages = df["pages"].tolist()
     visitor_count = df["count"].tolist()
     percentage = df["percentage"].tolist()

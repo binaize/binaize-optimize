@@ -110,7 +110,8 @@ create table if not exists products
     variant_id     bigint       not null,
     variant_title  varchar(100),
     variant_price  numeric(8, 2),
-    updated_at     timestamptz  not null
+    updated_at     timestamptz  not null,
+    tags           varchar(200)
 );
 
 create

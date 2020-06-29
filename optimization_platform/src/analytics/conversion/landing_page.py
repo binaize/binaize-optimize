@@ -98,17 +98,21 @@ def get_landing_page_analytics(data_store, client_id, start_date_str, end_date_s
                       how='left', left_on=["page_type"], right_on=["page_type"])
         df["conversion_count"] = df["conversion_count"].fillna(0).astype(int)
 
-    df["conversion_percentage"] = df["conversion_count"] * 100 / (df["visitor_count"] + 0.01)
-    df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: min(100, round(x, 2)))
+    df["non_conversion_count"] = df["visitor_count"] - df["conversion_count"]
+    df["non_conversion_count"] = df["non_conversion_count"].map(lambda x: 0 if x < 0 else x)
+    df["visitor_count"] = df["non_conversion_count"] + df["conversion_count"]
+    df["adjusted_visitor_count"] = df["visitor_count"].map(lambda x: x + 0.01 if x == 0 else x)
+    df["conversion_percentage"] = df["conversion_count"] * 100 / (df["adjusted_visitor_count"])
+    df["conversion_percentage"] = df["conversion_percentage"].map(lambda x: round(x, 2))
     df = df.sort_values(["id"])
 
     pages = df["page_name"].tolist()
-    visitor_count = df["visitor_count"].tolist()
+    non_conversion_count = df["non_conversion_count"].tolist()
     conversion_count = df["conversion_count"].tolist()
     conversion_percentage = df["conversion_percentage"].tolist()
 
     if visits_df is None and orders_df is None:
-        result = construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, visitor_count)
+        result = construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, non_conversion_count)
         return result
 
     min_idx = conversion_percentage.index(min(conversion_percentage))
@@ -116,15 +120,15 @@ def get_landing_page_analytics(data_store, client_id, start_date_str, end_date_s
     min_conversion = conversion_percentage[min_idx]
     conclusion, summary = get_description_for_enough_visitors(min_conversion, min_page)
 
-    result = construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, visitor_count)
+    result = construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, non_conversion_count)
     return result
 
 
-def construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, visitor_count):
+def construct_result(conclusion, conversion_count, conversion_percentage, pages, summary, non_conversion_count):
     result = dict()
     temp_dict = dict()
     result["pages"] = pages
-    temp_dict["visitor_count"] = visitor_count
+    temp_dict["non_conversion_count"] = non_conversion_count
     temp_dict["conversion_count"] = conversion_count
     temp_dict["conversion_percentage"] = conversion_percentage
     result["landing_conversion"] = temp_dict

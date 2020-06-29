@@ -14,7 +14,7 @@ class ProductAgent(object):
     def sync_products(cls, data_store, client_id):
         table = TABLE_PRODUCTS
         columns = ['client_id', 'product_id', "product_title", "product_handle", "variant_id", "variant_title",
-                   "variant_price", "updated_at"]
+                   "variant_price", "updated_at", "tags"]
 
         sql = "select max(updated_at) from {table} where client_id = '{client_id}'".format(table=table,
                                                                                            client_id=client_id)
@@ -69,6 +69,7 @@ class ProductAgent(object):
                 variant_dict["variant_title"] = variant["title"]
                 variant_dict["variant_price"] = float(variant["price"])
                 variant_dict["updated_at"] = variant["updated_at"]
+                variant_dict["tags"] = product["tags"]
                 variant_list.append(variant_dict)
                 variant_id_list.append(variant["id"])
 
@@ -86,7 +87,8 @@ class ProductAgent(object):
             file = IteratorFile((s.format(variant[columns[0]], variant[columns[1]],
                                           variant[columns[2]], variant[columns[3]],
                                           variant[columns[4]], variant[columns[5]],
-                                          variant[columns[6]], variant[columns[7]])
+                                          variant[columns[6]], variant[columns[7]],
+                                          variant[columns[8]])
                                  for variant in variant_list))
             data_store.run_batch_insert_sql(file=file, table=table, columns=columns)
 

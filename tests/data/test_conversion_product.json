@@ -5,6 +5,7 @@
       "title": "product_title_1",
       "handle": "product_handle_1",
       "updated_at": "2020-06-04T15:01:25-04:00",
+      "tags": "tag1, tag2",
       "variants": [
         {
           "id": 11,
@@ -27,6 +28,7 @@
       "title": "product_title_2",
       "handle": "product_handle_2",
       "updated_at": "2020-06-04T15:01:25-04:00",
+      "tags": "tag1",
       "variants": [
         {
           "id": 21,
@@ -49,12 +51,29 @@
       "title": "product_title_3",
       "handle": "product_handle_3",
       "updated_at": "2020-06-04T15:01:25-04:00",
+      "tags": "tag1",
       "variants": [
         {
           "id": 31,
           "product_id": 3,
           "title": "variant_title_31",
           "price": "100.00",
+          "updated_at": "2020-06-04T14:59:00-04:00"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "product_title_4",
+      "handle": "product_handle_4",
+      "updated_at": "2020-06-04T15:01:25-04:00",
+      "tags": "",
+      "variants": [
+        {
+          "id": 41,
+          "product_id": 4,
+          "title": "variant_title_41",
+          "price": "50.00",
           "updated_at": "2020-06-04T14:59:00-04:00"
         }
       ]

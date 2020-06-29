@@ -153,7 +153,7 @@ class TestConversionAnalytics(TestCase):
                                                                timezone_str="Asia/Kolkata")
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
-            'shop_funnel': {'visitor_count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 99.86, 71.33]},
+            'shop_funnel': {'visitor_count': [0, 0, 0, 0, 7, 5], 'percentage': [0.0, 0.0, 0.0, 0.0, 100.0, 71.43]},
             'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
             'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
 
@@ -171,7 +171,7 @@ class TestConversionAnalytics(TestCase):
         expected_result = {
             'pages': ['Home Page', 'Collection Page', 'Product Page', 'Cart Page', 'Checkout Page', 'Purchase'],
             'shop_funnel': {'visitor_count': [30, 20, 15, 10, 7, 5],
-                            'percentage': [99.97, 66.64, 49.98, 33.32, 23.33, 16.66]},
+                            'percentage': [100.0, 66.67, 50.0, 33.33, 23.33, 16.67]},
             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.33% </strong></span>",
             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
 
@@ -189,11 +189,10 @@ class TestConversionAnalytics(TestCase):
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
 
-        expected_result = {'products': [], 'product_conversion': {'visitor_count': [], 'conversion_count': [],
+        expected_result = {'products': [], 'product_conversion': {'non_conversion_count': [], 'conversion_count': [],
                                                                   'conversion_percentage': []},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
                            'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
-
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """visits and orders table are empty but products table has data"""
@@ -203,12 +202,22 @@ class TestConversionAnalytics(TestCase):
                                                                       start_date_str=start_date_str,
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
-        expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
-                           'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
-                                                  'conversion_percentage': [0.0, 0.0, 0.0]},
-                           'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
-                           'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
-
+        expected_result = {'tags': ['tag1', 'tag2', 'no-tag'], 'results': [
+            {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
+             'product_conversion': {'non_conversion_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
+                                    'conversion_percentage': [0.0, 0.0, 0.0]},
+             'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+             'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"},
+            {'products': ['product_title_1'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [0],
+                                    'conversion_percentage': [0.0]},
+             'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+             'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"},
+            {'products': ['product_title_4'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [0],
+                                    'conversion_percentage': [0.0]},
+             'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+             'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}]}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """visits table is empty but products and orders table has data"""
@@ -219,11 +228,23 @@ class TestConversionAnalytics(TestCase):
                                                                       start_date_str=start_date_str,
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
-        expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
-                           'product_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [5, 4, 1],
-                                                  'conversion_percentage': [100, 100, 100]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
-                           'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"}
+        expected_result = {'tags': ['tag1', 'tag2', 'no-tag'], 'results': [
+            {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
+             'product_conversion': {'non_conversion_count': [0, 0, 0], 'conversion_count': [5, 4, 1],
+                                    'conversion_percentage': [100.0, 100.0, 100.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"},
+            {'products': ['product_title_1'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [5],
+                                    'conversion_percentage': [100.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"},
+            {'products': ['product_title_4'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [0],
+                                    'conversion_percentage': [0.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_4 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_4 </strong></span>"}]}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """all tables have data"""
@@ -235,11 +256,22 @@ class TestConversionAnalytics(TestCase):
                                                                       start_date_str=start_date_str,
                                                                       end_date_str=end_date_str,
                                                                       timezone_str="Asia/Kolkata")
-        expected_result = {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
-                           'product_conversion': {'visitor_count': [5, 5, 5], 'conversion_count': [5, 4, 1],
-                                                  'conversion_percentage': [99.8, 79.84, 19.96]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 19.96% </strong></span>",
-                           'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span>"}
+        expected_result = {'tags': ['tag1', 'tag2', 'no-tag'], 'results': [
+            {'products': ['product_title_1', 'product_title_2', 'product_title_3'],
+             'product_conversion': {'non_conversion_count': [0, 1, 4], 'conversion_count': [5, 4, 1],
+                                    'conversion_percentage': [100.0, 80.0, 20.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 20.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_3 </strong></span>"},
+            {'products': ['product_title_1'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [5],
+                                    'conversion_percentage': [100.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_1 </strong></span>"},
+            {'products': ['product_title_4'],
+             'product_conversion': {'non_conversion_count': [0], 'conversion_count': [0],
+                                    'conversion_percentage': [0.0]},
+             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> product_title_4 </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 0.0% </strong></span>",
+             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for<span style = 'color: blue; font-size: 16px;'><strong> product_title_4 </strong></span>"}]}
         self.assertDictEqual(d1=result, d2=expected_result)
 
     def test_get_landing_page_analytics(self):
@@ -253,10 +285,11 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str, timezone_str="Asia/Kolkata")
 
         expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
-                           'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
+                           'landing_conversion': {'non_conversion_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
                            'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """visits and orders table are empty but products table has data"""
@@ -267,10 +300,11 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
         expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
-                           'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
+                           'landing_conversion': {'non_conversion_count': [0, 0, 0], 'conversion_count': [0, 0, 0],
                                                   'conversion_percentage': [0.0, 0.0, 0.0]},
                            'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
                            'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """visits table is empty but products and orders table has data"""
@@ -282,9 +316,9 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
         expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
-                           'landing_conversion': {'visitor_count': [0, 0, 0], 'conversion_count': [6, 2, 2],
-                                                  'conversion_percentage': [100, 100, 100]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100% </strong></span>",
+                           'landing_conversion': {'non_conversion_count': [0, 0, 0], 'conversion_count': [6, 2, 2],
+                                                  'conversion_percentage': [100.0, 100.0, 100.0]},
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 100.0% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
 
         self.assertDictEqual(d1=result, d2=expected_result)
@@ -299,8 +333,9 @@ class TestConversionAnalytics(TestCase):
                                                                 end_date_str=end_date_str,
                                                                 timezone_str="Asia/Kolkata")
         expected_result = {'pages': ['Home Page', 'Collections Page', 'Product Page'],
-                           'landing_conversion': {'visitor_count': [25, 10, 3], 'conversion_count': [6, 2, 2],
-                                                  'conversion_percentage': [23.99, 19.98, 66.45]},
-                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collections Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 19.98% </strong></span>",
+                           'landing_conversion': {'non_conversion_count': [19, 8, 1], 'conversion_count': [6, 2, 2],
+                                                  'conversion_percentage': [24.0, 20.0, 66.67]},
+                           'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Collections Page </strong></span> has the least conversion of <span style = 'color: blue; font-size: 16px;'><strong> 20.0% </strong></span>",
                            'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Collections Page </strong></span>"}
+
         self.assertDictEqual(d1=result, d2=expected_result)
