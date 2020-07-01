@@ -35,6 +35,10 @@ def mocked_requests_get(*args, **kwargs):
         with open("tests/data/test_experiment_order.json", "r") as fp:
             data = json.load(fp)
         return MockResponse(data, 200)
+    elif "products.json" in args[0]:
+        with open("tests/data/test_experiment_product.json", "r") as fp:
+            data = json.load(fp)
+        return MockResponse(data, 200)
     elif "checkouts.json" in args[0]:
         with open("tests/data/test_experiment_checkout.json", "r") as fp:
             data = json.load(fp)
@@ -87,18 +91,19 @@ class TestExperimentAnalytics(TestCase):
         OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
 
     def _create_cookie(self):
+        timestamp = 1590673060
         CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                                session_id="test_session_id_1", cart_token="cart_token_1",
-                                               creation_time=1590570923)
+                                               creation_time=timestamp)
         CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                                session_id="test_session_id_1", cart_token="cart_token_2",
-                                               creation_time=1590570923)
+                                               creation_time=timestamp)
         CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                                session_id="test_session_id_1", cart_token="cart_token_3",
-                                               creation_time=1590570923)
+                                               creation_time=timestamp)
         CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                                session_id="test_session_id_4", cart_token="cart_token_4",
-                                               creation_time=1590570923)
+                                               creation_time=timestamp)
 
     def _create_event(self, variation_1, variation_2):
         timestamp = 1590673060
@@ -219,6 +224,8 @@ class TestExperimentAnalytics(TestCase):
         """events and variations table both has data"""
 
         self._create_event(variation_1, variation_2)
+        self._create_orders()
+        self._create_cookie()
 
         result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
                                                                             client_id="test_client_id",
@@ -227,18 +234,18 @@ class TestExperimentAnalytics(TestCase):
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                              'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]},
-                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 8, 0, 0],
                                              'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]},
                            'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                                      'test_variation_name_2': [0, 0, 0, 0, 1, 0, 0]},
-                           'goal_conversion_percentage': {
-                               'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
-                               'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0]},
-                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                           'goal_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 12.5, 0.0, 0.0],
+                                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0,
+                                                                                    0.0]},
+                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 8, 0, 0],
                                                       'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
-                           'sales_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                                           'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                                                                     0.0]}}
+                           'sales_conversion_percentage': {
+                               'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
+                               'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 

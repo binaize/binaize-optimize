@@ -108,7 +108,7 @@ class TestConversionAnalytics(TestCase):
                              client_timezone="test_client_timezone")
         OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
 
-    # @mock.patch('datetime.datetime', new=datetime_mock)
+    @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_shop_funnel_analytics(self):
         start_date_str = "2020-05-28T00-00-01"
         end_date_str = "2020-06-28T23-59-59"
@@ -174,6 +174,22 @@ class TestConversionAnalytics(TestCase):
                             'percentage': [100.0, 66.67, 50.0, 33.33, 23.33, 16.67]},
             'summary': "<strong> SUMMARY : </strong> <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span> has the highest churn of <span style = 'color: blue; font-size: 16px;'><strong> 33.33% </strong></span>",
             'conclusion': "<strong> CONCLUSION : </strong> Experiment with different creatives/copies for <span style = 'color: blue; font-size: 16px;'><strong> Home Page </strong></span>"}
+
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+        """visits table does not exist"""
+
+        self.rds_data_store.run_custom_sql("drop table visits")
+
+        result = ConversionAnalytics.get_shop_funnel_analytics(data_store=self.rds_data_store,
+                                                               client_id="test_client_id",
+                                                               start_date_str=start_date_str,
+                                                               end_date_str=end_date_str,
+                                                               timezone_str="Asia/Kolkata")
+
+        expected_result = {'pages': [], 'shop_funnel': {'visitor_count': [], 'percentage': []},
+                           'summary': "<strong> SUMMARY : </strong> There are <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> enough visits registered on the website",
+                           'conclusion': "<strong> CONCLUSION : </strong> <span style = 'color: blue; font-size: 16px;'><strong> WAIT </strong></span> for the customers to interact with your website"}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 

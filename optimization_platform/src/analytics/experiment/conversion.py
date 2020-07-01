@@ -128,7 +128,12 @@ def get_sales_conversion_df(client_id, data_store, date_range_list, experiment_i
         sales_conv_df = pd.DataFrame.from_records(mobile_records)
         sales_conv_df.columns = ["session_id", "variation_id", "cart_token", "variant_id",
                                  "variant_quantity", "date", "iso_date"]
+        sales_conv_df = sales_conv_df[sales_conv_df['variation_id'].notna()]
+        if len(sales_conv_df) == 0:
+            sales_conv_df = None
+
     return sales_conv_df
+
 
 def get_conversion_per_variation_over_time(data_store, client_id, experiment_id, timezone_str):
     date_range_list = DateUtils.get_date_range_in_utc_str(timezone_str)
@@ -164,9 +169,10 @@ def get_conversion_per_variation_over_time(data_store, client_id, experiment_id,
         clicked_df.drop(columns=["session_count"], inplace=True)
         clicked_df.rename(columns={'visitor_count': 'goal_conversion_count'}, inplace=True)
         date_served_clicked_df = pd.merge(date_served_df, clicked_df,
-                      how='left', left_on=["date", "iso_date", "variation_id"],
-                      right_on=["date", "iso_date", "variation_id"])
-        date_served_clicked_df["goal_conversion_count"] = date_served_clicked_df["goal_conversion_count"].fillna(0).astype(int)
+                                          how='left', left_on=["date", "iso_date", "variation_id"],
+                                          right_on=["date", "iso_date", "variation_id"])
+        date_served_clicked_df["goal_conversion_count"] = date_served_clicked_df["goal_conversion_count"].fillna(
+            0).astype(int)
 
     df = date_served_clicked_df
     if sales_df is None:
@@ -209,7 +215,8 @@ def get_conversion_per_variation_over_time(data_store, client_id, experiment_id,
         variation_goal_conversion_count_dict[variation_name] = variation_df["goal_conversion_count"].tolist()
         variation_goal_conversion_percentage_dict[variation_name] = variation_df["goal_conversion_percentage"].tolist()
         variation_sales_conversion_count_dict[variation_name] = variation_df["sales_conversion_count"].tolist()
-        variation_sales_conversion_percentage_dict[variation_name] = variation_df["sales_conversion_percentage"].tolist()
+        variation_sales_conversion_percentage_dict[variation_name] = variation_df[
+            "sales_conversion_percentage"].tolist()
     result["date"] = date_list
     result["session_count"] = variation_session_count_dict
     result["visitor_count"] = variation_visitor_count_dict
