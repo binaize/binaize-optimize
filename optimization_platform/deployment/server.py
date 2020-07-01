@@ -358,6 +358,17 @@ async def register_cookie(*, cookie: Cookie):
     CookieAgent.register_cookie_for_client(data_store=app.rds_data_store, client_id=cookie.client_id,
                                            session_id=cookie.session_id, cart_token=cookie.cart_token,
                                            creation_time=creation_time)
+    experiment_id = ExperimentAgent.get_latest_experiment_id(data_store=app.rds_data_store, client_id=cookie.client_id)
+    if experiment_id is not None:
+        variation = VariationAgent.get_variation_id_to_recommend(data_store=app.rds_data_store,
+                                                                 client_id=cookie.client_id,
+                                                                 experiment_id=experiment_id,
+                                                                 session_id=cookie.session_id)
+        if variation is not None:
+            EventAgent.register_event_for_cookie(data_store=app.rds_data_store, client_id=cookie.client_id,
+                                                 experiment_id=experiment_id, session_id=cookie.session_id,
+                                                 event_name="served", creation_time=creation_time,
+                                                 variation_id=variation["variation_id"])
 
     response = ResponseMessage()
     response.message = "Cookie registration for client_id {client_id} is successful.".format(

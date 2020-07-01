@@ -45,9 +45,32 @@ class ExperimentAgent(object):
         if mobile_records is not None and len(mobile_records) > 0:
             df = pd.DataFrame.from_records(mobile_records)
             df.columns = columns
-            df["creation_time"] = df["creation_time"].map(DateUtils.convert_datetime_to_experiment_dashboard_date_string)
-            df["last_updation_time"] = df["last_updation_time"].map(DateUtils.convert_datetime_to_experiment_dashboard_date_string)
+            df["creation_time"] = df["creation_time"].map(
+                DateUtils.convert_datetime_to_experiment_dashboard_date_string)
+            df["last_updation_time"] = df["last_updation_time"].map(
+                DateUtils.convert_datetime_to_experiment_dashboard_date_string)
         experiments = None
         if df is not None:
             experiments = df.to_dict(orient="records")
         return experiments
+
+    @classmethod
+    def get_latest_experiment_id(cls, data_store, client_id):
+        sql = \
+            """
+            select 
+                experiment_id 
+            from experiments 
+            where 
+                client_id = '{client_id}' 
+                and last_updation_time = (
+                    select 
+                        max(last_updation_time) 
+                    from 
+                        experiments)
+            """.format(client_id=client_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        latest_experiment_id = None
+        if mobile_records is not None and len(mobile_records) > 0:
+            latest_experiment_id = mobile_records[0][0]
+        return latest_experiment_id

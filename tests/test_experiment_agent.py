@@ -85,3 +85,41 @@ class TestExperimentAgent(TestCase):
             result[i].pop('experiment_id', None)
 
         self.assertCountEqual(first=result, second=expected_result)
+
+    def test_get_latest_experiment_id(self):
+        experiment_id = ExperimentAgent.get_latest_experiment_id(data_store=self.rds_data_store,
+                                                               client_id="test_client_id")
+
+        expected_result = None
+        self.assertEqual(first=experiment_id, second=expected_result)
+
+
+        experiment_1 = ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
+                                                        client_id="test_client_id",
+                                                        experiment_name="test_experiment_name_1",
+                                                        page_type="test_page_type",
+                                                        experiment_type="test_experiment_type", status=False,
+                                                        creation_time=1590570923,
+                                                        last_updation_time=1590570923)
+        experiment_2 = ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
+                                                        client_id="test_client_id",
+                                                        experiment_name="test_experiment_name_2",
+                                                        page_type="test_page_type",
+                                                        experiment_type="test_experiment_type", status=False,
+                                                        creation_time=1590570926,
+                                                        last_updation_time=1590570926)
+
+        experiment_3 = ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
+                                                                       client_id="test_client_id",
+                                                                       experiment_name="test_experiment_name_2",
+                                                                       page_type="test_page_type",
+                                                                       experiment_type="test_experiment_type",
+                                                                       status=False,
+                                                                       creation_time=1590570920,
+                                                                       last_updation_time=1590570920)
+
+        experiment_id = ExperimentAgent.get_latest_experiment_id(data_store=self.rds_data_store,
+                                                               client_id="test_client_id")
+
+        expected_result = experiment_2["experiment_id"]
+        self.assertEqual(first=experiment_id, second=expected_result)

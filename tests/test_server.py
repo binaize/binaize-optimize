@@ -351,6 +351,9 @@ class TestServer(TestCase):
             }
         )
 
+        status_code = response.status_code
+        expected_status_code = 200
+        self.assertEqual(first=status_code, second=expected_status_code)
         response_json = response.json()
         response_json.pop("variation_id", None)
         expected_response_json = {"experiment_id": experiment_id,
@@ -459,6 +462,24 @@ class TestServer(TestCase):
                                   'message': 'Event registration for client_id test_client is successful.'}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
+        response = client.post(
+            "/api/v1/schemas/event/register",
+            headers={"Authorization": "Bearer " + access_token},
+            json={
+                "client_id": "test_client",
+                "experiment_id": "test_experiment_id",
+                "variation_id": "test_variation_id",
+                "session_id": "test_session_id",
+                "event_name": "test_event_nametest_event_nametest_event_nametest_event_nametest_event_name"
+            }
+        )
+        status_code = response.status_code
+        expected_status_code = 200
+        self.assertEqual(first=status_code, second=expected_status_code)
+        response_json = response.json()
+        expected_response_json = {'status': '404', 'message': 'Event registration for client_id test_client failed.'}
+        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
     @patch('datetime.datetime', new=datetime_mock)
     def test_register_visit(self):
         self._sign_up_new_client()
@@ -505,6 +526,31 @@ class TestServer(TestCase):
             json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
         )
         access_token = response.json()["access_token"]
+
+        response = client.post(
+            "/api/v1/schemas/experiment/create",
+            headers={"Authorization": "Bearer " + access_token},
+            json={"experiment_name": "",
+                  "page_type": "test_page_type_1",
+                  "experiment_type": "test_experiment_type_1",
+                  "status": "test_status_1"}
+        )
+
+        experiment_id = response.json()["experiment_id"]
+
+        response = client.post(
+            "/api/v1/schemas/variation/create",
+            headers={"Authorization": "Bearer " + access_token},
+            json={
+                "experiment_id": experiment_id,
+                "variation_name": "test_variation",
+                "traffic_percentage": 0
+            }
+        )
+
+        status_code = response.status_code
+        expected_status_code = 200
+        self.assertEqual(first=status_code, second=expected_status_code)
 
         response = client.post(
             "/api/v1/schemas/cookie/register",

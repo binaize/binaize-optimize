@@ -51,3 +51,37 @@ class TestEventAgent(TestCase):
         expected_status = None
         self.assertEqual(first=status, second=expected_status)
 
+    def test_register_event_for_cookie(self):
+        status = EventAgent.register_event_for_cookie(data_store=self.rds_data_store, client_id="test_client_id",
+                                                      experiment_id="test_experiment_id", event_name="test_event_name",
+                                                      session_id="test_session_id",
+                                                      creation_time=1590570923, variation_id="test_variation_id")
+
+        expected_status = True
+        self.assertEqual(first=status, second=expected_status)
+        result = self.rds_data_store.run_select_sql("select * from events")
+        length = len(result)
+        expected_length = 1
+        self.assertEqual(first=length, second=expected_length)
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_variation_id', 'test_client_id', 'test_experiment_id', 'test_session_id',
+                           'test_event_name', '2020-05-27T14:45:23+05:30']
+        self.assertListEqual(list1=expected_result, list2=result)
+
+        status = EventAgent.register_event_for_cookie(data_store=self.rds_data_store, client_id="test_client_id",
+                                                      experiment_id="test_experiment_id", event_name="test_event_name",
+                                                      session_id="test_session_id",
+                                                      creation_time=1590570923, variation_id="test_variation_id")
+
+        expected_status = False
+        self.assertEqual(first=status, second=expected_status)
+        result = self.rds_data_store.run_select_sql("select * from events")
+        length = len(result)
+        expected_length = 1
+        self.assertEqual(first=length, second=expected_length)
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_variation_id', 'test_client_id', 'test_experiment_id', 'test_session_id',
+                           'test_event_name', '2020-05-27T14:45:23+05:30']
+        self.assertListEqual(list1=expected_result, list2=result)
