@@ -182,13 +182,13 @@ class TestExperimentAnalytics(TestCase):
         return variation_1, variation_2
 
     @mock.patch('datetime.datetime', new=datetime_mock)
-    def test_get_session_count_per_variation_over_time(self):
+    def test_get_conversion_per_variation_over_time(self):
         """events and variations table both has are empty"""
 
-        result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
+        result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
+                                                                            client_id="test_client_id",
+                                                                            experiment_id="test_experiment_id",
+                                                                            timezone_str="Asia/Kolkata")
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -196,99 +196,84 @@ class TestExperimentAnalytics(TestCase):
 
         variation_1, variation_2 = self._create_variation()
 
-        result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
+        result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
+                                                                            client_id="test_client_id",
+                                                                            experiment_id="test_experiment_id",
+                                                                            timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]}}
+                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                     'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'goal_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                      'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'sales_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                           'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                                                     0.0]}}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """events and variations table both has data"""
 
         self._create_event(variation_1, variation_2)
 
-        result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
+        result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
+                                                                            client_id="test_client_id",
+                                                                            experiment_id="test_experiment_id",
+                                                                            timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]}}
+                                             'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]},
+                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                                             'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]},
+                           'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                                                     'test_variation_name_2': [0, 0, 0, 0, 1, 0, 0]},
+                           'goal_conversion_percentage': {
+                               'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
+                               'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0]},
+                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                      'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'sales_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                           'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                                                     0.0]}}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """events and variations table both has data"""
 
         self.rds_data_store.run_update_sql(query="truncate table events")
 
-        result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
+        result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
+                                                                            client_id="test_client_id",
+                                                                            experiment_id="test_experiment_id",
+                                                                            timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-    @mock.patch('datetime.datetime', new=datetime_mock)
-    def test_get_visitor_count_per_variation_over_time(self):
-        """events and variations table both has are empty"""
-
-        result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
-        expected_result = {}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-        """variations table has data but events table does not have"""
-
-        variation_1, variation_2 = self._create_variation()
-
-        result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
+                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
                            'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
+                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                     'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'goal_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                      'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                           'sales_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                                           'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                                                     0.0]}}
 
-        """events and variations table both has data"""
-
-        self._create_event(variation_1, variation_2)
-
-        result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-        """events and variations table both has data"""
-
-        self.rds_data_store.run_update_sql(query="truncate table events")
-
-        result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=self.rds_data_store,
-                                                                               client_id="test_client_id",
-                                                                               experiment_id="test_experiment_id",
-                                                                               timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
-                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]}}
         self.assertDictEqual(d1=result, d2=expected_result)
 
     @mock.patch('datetime.datetime', new=datetime_mock)
-    def test_get_conversion_rate_per_variation_over_time(self):
+    def test_get_conversion_table_of_experiment(self):
         """events and variations table both has are empty"""
 
-        result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=self.rds_data_store,
-                                                                                 client_id="test_client_id",
-                                                                                 experiment_id="test_experiment_id",
-                                                                                 timezone_str="Asia/Kolkata")
+        result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
+                                                                        client_id="test_client_id",
+                                                                        experiment_id="test_experiment_id")
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -296,58 +281,9 @@ class TestExperimentAnalytics(TestCase):
 
         variation_1, variation_2 = self._create_variation()
 
-        result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=self.rds_data_store,
-                                                                                 client_id="test_client_id",
-                                                                                 experiment_id="test_experiment_id",
-                                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                           'conversion': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-        """events and variations table both has data"""
-
-        self._create_event(variation_1, variation_2)
-
-        result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=self.rds_data_store,
-                                                                                 client_id="test_client_id",
-                                                                                 experiment_id="test_experiment_id",
-                                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                           'conversion': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 99.01, 0.0, 0.0],
-                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 49.75, 0.0, 0.0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-        """events and variations table both has data"""
-
-        self.rds_data_store.run_update_sql(query="truncate table events")
-
-        result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=self.rds_data_store,
-                                                                                 client_id="test_client_id",
-                                                                                 experiment_id="test_experiment_id",
-                                                                                 timezone_str="Asia/Kolkata")
-        expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                           'conversion': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-    @mock.patch('datetime.datetime', new=datetime_mock)
-    def test_get_conversion_rate_of_experiment(self):
-        """events and variations table both has are empty"""
-
-        result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=self.rds_data_store,
-                                                                       client_id="test_client_id",
-                                                                       experiment_id="test_experiment_id")
-        expected_result = {}
-        self.assertDictEqual(d1=result, d2=expected_result)
-
-        """variations table has data but events table does not have"""
-
-        variation_1, variation_2 = self._create_variation()
-
-        result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=self.rds_data_store,
-                                                                       client_id="test_client_id",
-                                                                       experiment_id="test_experiment_id")
+        result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
+                                                                        client_id="test_client_id",
+                                                                        experiment_id="test_experiment_id")
         for record in result:
             record.pop("variation_id", None)
         expected_result = [
@@ -365,9 +301,9 @@ class TestExperimentAnalytics(TestCase):
         self._create_orders()
         self._create_cookie()
 
-        result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=self.rds_data_store,
-                                                                       client_id="test_client_id",
-                                                                       experiment_id="test_experiment_id")
+        result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
+                                                                        client_id="test_client_id",
+                                                                        experiment_id="test_experiment_id")
 
         for record in result:
             record.pop("variation_id", None)
@@ -383,9 +319,9 @@ class TestExperimentAnalytics(TestCase):
 
         self.rds_data_store.run_update_sql(query="truncate table events")
 
-        result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=self.rds_data_store,
-                                                                       client_id="test_client_id",
-                                                                       experiment_id="test_experiment_id")
+        result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
+                                                                        client_id="test_client_id",
+                                                                        experiment_id="test_experiment_id")
         for record in result:
             record.pop("variation_id", None)
         expected_result = [

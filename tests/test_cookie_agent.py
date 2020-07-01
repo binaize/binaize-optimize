@@ -57,3 +57,18 @@ class TestCookieAgent(TestCase):
         expected_result = ['test_client_id', 'test_session_id', 'test_cart_token',
                            '2020-05-27T14:45:23+05:30']
         self.assertListEqual(list1=expected_result, list2=result)
+
+        status = CookieAgent.register_cookie_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                                        session_id="", cart_token="",
+                                                        creation_time=1590570925)
+        expected_status = False
+        self.assertEqual(first=status, second=expected_status)
+        result = self.rds_data_store.run_select_sql("select * from cookies")
+        length = len(result)
+        expected_length = 1
+        self.assertEqual(first=length, second=expected_length)
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_client_id', 'test_session_id', 'test_cart_token',
+                           '2020-05-27T14:45:23+05:30']
+        self.assertListEqual(list1=expected_result, list2=result)

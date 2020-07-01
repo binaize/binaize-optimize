@@ -584,7 +584,7 @@ class TestServer(TestCase):
         return variation_1, variation_2
 
     @patch('datetime.datetime', new=datetime_mock)
-    def test_get_session_count_for_dashboard(self):
+    def test_get_goal_conversion_for_dashboard(self):
         self._sign_up_new_client()
         variation_1, variation_2 = self._create_variation()
         self._create_event(variation_1, variation_2)
@@ -597,7 +597,7 @@ class TestServer(TestCase):
         access_token = response.json()["access_token"]
 
         response = client.get(
-            "/api/v1/schemas/report/session-count",
+            "/api/v1/schemas/report/conversion-over-time",
             headers={
                 "Authorization": "Bearer " + access_token},
             params={"client_id": "test_client",
@@ -611,69 +611,20 @@ class TestServer(TestCase):
         response_json = response.json()
         expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                                   'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
-                                                    'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]}}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
-
-    @patch('datetime.datetime', new=datetime_mock)
-    def test_get_visitor_count_for_dashboard(self):
-        self._sign_up_new_client()
-        variation_1, variation_2 = self._create_variation()
-        self._create_event(variation_1, variation_2)
-
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-        access_token = response.json()["access_token"]
-
-        response = client.get(
-            "/api/v1/schemas/report/visitor-count",
-            headers={
-                "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client",
-                    "experiment_id": "test_experiment_id"}
-        )
-
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
-
-        response_json = response.json()
-        expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
+                                                    'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]},
                                   'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
-                                                    'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]}}
-        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+                                                    'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]},
+                                  'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
+                                                            'test_variation_name_2': [0, 0, 0, 0, 1, 0, 0]},
+                                  'goal_conversion_percentage': {
+                                      'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
+                                      'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0]},
+                                  'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
+                                                             'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
+                                  'sales_conversion_percentage': {
+                                      'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                                      'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}
 
-    @patch('datetime.datetime', new=datetime_mock)
-    def test_get_conversion_rate_for_dashboard(self):
-        self._sign_up_new_client()
-        variation_1, variation_2 = self._create_variation()
-        self._create_event(variation_1, variation_2)
-
-        response = client.post(
-            "/api/v1/schemas/client/token",
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
-        )
-        access_token = response.json()["access_token"]
-
-        response = client.get(
-            "/api/v1/schemas/report/conversion-rate",
-            headers={
-                "Authorization": "Bearer " + access_token},
-            params={"client_id": "test_client",
-                    "experiment_id": "test_experiment_id"}
-        )
-
-        status_code = response.status_code
-        expected_status_code = 200
-        self.assertEqual(first=status_code, second=expected_status_code)
-
-        response_json = response.json()
-        expected_response_json = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
-                                  'conversion': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 99.01, 0.0, 0.0],
-                                                 'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 49.75, 0.0, 0.0]}}
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 
     @patch('datetime.datetime', new=datetime_mock)

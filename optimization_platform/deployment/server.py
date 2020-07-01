@@ -366,53 +366,21 @@ async def register_cookie(*, cookie: Cookie):
     return response
 
 
-@app.get("/api/v1/schemas/report/session-count", response_model=dict, tags=["Report"], summary="Get session count")
-async def get_session_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
-                                          experiment_id: str):
-    """
-        Get session count of all the variations of an existing experiment of a logged in client for last 7 days
-        at a daily level:
-        - **access_token**: access token issued by the server to the logged in client
-        - **experiment_id**: id of the experiment
-    """
-    result = ExperimentAnalytics.get_session_count_per_variation_over_time(data_store=app.rds_data_store,
-                                                                           client_id=current_client.client_id,
-                                                                           experiment_id=experiment_id,
-                                                                           timezone_str=current_client.client_timezone)
-
-    return result
-
-
-@app.get("/api/v1/schemas/report/visitor-count", response_model=dict, tags=["Report"], summary="Get visitor count")
-async def get_visitor_count_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
-                                          experiment_id: str):
-    """
-        Get visitor count of all the variations of an existing experiment of a logged in client for last 7 days
-        at a daily level:
-        - **access_token**: access token issued by the server to the logged in client
-        - **experiment_id**: id of the experiment
-    """
-    result = ExperimentAnalytics.get_visitor_count_per_variation_over_time(data_store=app.rds_data_store,
-                                                                           client_id=current_client.client_id,
-                                                                           experiment_id=experiment_id,
-                                                                           timezone_str=current_client.client_timezone)
-
-    return result
-
-
-@app.get("/api/v1/schemas/report/conversion-rate", response_model=dict, tags=["Report"], summary="Get conversion rate")
-async def get_conversion_rate_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+@app.get("/api/v1/schemas/report/conversion-over-time", response_model=dict, tags=["Report"],
+         summary="Get conversion rate")
+async def get_goal_conversion_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
                                             experiment_id: str):
     """
-        Get conversion rate of all the variations of an existing experiment of a logged in client for last 7 days
-        at a daily level:
+        Get session count, visitor count, goal conversion count, goal conversion rate, sales conversion count and sales
+        conversion rate of all the variations of an existing experiment of a logged in client for last 7 days at a
+        daily level:
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = ExperimentAnalytics.get_conversion_rate_per_variation_over_time(data_store=app.rds_data_store,
-                                                                             client_id=current_client.client_id,
-                                                                             experiment_id=experiment_id,
-                                                                             timezone_str=current_client.client_timezone)
+    result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=app.rds_data_store,
+                                                                        client_id=current_client.client_id,
+                                                                        experiment_id=experiment_id,
+                                                                        timezone_str=current_client.client_timezone)
 
     return result
 
@@ -426,9 +394,9 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
         - **access_token**: access token issued by the server to the logged in client
         - **experiment_id**: id of the experiment
     """
-    result = ExperimentAnalytics.get_conversion_rate_of_experiment(data_store=app.rds_data_store,
-                                                                   client_id=current_client.client_id,
-                                                                   experiment_id=experiment_id)
+    result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=app.rds_data_store,
+                                                                    client_id=current_client.client_id,
+                                                                    experiment_id=experiment_id)
 
     return result
 

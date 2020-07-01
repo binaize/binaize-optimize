@@ -8,6 +8,9 @@ class CookieAgent(object):
     def register_cookie_for_client(cls, data_store, client_id, session_id, cart_token, creation_time):
         table = TABLE_COOKIES
 
+        if len(session_id) == 0 or len(cart_token) == 0:
+            return False
+
         columns = ["client_id", "session_id", "cart_token"]
         where = "client_id='{client_id}' and session_id='{session_id}' and cart_token='{cart_token}'".format(
             client_id=client_id,
