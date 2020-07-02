@@ -35,10 +35,6 @@ def mocked_requests_get(*args, **kwargs):
         with open("tests/data/test_experiment_order.json", "r") as fp:
             data = json.load(fp)
         return MockResponse(data, 200)
-    elif "products.json" in args[0]:
-        with open("tests/data/test_experiment_product.json", "r") as fp:
-            data = json.load(fp)
-        return MockResponse(data, 200)
     elif "checkouts.json" in args[0]:
         with open("tests/data/test_experiment_checkout.json", "r") as fp:
             data = json.load(fp)
@@ -170,6 +166,22 @@ class TestExperimentAnalytics(TestCase):
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
                                              experiment_id="test_experiment_id",
                                              session_id=session_id, variation_id=variation_id_2,
+                                             event_name="clicked",
+                                             creation_time=timestamp + 60)
+
+    def _create_conversion_event(self, variation_1):
+        timestamp = 1590673060
+        variation_id_1 = variation_1["variation_id"]
+
+        session_id = uuid.uuid4().hex
+        EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             experiment_id="test_experiment_id",
+                                             session_id=session_id, variation_id=variation_id_1,
+                                             event_name="served",
+                                             creation_time=timestamp)
+        EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
+                                             experiment_id="test_experiment_id",
+                                             session_id=session_id, variation_id=variation_id_1,
                                              event_name="clicked",
                                              creation_time=timestamp + 60)
 
@@ -376,7 +388,7 @@ class TestExperimentAnalytics(TestCase):
 
         expected_result = {
             'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1566 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 22 </strong> days.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 17 </strong> days.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
 
         self.assertDictEqual(d1=result, d2=expected_result)
@@ -390,7 +402,7 @@ class TestExperimentAnalytics(TestCase):
 
         expected_result = {
             'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.98% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1366 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 1 </strong> days.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1365 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 1 </strong> days.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -405,6 +417,20 @@ class TestExperimentAnalytics(TestCase):
             'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.1% </strong></span> better than the others.",
             'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'><strong> ENOUGH </strong></span> evidence to conclude the experiment. There is <span style = 'color: red; font-size: 16px;'><strong> NO CLEAR WINNER </strong></span>. We are <span style = 'color: red; font-size: 16px;'><strong> 68.26% </strong></span> confident that <span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is the best.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."}
+        self.assertDictEqual(d1=result, d2=expected_result)
+
+        for i in range(5000):
+            self._create_conversion_event(variation_1)
+
+        result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
+                                                               client_id="test_client_id",
+                                                               experiment_id="test_experiment_id")
+
+        expected_result = {
+            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.1% </strong></span> better than the others.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'> <strong> ENOUGH </strong></span> evidence to conclude the experiment. We have a <span style = 'color: green; font-size: 16px;'><strong> WINNER </strong></span>. We are <span style = 'color: green; font-size: 16px;'><strong> 98.56% </strong></span> confident that <span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is the best.",
+            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """events and variations table both has data"""

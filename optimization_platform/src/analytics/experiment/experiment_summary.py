@@ -2,6 +2,7 @@ import pandas as pd
 
 from optimization_platform.src.analytics.experiment.conversion_table import get_conversion_table_of_experiment
 from optimization_platform.src.optim.abtest import ABTest
+from config import ABTEST_CONFIDENCE_MAX_VALUE, ABTEST_CONFIDENCE_THRESHOLD
 
 
 def get_summary_of_experiment(data_store, client_id, experiment_id):
@@ -28,10 +29,11 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
         result = construct_result(conclusion, recommendation, status)
         return result
     delta = end_time - start_time
-    num_hour = int(delta.seconds / 3600)
+    num_hour = int(delta.seconds / 3600) + delta.days * 24
     variation_names = df["variation_name"].tolist()
     visitor_converted = df["goal_conversion_count"].tolist()
     visitor_count = df["num_visitor"].tolist()
+    session_count = df["num_session"].tolist()
 
     if len(variation_names) <= 1:
         conclusion, recommendation, status = get_summary_for_data_not_enough()
@@ -39,11 +41,11 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
         return result
 
     ab = ABTest(arm_name_list=variation_names, conversion_count_list=visitor_converted,
-                session_count_list=visitor_count, num_hour=num_hour)
+                visitor_count_list=visitor_count, num_hour=num_hour, session_count_list=session_count)
 
     best_variation = ab.get_best_arm()
     confidence = ab.get_best_arm_confidence()
-    confidence_percentage = round(confidence * 100, 2)
+    confidence_percentage = round(min(confidence * 100, ABTEST_CONFIDENCE_MAX_VALUE), 2)
     betterness_score = ab.get_betterness_score()
     betterness_percentage = round(betterness_score * 100, 2)
     remaining_sample_size = ab.get_estimated_sample_size()
@@ -53,15 +55,17 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
     conclusion, recommendation, status = get_summary_for_pending_result(best_variation, betterness_percentage,
                                                                         remaining_days,
                                                                         remaining_sample_size)
+
     if remaining_sample_size < 0:
         conclusion, recommendation, status = get_summary_for_exceeding_deadline(best_variation, betterness_percentage,
                                                                                 confidence_percentage)
-    if confidence > 0.95:
-        conclusion, recommendation, status = get_summary_for_successful_conclusion(best_variation,
-                                                                                   betterness_percentage,
-                                                                                   confidence_percentage)
+        if confidence_percentage > ABTEST_CONFIDENCE_THRESHOLD:
+            conclusion, recommendation, status = get_summary_for_successful_conclusion(best_variation,
+                                                                                       betterness_percentage,
+                                                                                       confidence_percentage)
 
     result = construct_result(conclusion, recommendation, status)
+
     return result
 
 

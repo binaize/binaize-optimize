@@ -6,19 +6,21 @@ from optimization_platform.src.optim.abstract_optim import AbstractOptim
 
 
 class ABTest(AbstractOptim):
-    def __init__(self, arm_name_list, conversion_count_list, session_count_list, num_hour, *args, **kwargs):
+    def __init__(self, arm_name_list, conversion_count_list, visitor_count_list, num_hour, session_count_list, *args,
+                 **kwargs):
         super(ABTest, self).__init__(*args, **kwargs)
         self._arm_name_list = arm_name_list
+        self._visitor_count_list = np.array(visitor_count_list)
         self._session_count_list = np.array(session_count_list)
         self._conversion_count_list = np.array(conversion_count_list)
-        conversion_list = self._conversion_count_list / (self._session_count_list + 0.01)
+        conversion_list = self._conversion_count_list / (self._visitor_count_list + 0.01)
         max_arm_index = np.argmax(conversion_list)
         combs = [(max_arm_index, i) for i in range(len(arm_name_list)) if i != max_arm_index]
         conf_array = np.zeros(len(combs))
         for i in range(len(combs)):
             comb = combs[i]
             conversion = [self._conversion_count_list[comb[0]], self._conversion_count_list[comb[1]]]
-            session = [self._session_count_list[comb[0]], self._session_count_list[comb[1]]]
+            session = [self._visitor_count_list[comb[0]], self._visitor_count_list[comb[1]]]
             result = ssp.proportions_chisquare(count=conversion, nobs=session)
             confidence = 1 - result[1]
             conf_array[i] = confidence
