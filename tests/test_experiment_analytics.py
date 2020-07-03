@@ -326,11 +326,10 @@ class TestExperimentAnalytics(TestCase):
 
         for record in result:
             record.pop("variation_id", None)
-        expected_result = [
-            {'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
-             'sales_conversion_count': 8, 'goal_conversion': 99.01, 'sales_conversion': 100.0},
-            {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
-             'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
+        expected_result = [{'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
+              'sales_conversion_count': 1, 'goal_conversion': 99.01, 'sales_conversion': 99.01},
+             {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
+              'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
 
         self.assertCountEqual(first=result, second=expected_result)
 

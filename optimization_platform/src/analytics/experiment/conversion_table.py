@@ -158,7 +158,7 @@ def get_conversion_table_of_experiment(data_store, client_id, experiment_id):
         df["sales_conversion_count"] = 0
     else:
         sales_conv_df = sales_conv_df.groupby('variation_id').agg({
-            'variant_quantity': [('sales_conversion_count', lambda x: x.sum())]
+            'session_id': [('sales_conversion_count', lambda x: len(set(x)))]
         })
         sales_conv_df.columns = sales_conv_df.columns.droplevel()
         sales_conv_df["variation_id"] = sales_conv_df.index
