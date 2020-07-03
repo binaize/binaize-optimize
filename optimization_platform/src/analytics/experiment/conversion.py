@@ -199,7 +199,6 @@ def get_conversion_per_variation_over_time(data_store, client_id, experiment_id,
     df["sales_conversion_percentage"] = df["sales_conversion_percentage"].map(lambda x: round(x, 2))
     df["goal_conversion_percentage"] = df["goal_conversion_count"] * 100 / (df["adjusted_visitor_count"])
     df["goal_conversion_percentage"] = df["goal_conversion_percentage"].map(lambda x: round(x, 2))
-    df.sort_values(['date'], inplace=True)
 
     variation_names = df["variation_name"].unique()
     variation_session_count_dict = dict()
@@ -209,7 +208,8 @@ def get_conversion_per_variation_over_time(data_store, client_id, experiment_id,
     variation_sales_conversion_count_dict = dict()
     variation_sales_conversion_percentage_dict = dict()
     for variation_name in variation_names:
-        variation_df = df[df["variation_name"] == variation_name]
+        variation_df = df[df["variation_name"] == variation_name].copy()
+        variation_df.sort_values(['iso_date'], inplace=True)
         variation_session_count_dict[variation_name] = variation_df["session_count"].tolist()
         variation_visitor_count_dict[variation_name] = variation_df["visitor_count"].tolist()
         variation_goal_conversion_count_dict[variation_name] = variation_df["goal_conversion_count"].tolist()
