@@ -179,7 +179,7 @@ def get_conversion_per_variation_over_time(data_store, client_id, experiment_id,
         df["sales_conversion_count"] = 0
     else:
         sales_df = sales_df.groupby(["date", "iso_date", "variation_id"]).agg({
-            'variant_quantity': [('sales_conversion_count', lambda x: x.sum())]
+            'session_id': [('sales_conversion_count', lambda x: len(set(x)))]
         })
         sales_df.columns = sales_df.columns.droplevel()
         sales_df.reset_index(inplace=True)

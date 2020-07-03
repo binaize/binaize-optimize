@@ -246,14 +246,14 @@ class TestExperimentAnalytics(TestCase):
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                              'test_variation_name_2': [0, 0, 0, 0, 3, 0, 0]},
-                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 8, 0, 0],
+                           'visitor_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                              'test_variation_name_2': [0, 0, 0, 0, 2, 0, 0]},
                            'goal_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                                      'test_variation_name_2': [0, 0, 0, 0, 1, 0, 0]},
-                           'goal_conversion_percentage': {'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 12.5, 0.0, 0.0],
-                                                          'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0,
-                                                                                    0.0]},
-                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 8, 0, 0],
+                           'goal_conversion_percentage': {
+                               'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
+                               'test_variation_name_2': [0.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0]},
+                           'sales_conversion_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
                                                       'test_variation_name_2': [0, 0, 0, 0, 0, 0, 0]},
                            'sales_conversion_percentage': {
                                'test_variation_name_1': [0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0],
@@ -326,10 +326,11 @@ class TestExperimentAnalytics(TestCase):
 
         for record in result:
             record.pop("variation_id", None)
-        expected_result = [{'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
-              'sales_conversion_count': 1, 'goal_conversion': 99.01, 'sales_conversion': 99.01},
-             {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
-              'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
+        expected_result = [
+            {'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
+             'sales_conversion_count': 1, 'goal_conversion': 99.01, 'sales_conversion': 99.01},
+            {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
+             'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
 
         self.assertCountEqual(first=result, second=expected_result)
 
