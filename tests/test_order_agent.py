@@ -86,5 +86,5 @@ class TestProductAgent(TestCase):
         expected_result = 10
         self.assertEqual(first=result, second=expected_result)
         result = OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
-        expected_result = 1
+        expected_result = 4
         self.assertEqual(first=result, second=expected_result)

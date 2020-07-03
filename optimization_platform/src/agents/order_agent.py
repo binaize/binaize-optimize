@@ -15,23 +15,24 @@ class OrderAgent(object):
         table = TABLE_ORDERS
         columns = ["client_id", "order_id", "email_id", "cart_token", "product_id",
                    "variant_id", "variant_quantity", "variant_price", "updated_at", "payment_status", "landing_page"]
-        sql = "select max(updated_at) from {table} where client_id = '{client_id}'".format(table=table,
-                                                                                           client_id=client_id)
+        sql = "select max(updated_at) from {table} where client_id = '{client_id}' and payment_status=TRUE".format(
+            table=table,
+            client_id=client_id)
         mobile_records = data_store.run_select_sql(query=sql)
-        updated_at = None
+        order_updated_at = None
         max_datetime = mobile_records[0][0]
         if max_datetime is not None:
-            max_datetime += datetime.timedelta(microseconds=0)
+            max_datetime -= datetime.timedelta(seconds=2)
             max_datetime_utc = DateUtils.change_timezone(datetime_obj=max_datetime, timezone_str="UTC")
-            updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
+            order_updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
 
         client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
         shared_url = client_details["shopify_app_eg_url"]
         base_url = "/".join(shared_url.split("/")[:6])
         order_url = "{base_url}/orders.json?limit=250".format(base_url=base_url)
-        if updated_at is not None:
+        if order_updated_at is not None:
             order_url = "{base_url}/orders.json?updated_at_min={updated_at}".format(base_url=base_url,
-                                                                                    updated_at=updated_at)
+                                                                                    updated_at=order_updated_at)
         r = requests.get(order_url)
         order_list = r.json()["orders"]
 
@@ -76,9 +77,6 @@ class OrderAgent(object):
 
         base_url = "/".join(shared_url.split("/")[:6])
         checkout_url = "{base_url}/checkouts.json?limit=250".format(base_url=base_url)
-        if updated_at is not None:
-            checkout_url = "{base_url}/checkouts.json?updated_at_min={updated_at}".format(base_url=base_url,
-                                                                                          updated_at=updated_at)
         r = requests.get(checkout_url)
         checkout_list = r.json()["checkouts"]
 
@@ -119,8 +117,12 @@ class OrderAgent(object):
                 variant_list.append(variant_dict)
             order_id_list.append(checkout["id"])
 
-        if updated_at is not None and len(variant_list) > 0:
+        if len(variant_list) > 0:
             s = ",".join(["%s" for i in range(len(order_id_list))])
+            query = """delete from {table} where client_id = '{client_id}' and payment_status=FALSE""".format(
+                table=table,
+                client_id=client_id)
+            data_store.run_custom_sql(query=query)
             query = """delete from {table} where client_id = '{client_id}' and order_id in ({s})""".format(
                 table=table,
                 client_id=client_id,
