@@ -1,7 +1,8 @@
 import pandas as pd
+from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 
 
-def get_sales_conversion_df(client_id, data_store, experiment_id):
+def get_sales_conversion_df(client_id, data_store, experiment_id, start_time):
     sql = \
         """ select distinct
                 cookie_order_table.session_id,
@@ -43,7 +44,7 @@ def get_sales_conversion_df(client_id, data_store, experiment_id):
                         where
                             client_id = '{client_id}'
                             and payment_status = True
-                            and updated_at > '2020-06-25 08:55:48+00'
+                            and updated_at > '{start_time}'
                         )
                         table2
                         on (table1.cart_token = table2.cart_token)) cookie_order_table
@@ -57,7 +58,7 @@ def get_sales_conversion_df(client_id, data_store, experiment_id):
                             and experiment_id = '{experiment_id}'
                         ) events_table
                         on (cookie_order_table.session_id = events_table.session_id)
-        """.format(client_id=client_id, experiment_id=experiment_id)
+        """.format(client_id=client_id, experiment_id=experiment_id, start_time=start_time)
     mobile_records = data_store.run_custom_sql(sql)
     sales_conv_df = None
     if mobile_records is not None and len(mobile_records) > 0:
@@ -138,9 +139,11 @@ def get_variations_df(data_store, experiment_id, client_id):
 
 
 def get_conversion_table_of_experiment(data_store, client_id, experiment_id):
+    start_time = ExperimentAgent.get_start_time_of_experiment_id(data_store=data_store, client_id=client_id,
+                                                                 experiment_id=experiment_id)
     events_df = get_events_df(data_store, experiment_id, client_id)
     variations_df = get_variations_df(data_store, experiment_id, client_id)
-    sales_conv_df = get_sales_conversion_df(client_id, data_store, experiment_id)
+    sales_conv_df = get_sales_conversion_df(client_id, data_store, experiment_id, start_time)
 
     result = dict()
     if variations_df is None:

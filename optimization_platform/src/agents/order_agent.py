@@ -6,6 +6,7 @@ from optimization_platform.src.agents.client_agent import ClientAgent
 from utils.data_store.rds_data_store import IteratorFile
 from utils.date_utils import DateUtils
 from config import TABLE_ORDERS
+import uuid
 
 
 class OrderAgent(object):
@@ -22,7 +23,7 @@ class OrderAgent(object):
         order_updated_at = None
         max_datetime = mobile_records[0][0]
         if max_datetime is not None:
-            max_datetime -= datetime.timedelta(seconds=2)
+            max_datetime += datetime.timedelta(seconds=1)
             max_datetime_utc = DateUtils.change_timezone(datetime_obj=max_datetime, timezone_str="UTC")
             order_updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
 
@@ -57,21 +58,31 @@ class OrderAgent(object):
 
         variant_list = list()
         order_id_list = list()
+        session_cart_time_list = list()
         for order in order_list:
             items = order["line_items"]
+            order_id = order["id"]
+            email_id = order["email"]
+            cart_token = order["cart_token"]
+            updated_at = order["updated_at"]
+            landing_page = order["landing_site"]
+            if cart_token is None or len(cart_token) == 0:
+                cart_token = uuid.uuid4().hex
+                session_id = uuid.uuid4().hex
+                session_cart_time_list.append((session_id, cart_token, updated_at))
             for item in items:
                 variant_dict = dict()
                 variant_dict["client_id"] = client_id
-                variant_dict["order_id"] = order["id"]
-                variant_dict["email_id"] = order["email"]
-                variant_dict["cart_token"] = order["cart_token"]
+                variant_dict["order_id"] = order_id
+                variant_dict["email_id"] = email_id
+                variant_dict["cart_token"] = cart_token
                 variant_dict["product_id"] = item["product_id"]
                 variant_dict["variant_id"] = item["variant_id"]
                 variant_dict["variant_quantity"] = int(item["quantity"])
                 variant_dict["variant_price"] = float(item["price"])
-                variant_dict["updated_at"] = order["updated_at"]
+                variant_dict["updated_at"] = updated_at
                 variant_dict["payment_status"] = True
-                variant_dict["landing_page"] = order["landing_site"]
+                variant_dict["landing_page"] = landing_page
                 variant_list.append(variant_dict)
             order_id_list.append(order["id"])
 
@@ -141,4 +152,4 @@ class OrderAgent(object):
             data_store.run_batch_insert_sql(file=file, table=table, columns=columns)
 
         order_id_count = len(order_id_list)
-        return order_id_count
+        return order_id_count, session_cart_time_list

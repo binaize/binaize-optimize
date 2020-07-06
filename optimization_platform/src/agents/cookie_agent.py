@@ -1,4 +1,5 @@
 from config import TABLE_COOKIES
+from utils.data_store.rds_data_store import IteratorFile
 from utils.date_utils import DateUtils
 
 
@@ -36,4 +37,18 @@ class CookieAgent(object):
 
             sql = """insert into {table} ({column}) values {value}""".format(table=table, column=column, value=value)
             status = data_store.run_insert_into_sql(query=sql)
+        return status
+
+    @classmethod
+    def register_dummy_cookie_for_client(cls, data_store, client_id, session_cart_time_list):
+        table = "cookies"
+        columns = ["client_id", "session_id", "cart_token", "creation_time"]
+        status = False
+        if len(session_cart_time_list) > 0:
+            s = "\t".join(["{}" for i in range(len(columns))])
+
+            file = IteratorFile((s.format(client_id, session_cart_time[0], session_cart_time[1],
+                                          session_cart_time[2])
+                                 for session_cart_time in session_cart_time_list))
+            status = data_store.run_batch_insert_sql(file=file, table=table, columns=columns)
         return status

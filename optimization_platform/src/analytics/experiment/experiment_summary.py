@@ -3,6 +3,7 @@ import pandas as pd
 from optimization_platform.src.analytics.experiment.conversion_table import get_conversion_table_of_experiment
 from optimization_platform.src.optim.abtest import ABTest
 from config import ABTEST_CONFIDENCE_MAX_VALUE, ABTEST_CONFIDENCE_THRESHOLD
+from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 
 
 def get_summary_of_experiment(data_store, client_id, experiment_id):
@@ -23,7 +24,9 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
         result = construct_result(conclusion, recommendation, status)
         return result
 
-    end_time, start_time = get_start_time_and_end_time_of_experiment(client_id, data_store, experiment_id)
+    end_time = get_end_time_of_experiment(client_id, data_store, experiment_id)
+    start_time = ExperimentAgent.get_start_time_of_experiment_id(data_store=data_store, client_id=client_id,
+                                                                 experiment_id=experiment_id)
     if start_time is None or end_time is None:
         conclusion, recommendation, status = get_summary_for_data_not_enough()
         result = construct_result(conclusion, recommendation, status)
@@ -69,11 +72,10 @@ def get_summary_of_experiment(data_store, client_id, experiment_id):
     return result
 
 
-def get_start_time_and_end_time_of_experiment(client_id, data_store, experiment_id):
+def get_end_time_of_experiment(client_id, data_store, experiment_id):
     sql = \
         """
             select
-                min(creation_time),
                 max(creation_time)
             from
                 events 
@@ -82,9 +84,8 @@ def get_start_time_and_end_time_of_experiment(client_id, data_store, experiment_
                 and experiment_id = '{experiment_id}'
         """.format(client_id=client_id, experiment_id=experiment_id)
     records = data_store.run_custom_sql(sql)
-    start_time = records[0][0]
-    end_time = records[0][1]
-    return end_time, start_time
+    end_time = records[0][0]
+    return end_time
 
 
 def get_summary_for_successful_conclusion(best_variation, betterness_percentage, confidence_percentage):

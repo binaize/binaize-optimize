@@ -75,6 +75,13 @@ class DateUtils(object):
         datetime_obj = datetime.datetime.strptime(datetime_str, '%Y-%m-%dT%H-%M-%S')
         timezone = pytz.timezone(timezone_str)
         datetime_tz = timezone.localize(datetime_obj)
-        datetime_utc = cls.change_timezone(datetime_obj=datetime_tz,timezone_str="UTC")
+        datetime_utc = cls.change_timezone(datetime_obj=datetime_tz, timezone_str="UTC")
         iso_str = cls.convert_datetime_to_iso_string(datetime_utc)
         return iso_str
+
+    @classmethod
+    def convert_utc_iso_format_to_timestamp(cls, datetime_str):
+        from dateutil.parser import parse
+        datetime_obj = parse(datetime_str)
+        timestamp = int(datetime_obj.timestamp())
+        return timestamp

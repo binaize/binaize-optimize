@@ -67,10 +67,29 @@ class ExperimentAgent(object):
                     select 
                         max(last_updation_time) 
                     from 
-                        experiments)
+                        experiments
+                    where
+                        client_id = '{client_id}')
             """.format(client_id=client_id)
         mobile_records = data_store.run_custom_sql(sql)
         latest_experiment_id = None
         if mobile_records is not None and len(mobile_records) > 0:
             latest_experiment_id = mobile_records[0][0]
         return latest_experiment_id
+
+    @classmethod
+    def get_start_time_of_experiment_id(cls, data_store, client_id, experiment_id):
+        sql = \
+            """
+            select 
+                creation_time 
+            from experiments 
+            where 
+                client_id = '{client_id}' 
+                and experiment_id = '{experiment_id}'
+            """.format(client_id=client_id, experiment_id=experiment_id)
+        mobile_records = data_store.run_custom_sql(sql)
+        creation_time = None
+        if mobile_records is not None and len(mobile_records) > 0:
+            creation_time = mobile_records[0][0]
+        return creation_time
