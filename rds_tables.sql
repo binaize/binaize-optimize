@@ -168,3 +168,40 @@ create
 index if not exists cookies_cart_token_idx on cookies (cart_token);
 create
 index if not exists cookies_creation_time_idx on cookies (creation_time);
+
+drop table if exists visitors;
+
+create table if not exists visitors
+(
+    client_id     varchar(50) not null,
+    session_id    varchar(100),
+    ip            varchar(20),
+    city          varchar(50),
+    region        varchar(50),
+    country       varchar(50),
+    lat           varchar(20),
+    long          varchar(20),
+    timezone      varchar(30),
+    browser       varchar(30),
+    os            varchar(30),
+    device        varchar(30),
+    fingerprint   varchar(30),
+    creation_time timestamptz not null
+);
+
+create
+index if not exists visitors_client_id_idx on visitors (client_id);
+create
+index if not exists visitors_os_idx on visitors (os);
+create
+index if not exists visitors_device_idx on visitors (device);
+create
+index if not exists visitors_browser_idx on visitors (browser);
+create
+index if not exists visitors_ip_idx on visitors (ip);
+create
+index if not exists visitors_country_idx on visitors (country);
+create
+index if not exists visitors_creation_time_idx on visitors (creation_time);
+create
+index if not exists visitors_session_idx on visitors (session_id);

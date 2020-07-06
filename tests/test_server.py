@@ -517,6 +517,44 @@ class TestServer(TestCase):
         self.assertCountEqual(first=result, second=expected_result)
 
     @patch('datetime.datetime', new=datetime_mock)
+    def test_register_visitor(self):
+        self._sign_up_new_client()
+
+        response = client.post(
+            "/api/v1/schemas/client/token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            json="grant_type=password&username=test_client&password=test_password&scope=&client_id=&client_secret="
+        )
+        access_token = response.json()["access_token"]
+
+        response = client.post(
+            "/api/v1/schemas/visitor/register",
+            headers={"Authorization": "Bearer " + access_token},
+            json={
+                "client_id": "test_client",
+                "session_id": "test_session_id",
+                "ip": "ip", "city": "city", "region": "region",
+                "country": "country", "lat": "lat", "long": "long", "timezone": "timezone",
+                "browser": "browser", "os": "os", "device": "device", "fingerprint": "fingerprint"
+            }
+        )
+        status_code = response.status_code
+        expected_status_code = 200
+        self.assertEqual(first=status_code, second=expected_status_code)
+        response_json = response.json()
+        expected_response_json = {'status': '200',
+                                  'message': 'Visitor registration for client_id test_client and ip ip is successful.'}
+
+        self.assertDictEqual(d1=response_json, d2=expected_response_json)
+
+        result = app.rds_data_store.run_select_sql("select * from visitors")
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_client', 'test_session_id', 'ip', 'city', 'region', 'country', 'lat', 'long',
+                           'timezone', 'browser', 'os', 'device', 'fingerprint', '2020-05-30T13:00:00+05:30']
+        self.assertCountEqual(first=result, second=expected_result)
+
+    @patch('datetime.datetime', new=datetime_mock)
     def test_register_cookie(self):
         self._sign_up_new_client()
 
@@ -703,9 +741,12 @@ class TestServer(TestCase):
             record.pop("variation_id", None)
         expected_response_json = [
             {'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
-             'sales_conversion_count': 0, 'goal_conversion': 99.01, 'sales_conversion': 0.0},
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 99.01,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0},
             {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
-             'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 49.75,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0}]
+
         self.assertCountEqual(first=response_json, second=expected_response_json)
 
     def test_get_experiment_summary(self):
@@ -732,10 +773,9 @@ class TestServer(TestCase):
         self.assertEqual(first=status_code, second=expected_status_code)
 
         response_json = response.json()
-        expected_response_json = {
-            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 17 </strong> days.",
-            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
+        expected_response_json = {'status': '<strong> SUMMARY : </strong> Not enough visitors on the website.',
+                                  'conclusion': '<strong> STATUS : </strong> Not enough visitors on the website.',
+                                  'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
 
         self.assertDictEqual(d1=response_json, d2=expected_response_json)
 

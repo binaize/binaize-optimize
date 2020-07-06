@@ -84,3 +84,19 @@ class Cookie(BaseModel):
     client_id: str
     session_id: str
     cart_token: str
+
+
+class Visitor(BaseModel):
+    client_id: str
+    session_id: str
+    ip: str
+    city: str
+    region: str
+    country: str
+    lat: str
+    long: str
+    timezone: str
+    browser: str
+    os: str
+    device: str
+    fingerprint: str

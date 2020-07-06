@@ -36,7 +36,8 @@ class RDSDataStore(object):
             self.conn.commit()
             cursor.close()
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             self.conn.rollback()
             return None
 

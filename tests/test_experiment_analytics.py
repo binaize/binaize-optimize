@@ -16,6 +16,7 @@ from optimization_platform.src.agents.order_agent import OrderAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from optimization_platform.src.agents.cookie_agent import CookieAgent
 from optimization_platform.src.agents.client_agent import ClientAgent
+from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 
 
 def mocked_requests_get(*args, **kwargs):
@@ -101,42 +102,42 @@ class TestExperimentAnalytics(TestCase):
                                                session_id="test_session_id_4", cart_token="cart_token_4",
                                                creation_time=timestamp)
 
-    def _create_event(self, variation_1, variation_2):
+    def _create_event(self, variation_1, variation_2, experiment_id):
         timestamp = 1590673060
         variation_id_1 = variation_1["variation_id"]
         variation_id_2 = variation_2["variation_id"]
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_1", variation_id=variation_id_1,
                                              event_name="served",
                                              creation_time=timestamp)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_1", variation_id=variation_id_1,
                                              event_name="clicked",
                                              creation_time=timestamp + 10)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_2", variation_id=variation_id_2,
                                              event_name="served",
                                              creation_time=timestamp + 20)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_3", variation_id=variation_id_2,
                                              event_name="served",
                                              creation_time=timestamp + 30)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_3", variation_id=variation_id_2,
                                              event_name="clicked",
                                              creation_time=timestamp + 40)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_3", variation_id=variation_id_2,
                                              event_name="served",
                                              creation_time=timestamp + 50)
         EventAgent.register_event_for_client(data_store=self.rds_data_store, client_id="test_client_id",
-                                             experiment_id="test_experiment_id",
+                                             experiment_id=experiment_id,
                                              session_id="test_session_id_3", variation_id=variation_id_2,
                                              event_name="clicked",
                                              creation_time=timestamp + 60)
@@ -185,15 +186,28 @@ class TestExperimentAnalytics(TestCase):
                                              event_name="clicked",
                                              creation_time=timestamp + 60)
 
-    def _create_variation(self):
+    def _create_experiment(self):
+
+        experiment = ExperimentAgent.create_experiment_for_client_id(data_store=self.rds_data_store,
+                                                                     client_id="test_client_id",
+                                                                     experiment_name="test_experiment_name_2",
+                                                                     page_type="test_page_type",
+                                                                     experiment_type="test_experiment_type",
+                                                                     status=False,
+                                                                     creation_time=1590573060,
+                                                                     last_updation_time=1590573060)
+        return experiment["experiment_id"]
+
+    def _create_variation(self, experiment_id):
+
         variation_1 = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,
                                                                                       client_id="test_client_id",
-                                                                                      experiment_id="test_experiment_id",
+                                                                                      experiment_id=experiment_id,
                                                                                       variation_name="test_variation_name_1",
                                                                                       traffic_percentage=50)
         variation_2 = VariationAgent.create_variation_for_client_id_and_experiment_id(data_store=self.rds_data_store,
                                                                                       client_id="test_client_id",
-                                                                                      experiment_id="test_experiment_id",
+                                                                                      experiment_id=experiment_id,
                                                                                       variation_name="test_variation_name_2",
                                                                                       traffic_percentage=50)
         return variation_1, variation_2
@@ -201,21 +215,22 @@ class TestExperimentAnalytics(TestCase):
     @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_conversion_per_variation_over_time(self):
         """events and variations table both has are empty"""
+        experiment_id = self._create_experiment()
 
         result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
                                                                             client_id="test_client_id",
-                                                                            experiment_id="test_experiment_id",
+                                                                            experiment_id=experiment_id,
                                                                             timezone_str="Asia/Kolkata")
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """variations table has data but events table does not have"""
 
-        variation_1, variation_2 = self._create_variation()
+        variation_1, variation_2 = self._create_variation(experiment_id)
 
         result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
                                                                             client_id="test_client_id",
-                                                                            experiment_id="test_experiment_id",
+                                                                            experiment_id=experiment_id,
                                                                             timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
@@ -235,13 +250,13 @@ class TestExperimentAnalytics(TestCase):
 
         """events and variations table both has data"""
 
-        self._create_event(variation_1, variation_2)
+        self._create_event(variation_1, variation_2, experiment_id)
         self._create_orders()
         self._create_cookie()
 
         result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
                                                                             client_id="test_client_id",
-                                                                            experiment_id="test_experiment_id",
+                                                                            experiment_id=experiment_id,
                                                                             timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 1, 0, 0],
@@ -267,7 +282,7 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_conversion_per_variation_over_time(data_store=self.rds_data_store,
                                                                             client_id="test_client_id",
-                                                                            experiment_id="test_experiment_id",
+                                                                            experiment_id=experiment_id,
                                                                             timezone_str="Asia/Kolkata")
         expected_result = {'date': ['May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29', 'May 30'],
                            'session_count': {'test_variation_name_1': [0, 0, 0, 0, 0, 0, 0],
@@ -290,47 +305,51 @@ class TestExperimentAnalytics(TestCase):
     def test_get_conversion_table_of_experiment(self):
         """events and variations table both has are empty"""
 
+        experiment_id = self._create_experiment()
         result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
                                                                         client_id="test_client_id",
-                                                                        experiment_id="test_experiment_id")
+                                                                        experiment_id=experiment_id)
         expected_result = {}
         self.assertDictEqual(d1=result, d2=expected_result)
 
         """variations table has data but events table does not have"""
 
-        variation_1, variation_2 = self._create_variation()
+        variation_1, variation_2 = self._create_variation(experiment_id=experiment_id)
 
         result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
                                                                         client_id="test_client_id",
-                                                                        experiment_id="test_experiment_id")
+                                                                        experiment_id=experiment_id)
         for record in result:
             record.pop("variation_id", None)
         expected_result = [
-            {'variation_name': 'test_variation_name_1',
-             'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0, 'sales_conversion_count': 0,
-             'goal_conversion': 0.0, 'sales_conversion': 0.0},
-            {'variation_name': 'test_variation_name_2',
-             'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0, 'sales_conversion_count': 0,
-             'goal_conversion': 0.0, 'sales_conversion': 0.0}]
+            {'variation_name': 'test_variation_name_1', 'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0,
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 0.0,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0},
+            {'variation_name': 'test_variation_name_2', 'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0,
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 0.0,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0}]
+
         self.assertCountEqual(first=result, second=expected_result)
 
         """events and variations table both has data"""
 
-        self._create_event(variation_1, variation_2)
+        self._create_event(variation_1, variation_2, experiment_id)
         self._create_orders()
         self._create_cookie()
 
         result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
                                                                         client_id="test_client_id",
-                                                                        experiment_id="test_experiment_id")
+                                                                        experiment_id=experiment_id)
 
         for record in result:
             record.pop("variation_id", None)
         expected_result = [
             {'variation_name': 'test_variation_name_1', 'num_session': 1, 'num_visitor': 1, 'goal_conversion_count': 1,
-             'sales_conversion_count': 1, 'goal_conversion': 99.01, 'sales_conversion': 99.01},
+             'sales_conversion_count': 1, 'order_count': 2, 'total_order_value': 3592.0, 'goal_conversion': 99.01,
+             'sales_conversion': 99.01, 'avg_total_order_value': 1787.06},
             {'variation_name': 'test_variation_name_2', 'num_session': 3, 'num_visitor': 2, 'goal_conversion_count': 1,
-             'sales_conversion_count': 0, 'goal_conversion': 49.75, 'sales_conversion': 0.0}]
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 49.75,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0}]
 
         self.assertCountEqual(first=result, second=expected_result)
 
@@ -340,25 +359,28 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_conversion_table_of_experiment(data_store=self.rds_data_store,
                                                                         client_id="test_client_id",
-                                                                        experiment_id="test_experiment_id")
+                                                                        experiment_id=experiment_id)
         for record in result:
             record.pop("variation_id", None)
         expected_result = [
-            {'variation_name': 'test_variation_name_1',
-             'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0, 'sales_conversion_count': 0,
-             'goal_conversion': 0.0, 'sales_conversion': 0.0},
-            {'variation_name': 'test_variation_name_2',
-             'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0, 'sales_conversion_count': 0,
-             'goal_conversion': 0.0, 'sales_conversion': 0.0}]
+            {'variation_name': 'test_variation_name_1', 'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0,
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 0.0,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0},
+            {'variation_name': 'test_variation_name_2', 'num_session': 0, 'num_visitor': 0, 'goal_conversion_count': 0,
+             'sales_conversion_count': 0, 'order_count': 0, 'total_order_value': 0.0, 'goal_conversion': 0.0,
+             'sales_conversion': 0.0, 'avg_total_order_value': 0.0}]
+
         self.assertCountEqual(first=result, second=expected_result)
 
     @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_summary_of_experiment(self):
         """events and variations table both has are empty"""
 
+        experiment_id = self._create_experiment()
+
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
         expected_result = {'status': '<strong> SUMMARY : </strong> Not enough visitors on the website.',
                            'conclusion': '<strong> STATUS : </strong> Not enough visitors on the website.',
                            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
@@ -366,11 +388,11 @@ class TestExperimentAnalytics(TestCase):
 
         """variations table has data but events table does not have"""
 
-        variation_1, variation_2 = self._create_variation()
+        variation_1, variation_2 = self._create_variation(experiment_id)
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
         expected_result = {'status': '<strong> SUMMARY : </strong> Not enough visitors on the website.',
                            'conclusion': '<strong> STATUS : </strong> Not enough visitors on the website.',
                            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
@@ -378,17 +400,17 @@ class TestExperimentAnalytics(TestCase):
 
         """events and variations table both has data"""
 
-        self._create_event(variation_1, variation_2)
+        self._create_event(variation_1, variation_2, experiment_id)
         self._create_orders()
         self._create_cookie()
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
 
         expected_result = {
             'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 17 </strong> days.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 457 </strong> days.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
 
         self.assertDictEqual(d1=result, d2=expected_result)
@@ -398,12 +420,13 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
 
         expected_result = {
-            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.98% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1365 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 1 </strong> days.",
+            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 457 </strong> days.",
             'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         for i in range(900):
@@ -411,12 +434,13 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
 
         expected_result = {
-            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.1% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'><strong> ENOUGH </strong></span> evidence to conclude the experiment. There is <span style = 'color: red; font-size: 16px;'><strong> NO CLEAR WINNER </strong></span>. We are <span style = 'color: red; font-size: 16px;'><strong> 68.26% </strong></span> confident that <span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is the best.",
-            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."}
+            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 457 </strong> days.",
+            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
+
         self.assertDictEqual(d1=result, d2=expected_result)
 
         for i in range(5000):
@@ -424,12 +448,12 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
 
         expected_result = {
-            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 0.1% </strong></span> better than the others.",
-            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: green; font-size: 16px;'> <strong> ENOUGH </strong></span> evidence to conclude the experiment. We have a <span style = 'color: green; font-size: 16px;'><strong> WINNER </strong></span>. We are <span style = 'color: green; font-size: 16px;'><strong> 98.56% </strong></span> confident that <span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is the best.",
-            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: green; font-size: 16px;'><strong>  STOP </strong></span> the Experiment."}
+            'status': "<strong> SUMMARY : </strong><span style = 'color: blue; font-size: 16px;'><strong> test_variation_name_1 </strong></span> is winning. It is <span style = 'color: blue; font-size: 16px;'><strong> 49.75% </strong></span> better than the others.",
+            'conclusion': "<strong> STATUS : </strong> There is <span style = 'color: red; font-size: 16px;'><strong> NOT ENOUGH</strong></span> evidence to conclude the experiment (It is <span style = 'color: red; font-size: 16px;'><strong> NOT </strong></span> yet statistically significant).To be statistically confident, we need <strong> 1565 </strong> more visitors.Based on recent visitor trend, experiment should run for another <strong> 457 </strong> days.",
+            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
 
         self.assertDictEqual(d1=result, d2=expected_result)
 
@@ -439,8 +463,9 @@ class TestExperimentAnalytics(TestCase):
 
         result = ExperimentAnalytics.get_summary_of_experiment(data_store=self.rds_data_store,
                                                                client_id="test_client_id",
-                                                               experiment_id="test_experiment_id")
+                                                               experiment_id=experiment_id)
         expected_result = {'status': '<strong> SUMMARY : </strong> Not enough visitors on the website.',
                            'conclusion': '<strong> STATUS : </strong> Not enough visitors on the website.',
                            'recommendation': "<strong> RECOMMENDATION : </strong> <span style = 'color: blue; font-size: 16px;'><strong>  CONTINUE </strong></span> the Experiment."}
+
         self.assertDictEqual(d1=result, d2=expected_result)

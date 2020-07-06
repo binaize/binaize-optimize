@@ -22,6 +22,7 @@ from optimization_platform.src.agents.visit_agent import VisitAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from utils.date_utils import DateUtils
 from utils.logger.pylogger import get_logger
+from optimization_platform.src.agents.visitor_agent import VisitorAgent
 
 logger = get_logger("server", "INFO")
 
@@ -54,6 +55,10 @@ tags_metadata = [
         "name": "Report",
         "description": "Operations with reports.",
     },
+    {
+        "name": "Visitors",
+        "description": "Operations with visitors.",
+    }
 
 ]
 
@@ -341,6 +346,28 @@ async def register_visit(*, visit: Visit):
     response = ResponseMessage()
     response.message = "Visit registration for client_id {client_id} and event name {event_name} is successful.".format(
         client_id=visit.client_id, event_name=visit.event_name)
+    response.status = status.HTTP_200_OK
+    return response
+
+
+@app.post("/api/v1/schemas/visitor/register", response_model=ResponseMessage, tags=["Visitor"],
+          summary="Register visitor")
+async def register_visitor(*, visitor: Visitor):
+    """
+        Register visitors on the client's website:
+    """
+    creation_time = DateUtils.get_timestamp_now()
+    VisitorAgent.register_visitor_for_client(data_store=app.rds_data_store, client_id=visitor.client_id,
+                                             session_id=visitor.session_id, ip=visitor.ip,
+                                             city=visitor.city, region=visitor.region, country=visitor.country,
+                                             lat=visitor.lat, long=visitor.long, timezone=visitor.timezone,
+                                             browser=visitor.browser, os=visitor.os, device=visitor.device,
+                                             fingerprint=visitor.fingerprint,
+                                             creation_time=creation_time)
+
+    response = ResponseMessage()
+    response.message = "Visitor registration for client_id {client_id} and ip {ip} is successful.".format(
+        client_id=visitor.client_id, ip=visitor.ip)
     response.status = status.HTTP_200_OK
     return response
 

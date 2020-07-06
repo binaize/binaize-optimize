@@ -166,6 +166,8 @@ def get_conversion_table_of_experiment(data_store, client_id, experiment_id):
     df = variation_events_df
     if sales_conv_df is None:
         df["sales_conversion_count"] = 0
+        df["order_count"] = 0
+        df["total_order_value"] = 0.0
     else:
         sales_conv_df["variant_total_price"] = sales_conv_df["variant_quantity"] * sales_conv_df["variant_price"]
         sales_conv_df = sales_conv_df.groupby('variation_id').agg({
