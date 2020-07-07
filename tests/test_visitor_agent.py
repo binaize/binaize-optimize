@@ -37,6 +37,9 @@ class TestVisitorAgent(TestCase):
         expected_status = True
         self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_select_sql("select * from visitors ")
+        length = len(result)
+        expected_length = 1
+        self.assertEqual(first=length, second=expected_length)
         result = list(result[0])
         result[-1] = result[-1].isoformat()
         expected_result = ['test_client_id', 'test_session_id', '435.423.4234.4234', 'BLR', 'KA', 'IN', '2.334',
@@ -55,10 +58,13 @@ class TestVisitorAgent(TestCase):
         expected_status = True
         self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_select_sql("select * from visitors ")
-        result = list(result[0])
+        length = len(result)
+        expected_length = 2
+        self.assertEqual(first=length, second=expected_length)
+        result = list(result[1])
         result[-1] = result[-1].isoformat()
         expected_result = ['test_client_id', 'test_session_id', '435.423.4234.4234', 'BLR', 'KA', 'IN', '2.334',
                            '3.556', 'Asia/Kolkata', 'Safari', 'Mac OS', 'Macbook', '5234523453245',
-                           '2020-05-27T14:45:23+05:30']
+                           '2020-05-27T14:46:06+05:30']
 
         self.assertListEqual(list1=expected_result, list2=result)

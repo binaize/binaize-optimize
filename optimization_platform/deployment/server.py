@@ -56,7 +56,7 @@ tags_metadata = [
         "description": "Operations with reports.",
     },
     {
-        "name": "Visitors",
+        "name": "Visitor",
         "description": "Operations with visitors.",
     }
 

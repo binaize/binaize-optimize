@@ -10,35 +10,17 @@ class VisitorAgent(object):
                                     timezone, browser, os, device, fingerprint, creation_time):
         table = "visitors"
 
-        columns = ["client_id", "session_id", "ip", "city", "region", "country", "lat", "long",
-                   "timezone", "browser", "os", "device", "fingerprint"]
-        where = "client_id='{client_id}' and session_id='{session_id}' and ip='{ip}' and city='{city}' and region='region'" \
-                "and country='{country}' and lat='{lat}' and long='{long}' and timezone='{timezone}'" \
-                "and browser='{browser}' and os='{os}' and device='{device}' and fingerprint='{fingerprint}'".format(
-            client_id=client_id,
-            session_id=session_id, ip=ip, city=city, region=region, country=country, lat=lat, long=long,
-            timezone=timezone, browser=browser, os=os, device=device, fingerprint=fingerprint)
-
+        creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_time)
+        columns_value_dict = {"client_id": client_id,
+                              "session_id": session_id, "ip": ip, "city": city, "region": region,
+                              "country": country, "lat": lat, "long": long, "timezone": timezone,
+                              "browser": browser, "os": os, "device": device, "fingerprint": fingerprint,
+                              "creation_time": creation_time_utc_str}
+        columns = list(columns_value_dict.keys())
         column = ",".join(columns)
-        sql = """ SELECT {column} from {table} where {where}""".format(column=column, table=table, where=where)
+        values = [columns_value_dict[key] for key in columns]
+        value = str(tuple(values))
 
-        mobile_records = data_store.run_select_sql(query=sql)
-        record_exist = False
-        if mobile_records is not None and len(mobile_records) > 0:
-            record_exist = True
-        status = record_exist
-        if not record_exist:
-            creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_time)
-            columns_value_dict = {"client_id": client_id,
-                                  "session_id": session_id, "ip": ip, "city": city, "region": region,
-                                  "country": country, "lat": lat, "long": long, "timezone": timezone,
-                                  "browser": browser, "os": os, "device": device, "fingerprint": fingerprint,
-                                  "creation_time": creation_time_utc_str}
-            columns = list(columns_value_dict.keys())
-            column = ",".join(columns)
-            values = [columns_value_dict[key] for key in columns]
-            value = str(tuple(values))
-
-            sql = """insert into {table} ({column}) values {value}""".format(table=table, column=column, value=value)
-            status = data_store.run_insert_into_sql(query=sql)
+        sql = """insert into {table} ({column}) values {value}""".format(table=table, column=column, value=value)
+        status = data_store.run_insert_into_sql(query=sql)
         return status
