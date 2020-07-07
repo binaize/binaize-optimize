@@ -15,6 +15,8 @@ from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.cookie_agent import CookieAgent
 from optimization_platform.src.analytics.conversion.conversion_analytics import ConversionAnalytics
 from optimization_platform.src.analytics.experiment.experiment_analytics import ExperimentAnalytics
+from optimization_platform.src.analytics.visitor.visitor_analytics import VisitorAnalytics
+
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
@@ -509,5 +511,25 @@ async def get_landing_page_analytics_for_dashboard(*,
                                                             client_id=current_client.client_id,
                                                             start_date_str=start_date, end_date_str=end_date,
                                                             timezone_str=current_client.client_timezone)
+
+    return result
+
+
+@app.get("/api/v1/schemas/report/visitor-activity", response_model=dict, tags=["Report"],
+         summary="Get visitor analytics")
+async def get_landing_page_analytics_for_dashboard(*,
+                                                   current_client: ShopifyClient = Depends(get_current_active_client),
+                                                   start_date: str, end_date: str
+                                                   ):
+    """
+        Get visitor analytics of the client's website till now:
+        - **access_token**: access token issued by the server to the logged in client
+        - **start_date**: start date in YYYY-MM-DD format
+        - **end_date**: end date in YYYY-MM-DD format
+    """
+    result = VisitorAnalytics.get_sales_analytics(data_store=app.rds_data_store,
+                                                  client_id=current_client.client_id,
+                                                  start_date_str=start_date, end_date_str=end_date,
+                                                  timezone_str=current_client.client_timezone)
 
     return result
