@@ -20,19 +20,16 @@ rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
 
 
 def main(rds_data_store):
-    # client_ids = ClientAgent.get_all_client_ids(data_store=rds_data_store)
-    client_ids = ["esker"]
+    client_ids = ClientAgent.get_all_client_ids(data_store=rds_data_store)
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
     logger.info("sync orders job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
     for client_id in client_ids:
         logger.info("sync orders job for client id = {client_id} started".format(client_id=client_id))
         try:
             _, session_cart_time_list = OrderAgent.sync_orders(data_store=rds_data_store, client_id=client_id)
-            print(session_cart_time_list)
             CookieAgent.register_dummy_cookie_for_client(data_store=rds_data_store, client_id=client_id,
                                                          session_cart_time_list=session_cart_time_list)
             experiment_id = ExperimentAgent.get_latest_experiment_id(data_store=rds_data_store, client_id=client_id)
-            print(experiment_id)
             if experiment_id is not None:
                 for session_cart_time in session_cart_time_list:
                     session_id = session_cart_time[0]
@@ -41,7 +38,6 @@ def main(rds_data_store):
                                                                              client_id=client_id,
                                                                              experiment_id=experiment_id,
                                                                              session_id=session_id)
-                    print(variation)
                     if variation is not None:
                         EventAgent.register_event_for_client(data_store=rds_data_store,
                                                              client_id=client_id,
