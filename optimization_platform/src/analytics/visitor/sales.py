@@ -121,16 +121,16 @@ def get_sales_analytics(data_store, client_id, start_date_str, end_date_str, tim
 
 def get_aggregate_for_column(df, column):
     result_session_df = df.groupby(column).agg({
-        'session_id': [('session_count', lambda x: len(x)), ('visitor_count', lambda x: len(set(x)))],
-        'total_order_value': [('total_sales', lambda x: sum(x))]
+        'session_id': [('session_count', lambda x: len(x)), ('visitor_count', lambda x: len(set(x)))]
     })
     result_session_df.columns = result_session_df.columns.droplevel()
     result_session_df[column] = result_session_df.index
     result_session_df.reset_index(inplace=True, drop=True)
-    result_conv_df = df[df["order_id"] != 0]
+    result_conv_df = df[df["order_id"] != 0].drop_duplicates()
     result_conv_df = result_conv_df.groupby(column).agg({
         'session_id': [('sales_conversion_count', lambda x: len(set(x)))],
         'order_id': [('order_count', lambda x: len(set(x)))],
+        'total_order_value': [('total_sales', lambda x: sum(x))]
     })
     result_conv_df.columns = result_conv_df.columns.droplevel()
     result_conv_df[column] = result_conv_df.index
@@ -140,6 +140,7 @@ def get_aggregate_for_column(df, column):
                          right_on=[column])
     result_df["sales_conversion_count"] = result_df["sales_conversion_count"].fillna(0).astype(int)
     result_df["order_count"] = result_df["order_count"].fillna(0).astype(int)
+    result_df["total_sales"] = result_df["total_sales"].fillna(0)
 
     result_df["sales_conversion"] = result_df["sales_conversion_count"] * 100 / (result_df["visitor_count"] + 0.01)
     result_df["sales_conversion"] = result_df["sales_conversion"].map(lambda x: min(100.00, round(x, 2)))
@@ -153,16 +154,16 @@ def get_aggregate_for_column(df, column):
 def get_aggregate_for_region(df, location_df):
     column = "region"
     result_session_df = df.groupby(column).agg({
-        'session_id': [('session_count', lambda x: len(x)), ('visitor_count', lambda x: len(set(x)))],
-        'total_order_value': [('total_sales', lambda x: sum(x))]
+        'session_id': [('session_count', lambda x: len(x)), ('visitor_count', lambda x: len(set(x)))]
     })
     result_session_df.columns = result_session_df.columns.droplevel()
     result_session_df[column] = result_session_df.index
     result_session_df.reset_index(inplace=True, drop=True)
-    result_conv_df = df[df["order_id"] != 0]
+    result_conv_df = df[df["order_id"] != 0].drop_duplicates()
     result_conv_df = result_conv_df.groupby(column).agg({
         'session_id': [('sales_conversion_count', lambda x: len(set(x)))],
         'order_id': [('order_count', lambda x: len(set(x)))],
+        'total_order_value': [('total_sales', lambda x: sum(x))]
     })
     result_conv_df.columns = result_conv_df.columns.droplevel()
     result_conv_df[column] = result_conv_df.index
@@ -177,12 +178,13 @@ def get_aggregate_for_region(df, location_df):
     result_df.fillna(0, inplace=True)
     result_df["sales_conversion_count"] = result_df["sales_conversion_count"].fillna(0).astype(int)
     result_df["order_count"] = result_df["order_count"].fillna(0).astype(int)
+    result_df["total_sales"] = result_df["total_sales"].fillna(0)
+
 
     result_df["sales_conversion"] = result_df["sales_conversion_count"] * 100 / (result_df["visitor_count"] + 0.01)
     result_df["sales_conversion"] = result_df["sales_conversion"].map(lambda x: min(100.00, round(x, 2)))
     result_df["avg_order_value"] = result_df["total_sales"] / (result_df["order_count"] + 0.01)
     result_df["avg_order_value"] = result_df["avg_order_value"].map(lambda x: round(x, 2))
-
 
     result_df["properties"] = list(
         zip(result_df["region_name"], result_df["session_count"], result_df["visitor_count"], result_df["total_sales"],
