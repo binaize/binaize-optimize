@@ -29,7 +29,8 @@ class ABTest(AbstractOptim):
         self._best_arm_index = max_arm_index
         max_conv = conversion_list[max_arm_index]
         sum_conv = np.sum(conversion_list)
-        self._betterness_score = (max_conv - (sum_conv - max_conv) / (len(arm_name_list) - 1)) / max_conv
+        self._betterness_score = 0.0 if max_conv == 0.0 else (max_conv - (sum_conv - max_conv) / (
+                len(arm_name_list) - 1)) / max_conv
         EFFECT_SIZE = 0.1  # 0.1 is low effect. 0.5 is large effect
         ALPHA = 0.05  # Significance level.
         POWER = 0.8  # 1 - acceptable type II error rate. 0.8 is a good choice
