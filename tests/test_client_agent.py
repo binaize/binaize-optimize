@@ -36,23 +36,46 @@ class TestClientAgent(TestCase):
                                             disabled=disabled, client_timezone=client_timezone,
                                             shopify_app_eg_url=shopify_app_eg_url,
                                             creation_timestamp=timestamp)
-        expected_status = True
-        self.assertEqual(first=status, second=expected_status)
         return status
 
+    def _add_multiple_clients(self):
+        # f = open("./tests/data/test_client_agent/clients.csv", 'r')
+        csv_file_name = "./tests/data/test_client_agent/clients.csv"
+        cursor = self.rds_data_store.conn.cursor()
+        sql = "COPY clients FROM STDIN DELIMITER ',' CSV HEADER"
+        cursor.copy_expert(sql, open(csv_file_name, "r"))
+        self.rds_data_store.conn.commit()
+        cursor.close()
+
     def test_add_new_client(self):
+        self._add_multiple_clients()
         status = self._add_new_client(client_id="test_client_id",
-                                      full_name="test_full_name",
-                                      company_name="test_company_name", hashed_password="test_hashed_password",
-                                      disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
-                                      client_timezone="test_client_timezone")
+                                      full_name="test_full_name_1",
+                                      company_name="test_company_name_1", hashed_password="test_hashed_password_1",
+                                      disabled=False, shopify_app_eg_url="test_shopify_app_eg_url_1",
+                                      client_timezone="Asia/Kolkata")
         expected_status = True
         self.assertEqual(first=status, second=expected_status)
         result = self.rds_data_store.run_custom_sql("select * from clients")
         result = list(result[0])
         result[-1] = result[-1].isoformat()
-        expected_result = ['test_client_id', 'test_full_name', 'test_company_name', 'test_hashed_password', False,
-                           'test_shopify_app_eg_url', 'test_client_timezone', '2020-05-28T19:07:40+05:30']
+        expected_result = ['test_client_id', 'test_full_name_1', 'test_company_name_1', 'test_hashed_password_1', False,
+                           'test_shopify_app_eg_url_1', 'Asia/Kolkata', '2020-05-28T19:07:40+05:30']
+
+        self.assertListEqual(list1=expected_result, list2=result)
+
+        status = self._add_new_client(client_id="test_client_id",
+                                      full_name="test_full_name",
+                                      company_name="test_company_name", hashed_password="test_hashed_password",
+                                      disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
+                                      client_timezone="Asia/Kolkata")
+        expected_status = None
+        self.assertEqual(first=status, second=expected_status)
+        result = self.rds_data_store.run_custom_sql("select * from clients")
+        result = list(result[0])
+        result[-1] = result[-1].isoformat()
+        expected_result = ['test_client_id', 'test_full_name_1', 'test_company_name_1', 'test_hashed_password_1', False,
+                           'test_shopify_app_eg_url_1', 'Asia/Kolkata', '2020-05-28T19:07:40+05:30']
         self.assertListEqual(list1=expected_result, list2=result)
 
     def test_get_client_details_for_client_id(self):
