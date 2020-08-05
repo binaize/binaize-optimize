@@ -98,7 +98,7 @@ def get_password_hash(password):
 def get_client(data_store, client_id: str):
     client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
     if client_details is not None:
-        return ShopifyClient(**client_details)
+        return BinaizeClient(**client_details)
 
 
 def authenticate_client(data_store, client_id: str, password: str):
@@ -135,7 +135,7 @@ async def _get_current_client(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-async def get_current_active_client(current_client: ShopifyClient = Depends(_get_current_client)):
+async def get_current_active_client(current_client: BinaizeClient = Depends(_get_current_client)):
     if current_client.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_client
@@ -155,7 +155,7 @@ async def home_page():
 
 @app.post("/api/v1/schemas/client/sign_up", response_model=ResponseMessage, tags=["Client"],
           summary="Sign up a new client")
-async def sign_up_new_client(new_client: NewClient):
+async def sign_up_new_client(new_client: ShopifyClient):
     """
         Sign up a new client:
         - **client_id**: shopify store id
@@ -195,7 +195,7 @@ async def sign_up_new_client(new_client: NewClient):
 
 @app.post("/api/v1/schemas/client/delete", response_model=ResponseMessage, tags=["Client"],
           summary="Remove an existing client")
-async def delete_client(*, shop_id: str):
+async def delete_client(*, client: ShopifyClient):
     """
         Delete a new client:
         - **shop_id**: the e-mail id of the new client
@@ -203,12 +203,15 @@ async def delete_client(*, shop_id: str):
 
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
     logger.info("deletion of existing client started.")
-    logger.info("shop_id : {shop_id}".format(shop_id=shop_id))
+    logger.info("client_id : {client_id}".format(client_id=client.client_id))
+    logger.info("shopify_store : {shopify_store}".format(shopify_store=client.shopify_store))
+    logger.info(
+        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=client.shopify_access_token))
 
     response = ResponseMessage()
-    ClientAgent.delete_client_for_client_id(data_store=app.rds_data_store, client_id=shop_id)
+    ClientAgent.delete_client_for_client_id(data_store=app.rds_data_store, client_id=client.client_id)
     response.message = "Deletion for client with client_id {client_id} is successful.".format(
-        client_id=shop_id)
+        client_id=client.client_id)
     response.status = status.HTTP_200_OK
 
     logger.info(response.message)
@@ -242,7 +245,7 @@ async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depe
 
 @app.get("/api/v1/schemas/client/details", response_model=Client, tags=["Client"],
          summary="Get details of a logged in client")
-async def get_client_details(*, current_client: ShopifyClient = Depends(
+async def get_client_details(*, current_client: BinaizeClient = Depends(
     get_current_active_client)):
     """
         Get details of a logged in client:
@@ -257,7 +260,7 @@ async def get_client_details(*, current_client: ShopifyClient = Depends(
 
 @app.post("/api/v1/schemas/experiment/create", response_model=Experiment, tags=["Experiment"],
           summary="Create a new experiment")
-async def add_experiment(*, current_client: ShopifyClient = Depends(get_current_active_client),
+async def add_experiment(*, current_client: BinaizeClient = Depends(get_current_active_client),
                          new_experiment: BaseExperiment):
     """
         Create a new experiment for a logged in client:
@@ -282,7 +285,7 @@ async def add_experiment(*, current_client: ShopifyClient = Depends(get_current_
 
 @app.get("/api/v1/schemas/experiment/list", response_model=List[Experiment], tags=["Experiment"],
          summary="List down all the experiments")
-async def list_experiments(*, current_client: ShopifyClient = Depends(get_current_active_client)):
+async def list_experiments(*, current_client: BinaizeClient = Depends(get_current_active_client)):
     """
         List down all the experiments for a logged in client:
         - **access_token**: access token issued by the server to the logged in client
@@ -294,7 +297,7 @@ async def list_experiments(*, current_client: ShopifyClient = Depends(get_curren
 
 @app.post("/api/v1/schemas/variation/create", response_model=Variation, tags=["Variation"],
           summary="Create a new variation")
-async def add_variation(*, current_client: ShopifyClient = Depends(get_current_active_client),
+async def add_variation(*, current_client: BinaizeClient = Depends(get_current_active_client),
                         new_variation: NewVariation):
     """
         Create a new variation for an existing experiment of a logged in client:
@@ -440,7 +443,7 @@ async def register_cookie(*, cookie: Cookie):
 
 @app.get("/api/v1/schemas/report/conversion-over-time", response_model=dict, tags=["Report"],
          summary="Get conversion rate")
-async def get_goal_conversion_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+async def get_goal_conversion_for_dashboard(*, current_client: BinaizeClient = Depends(get_current_active_client),
                                             experiment_id: str):
     """
         Get session count, visitor count, goal conversion count, goal conversion rate, sales conversion count and sales
@@ -459,7 +462,7 @@ async def get_goal_conversion_for_dashboard(*, current_client: ShopifyClient = D
 
 @app.get("/api/v1/schemas/report/conversion-table", response_model=List[dict], tags=["Report"],
          summary="Get conversion table")
-async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = Depends(get_current_active_client),
+async def get_conversion_table_for_dashboard(*, current_client: BinaizeClient = Depends(get_current_active_client),
                                              experiment_id: str):
     """
         Get conversion table of all the variations of an existing experiment of a logged in client till now:
@@ -475,7 +478,7 @@ async def get_conversion_table_for_dashboard(*, current_client: ShopifyClient = 
 
 @app.get("/api/v1/schemas/report/experiment-summary", response_model=dict, tags=["Report"],
          summary="Get experiment summary")
-async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_current_active_client),
+async def get_experiment_summary(*, current_client: BinaizeClient = Depends(get_current_active_client),
                                  experiment_id: str):
     """
         Get experiment summary of an existing experiment of a logged in client:
@@ -493,7 +496,7 @@ async def get_experiment_summary(*, current_client: ShopifyClient = Depends(get_
 @app.get("/api/v1/schemas/report/shop-funnel", response_model=dict, tags=["Report"],
          summary="Get shop funnel analytics")
 async def get_shop_funnel_analytics_for_dashboard(*,
-                                                  current_client: ShopifyClient = Depends(get_current_active_client),
+                                                  current_client: BinaizeClient = Depends(get_current_active_client),
                                                   start_date: str, end_date: str):
     """
         Get shop funnel analytics of the client's website till now:
@@ -511,7 +514,7 @@ async def get_shop_funnel_analytics_for_dashboard(*,
 
 @app.get("/api/v1/schemas/report/product-conversion", response_model=dict, tags=["Report"],
          summary="Get product conversion analytics")
-async def get_product_conversion_analytics_for_dashboard(*, current_client: ShopifyClient = Depends(
+async def get_product_conversion_analytics_for_dashboard(*, current_client: BinaizeClient = Depends(
     get_current_active_client), start_date: str, end_date: str):
     """
         Get product conversion analytics of the client's website till now:
@@ -530,7 +533,7 @@ async def get_product_conversion_analytics_for_dashboard(*, current_client: Shop
 @app.get("/api/v1/schemas/report/landing-page", response_model=dict, tags=["Report"],
          summary="Get landing page analytics")
 async def get_landing_page_analytics_for_dashboard(*,
-                                                   current_client: ShopifyClient = Depends(get_current_active_client),
+                                                   current_client: BinaizeClient = Depends(get_current_active_client),
                                                    start_date: str, end_date: str
                                                    ):
     """
@@ -550,7 +553,7 @@ async def get_landing_page_analytics_for_dashboard(*,
 @app.get("/api/v1/schemas/report/visitor-activity", response_model=dict, tags=["Report"],
          summary="Get visitor analytics")
 async def get_landing_page_analytics_for_dashboard(*,
-                                                   current_client: ShopifyClient = Depends(get_current_active_client),
+                                                   current_client: BinaizeClient = Depends(get_current_active_client),
                                                    start_date: str, end_date: str
                                                    ):
     """

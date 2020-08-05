@@ -6,7 +6,7 @@ class Token(BaseModel):
     token_type: str
 
 
-class ShopifyClient(BaseModel):
+class BinaizeClient(BaseModel):
     client_id: str
     shopify_domain: str
     shop_domain: str
@@ -22,7 +22,7 @@ class ShopifyClient(BaseModel):
     client_timezone: str
 
 
-class NewClient(BaseModel):
+class ShopifyClient(BaseModel):
     client_id: str
     shopify_store: str
     shopify_access_token: str
