@@ -195,7 +195,7 @@ async def sign_up_new_client(new_client: NewClient):
 
 @app.post("/api/v1/schemas/client/delete", response_model=ResponseMessage, tags=["Client"],
           summary="Remove an existing client")
-async def delete_client(shop_id: str):
+async def delete_client(*, shop_id: str):
     """
         Delete a new client:
         - **shop_id**: the e-mail id of the new client
