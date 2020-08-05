@@ -13,18 +13,17 @@ from config import *
 from optimization_platform.deployment.server_models import *
 from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.cookie_agent import CookieAgent
-from optimization_platform.src.analytics.conversion.conversion_analytics import ConversionAnalytics
-from optimization_platform.src.analytics.experiment.experiment_analytics import ExperimentAnalytics
-from optimization_platform.src.analytics.visitor.visitor_analytics import VisitorAnalytics
-
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
 from optimization_platform.src.agents.visit_agent import VisitAgent
+from optimization_platform.src.agents.visitor_agent import VisitorAgent
+from optimization_platform.src.analytics.conversion.conversion_analytics import ConversionAnalytics
+from optimization_platform.src.analytics.experiment.experiment_analytics import ExperimentAnalytics
+from optimization_platform.src.analytics.visitor.visitor_analytics import VisitorAnalytics
 from utils.data_store.rds_data_store import RDSDataStore
 from utils.date_utils import DateUtils
 from utils.logger.pylogger import get_logger
-from optimization_platform.src.agents.visitor_agent import VisitorAgent
 
 logger = get_logger("server", "INFO")
 
@@ -164,6 +163,14 @@ async def sign_up_new_client(new_client: NewClient):
         - **shopify_access_token**: shopify access token of the new client
     """
 
+    logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
+    logger.info("signing up new client started.")
+
+    logger.info("client_id : {client_id}".format(client_id=new_client.client_id))
+    logger.info("shopify_store : {shopify_store}".format(shopify_store=new_client.shopify_store))
+    logger.info(
+        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=new_client.shopify_access_token))
+
     creation_time = DateUtils.get_timestamp_now()
     user = get_client(app.rds_data_store, client_id=new_client.client_id)
     response = ResponseMessage()
@@ -178,6 +185,11 @@ async def sign_up_new_client(new_client: NewClient):
         response.message = "Sign up for new client with client_id {client_id} is successful.".format(
             client_id=new_client.client_id)
         response.status = status.HTTP_200_OK
+
+    logger.info(response.message)
+    logger.info("signing up new client ended.")
+    logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
+
     return response
 
 
@@ -189,11 +201,19 @@ async def delete_client(shop_id: str):
         - **shop_id**: the e-mail id of the new client
     """
 
+    logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
+    logger.info("deletion of existing client started.")
+    logger.info("shop_id : {shop_id}".format(shop_id=shop_id))
+
     response = ResponseMessage()
     ClientAgent.delete_client_for_client_id(data_store=app.rds_data_store, client_id=shop_id)
     response.message = "Deletion for client with client_id {client_id} is successful.".format(
         client_id=shop_id)
     response.status = status.HTTP_200_OK
+
+    logger.info("deletion of existing client ended.")
+    logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
+
     return response
 
 
@@ -205,7 +225,7 @@ async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depe
         - **password**: password used for signing up by the client
     """
 
-    user = authenticate_client(app.rds_data_store, form_data.username, form_data.password)
+    user = authenticate_client(data_store=app.rds_data_store, client_id=form_data.username, password=form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
