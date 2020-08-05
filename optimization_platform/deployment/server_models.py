@@ -6,22 +6,25 @@ class Token(BaseModel):
     token_type: str
 
 
-class BaseClient(BaseModel):
+class ShopifyClient(BaseModel):
     client_id: str
-    company_name: str
-    full_name: str
+    shopify_domain: str
+    shop_domain: str
+    shop_owner: str
+    email_id: str
+    shopify_access_token: str
+    city: str
+    country: str
+    province: str
     disabled: bool
-    shopify_app_eg_url: str
-    client_timezone: str
-
-
-class NewClient(BaseClient):
-    password: str
-
-
-class ShopifyClient(BaseClient):
     hashed_password: str
     creation_time: str
+
+
+class NewClient(BaseModel):
+    client_id: str
+    shopify_store: str
+    shopify_access_token: str
 
 
 class Client(BaseModel):

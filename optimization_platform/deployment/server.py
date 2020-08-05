@@ -136,7 +136,7 @@ async def _get_current_client(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-async def get_current_active_client(current_client: BaseClient = Depends(_get_current_client)):
+async def get_current_active_client(current_client: ShopifyClient = Depends(_get_current_client)):
     if current_client.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
     return current_client
@@ -159,11 +159,9 @@ async def home_page():
 async def sign_up_new_client(new_client: NewClient):
     """
         Sign up a new client:
-        - **client_id**: the e-mail id of the new client
-        - **full_name**: full name of the new client
-        - **company_name**: company name of the new client
-        - **disabled**: *true* if the new client should be disabled else *false*
-        - **password**: password used for signing up by the new client
+        - **client_id**: shopify store id
+        - **shopify_store**: shopify store name
+        - **shopify_access_token**: shopify access token of the new client
     """
 
     creation_time = DateUtils.get_timestamp_now()
@@ -173,16 +171,29 @@ async def sign_up_new_client(new_client: NewClient):
         client_id=new_client.client_id)
     response.status = status.HTTP_409_CONFLICT
     if user is None:
-        hashed_password = get_password_hash(new_client.password)
-        ClientAgent.add_new_client(data_store=app.rds_data_store, client_id=new_client.client_id,
-                                   full_name=new_client.full_name,
-                                   company_name=new_client.company_name, hashed_password=hashed_password,
-                                   disabled=new_client.disabled, shopify_app_eg_url=new_client.shopify_app_eg_url,
-                                   client_timezone=new_client.client_timezone, creation_timestamp=creation_time)
+        hashed_password = get_password_hash(new_client.shopify_store)
+        ClientAgent.add_new_client(data_store=app.rds_data_store, shopify_store=new_client.shopify_store,
+                                   shopify_access_token=new_client.shopify_access_token,
+                                   hashed_password=hashed_password, creation_timestamp=creation_time)
         response.message = "Sign up for new client with client_id {client_id} is successful.".format(
             client_id=new_client.client_id)
         response.status = status.HTTP_200_OK
+    return response
 
+
+@app.post("/api/v1/schemas/client/delete", response_model=ResponseMessage, tags=["Client"],
+          summary="Remove an existing client")
+async def delete_client(shop_id: str):
+    """
+        Delete a new client:
+        - **shop_id**: the e-mail id of the new client
+    """
+
+    response = ResponseMessage()
+    ClientAgent.delete_client_for_client_id(data_store=app.rds_data_store, client_id=shop_id)
+    response.message = "Deletion for client with client_id {client_id} is successful.".format(
+        client_id=shop_id)
+    response.status = status.HTTP_200_OK
     return response
 
 
