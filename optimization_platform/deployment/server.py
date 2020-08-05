@@ -211,6 +211,7 @@ async def delete_client(shop_id: str):
         client_id=shop_id)
     response.status = status.HTTP_200_OK
 
+    logger.info(response.message)
     logger.info("deletion of existing client ended.")
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
 
@@ -247,9 +248,9 @@ async def get_client_details(*, current_client: ShopifyClient = Depends(
         Get details of a logged in client:
         - **access_token**: access token issued by the server to the logged in client
     """
-    client = Client(client_id=current_client.client_id, full_name=current_client.full_name,
-                    company_name=current_client.company_name, disabled=current_client.disabled,
-                    shopify_app_eg_url=current_client.shopify_app_eg_url,
+    client = Client(client_id=current_client.client_id, full_name=current_client.client_id,
+                    company_name=current_client.client_id, disabled=current_client.disabled,
+                    shopify_app_eg_url=current_client.shopify_domain,
                     client_timezone=current_client.client_timezone, creation_time=current_client.creation_time)
     return client
 

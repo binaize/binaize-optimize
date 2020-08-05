@@ -19,6 +19,7 @@ class ShopifyClient(BaseModel):
     disabled: bool
     hashed_password: str
     creation_time: str
+    client_timezone: str
 
 
 class NewClient(BaseModel):
