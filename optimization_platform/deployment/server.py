@@ -179,7 +179,7 @@ async def sign_up_new_client(new_client: ShopifyClient):
     response.status = status.HTTP_409_CONFLICT
     if user is None:
         hashed_password = get_password_hash(new_client.shopify_store)
-        ClientAgent.add_new_client(data_store=app.rds_data_store, shopify_store=new_client.shopify_store,
+        ClientAgent.add_new_client(data_store=app.rds_data_store, shopify_domain=new_client.shopify_store,
                                    shopify_access_token=new_client.shopify_access_token,
                                    hashed_password=hashed_password, creation_timestamp=creation_time)
         response.message = "Sign up for new client with client_id {client_id} is successful.".format(

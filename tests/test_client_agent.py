@@ -29,7 +29,7 @@ class TestClientAgent(TestCase):
 
     def _add_new_client(self, shopify_store, shopify_access_token, hashed_password):
         timestamp = 1590673060
-        status = ClientAgent.add_new_client(data_store=self.rds_data_store, shopify_store=shopify_store,
+        status = ClientAgent.add_new_client(data_store=self.rds_data_store, shopify_domain=shopify_store,
                                             shopify_access_token=shopify_access_token, hashed_password=hashed_password,
                                             creation_timestamp=timestamp)
         return status

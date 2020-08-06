@@ -8,11 +8,11 @@ from utils.date_utils import DateUtils
 class ClientAgent(object):
 
     @classmethod
-    def add_new_client(cls, data_store, shopify_store, shopify_access_token, hashed_password, creation_timestamp):
+    def add_new_client(cls, data_store, shopify_domain, shopify_access_token, hashed_password, creation_timestamp):
         table = TABLE_CLIENTS
         creation_time_utc_str = DateUtils.convert_timestamp_to_utc_iso_string(creation_timestamp)
-        STORE_DETAILS_URL = "https://{shopify_store}.myshopify.com/admin/api/2020-07/shop.json".format(
-            shopify_store=shopify_store)
+        STORE_DETAILS_URL = "https://{shopify_store}/admin/api/2020-07/shop.json".format(
+            shopify_store=shopify_domain)
         shop_details_response = requests.get(STORE_DETAILS_URL, headers={
             "X-Shopify-Access-Token": shopify_access_token
         })
