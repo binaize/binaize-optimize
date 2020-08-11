@@ -15,7 +15,7 @@ from optimization_platform.src.agents.variation_agent import VariationAgent
 from optimization_platform.src.agents.order_agent import OrderAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from optimization_platform.src.agents.cookie_agent import CookieAgent
-from optimization_platform.src.agents.client_agent import ClientAgent
+from optimization_platform.src.agents.shop_agent import ShopAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
 
 
@@ -71,12 +71,12 @@ class TestExperimentAnalytics(TestCase):
     def _add_new_client(self, client_id, full_name, company_name, hashed_password, disabled, shopify_app_eg_url,
                         client_timezone):
         timestamp = 1590673060
-        ClientAgent.add_new_client(data_store=self.rds_data_store, client_id=client_id,
-                                   full_name=full_name,
-                                   company_name=company_name, hashed_password=hashed_password,
-                                   disabled=disabled, client_timezone=client_timezone,
-                                   shopify_app_eg_url=shopify_app_eg_url,
-                                   creation_timestamp=timestamp)
+        ShopAgent.add_new_client(data_store=self.rds_data_store, client_id=client_id,
+                                 full_name=full_name,
+                                 company_name=company_name, hashed_password=hashed_password,
+                                 disabled=disabled, client_timezone=client_timezone,
+                                 shopify_app_eg_url=shopify_app_eg_url,
+                                 creation_timestamp=timestamp)
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def _create_orders(self, x):

@@ -6,9 +6,8 @@ class Token(BaseModel):
     token_type: str
 
 
-class BinaizeClient(BaseModel):
-    client_id: str
-    shopify_domain: str
+class BinaizeShop(BaseModel):
+    shop_id: str
     shop_domain: str
     shop_owner: str
     email_id: str
@@ -19,23 +18,25 @@ class BinaizeClient(BaseModel):
     disabled: bool
     hashed_password: str
     creation_time: str
-    client_timezone: str
+    timezone: str
 
 
-class ShopifyClient(BaseModel):
-    client_id: str
-    shopify_store: str
+class ShopifyShop(BaseModel):
+    shop_id: str
     shopify_access_token: str
 
 
-class Client(BaseModel):
-    client_id: str
-    company_name: str
-    full_name: str
+class Shop(BaseModel):
+    shop_id: str
+    shop_domain: str
+    shop_owner: str
+    email_id: str
+    city: str
+    country: str
+    province: str
     disabled: bool
-    shopify_app_eg_url: str
-    client_timezone: str
     creation_time: str
+    timezone: str
 
 
 class ResponseMessage(BaseModel):

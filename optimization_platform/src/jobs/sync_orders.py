@@ -1,7 +1,7 @@
 import sys
 
 from config import *
-from optimization_platform.src.agents.client_agent import ClientAgent
+from optimization_platform.src.agents.shop_agent import ShopAgent
 from optimization_platform.src.agents.order_agent import OrderAgent
 from utils.data_store.rds_data_store import RDSDataStore
 from utils.logger.pylogger import get_logger
@@ -20,7 +20,7 @@ rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
 
 
 def main(rds_data_store):
-    client_ids = ClientAgent.get_all_client_ids(data_store=rds_data_store)
+    client_ids = ShopAgent.get_all_shop_ids(data_store=rds_data_store)
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
     logger.info("sync orders job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
     for client_id in client_ids:

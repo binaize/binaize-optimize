@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 from typing import List
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi import FastAPI
+from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,10 +12,10 @@ from passlib.context import CryptContext
 
 from config import *
 from optimization_platform.deployment.server_models import *
-from optimization_platform.src.agents.client_agent import ClientAgent
 from optimization_platform.src.agents.cookie_agent import CookieAgent
 from optimization_platform.src.agents.event_agent import EventAgent
 from optimization_platform.src.agents.experiment_agent import ExperimentAgent
+from optimization_platform.src.agents.shop_agent import ShopAgent
 from optimization_platform.src.agents.variation_agent import VariationAgent
 from optimization_platform.src.agents.visit_agent import VisitAgent
 from optimization_platform.src.agents.visitor_agent import VisitorAgent
@@ -29,8 +30,8 @@ logger = get_logger("server", "INFO")
 
 tags_metadata = [
     {
-        "name": "Client",
-        "description": "Operations with clients. The **login** logic is also here."
+        "name": "Shop",
+        "description": "Operations with shops. The **login** logic is also here."
     },
     {
         "name": "Experiment",
@@ -84,7 +85,7 @@ app.rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/schemas/client/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/schemas/shop/token")
 
 
 def verify_password(plain_password, hashed_password):
@@ -95,19 +96,19 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_client(data_store, client_id: str):
-    client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
-    if client_details is not None:
-        return BinaizeClient(**client_details)
+def get_shop(data_store, shop_id: str):
+    shop_details = ShopAgent.get_shop_details_for_shop_id(data_store=data_store, shop_id=shop_id)
+    if shop_details is not None:
+        return BinaizeShop(**shop_details)
 
 
-def authenticate_client(data_store, client_id: str, password: str):
-    user = get_client(data_store, client_id)
-    if not user:
+def authenticate_shop(data_store, shop_id: str, password: str):
+    shop = get_shop(data_store, shop_id)
+    if not shop:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, shop.hashed_password):
         return False
-    return user
+    return shop
 
 
 def create_access_token(*, data: dict, expires_delta: timedelta):
@@ -118,7 +119,7 @@ def create_access_token(*, data: dict, expires_delta: timedelta):
     return encoded_jwt
 
 
-async def _get_current_client(token: str = Depends(oauth2_scheme)):
+async def _get_current_shop(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -126,8 +127,8 @@ async def _get_current_client(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        client_id = payload.get("sub")
-        user = get_client(app.rds_data_store, client_id=client_id)
+        shop_id = payload.get("sub")
+        user = get_shop(app.rds_data_store, shop_id=shop_id)
         if user is None:
             raise credentials_exception
         return user
@@ -135,10 +136,10 @@ async def _get_current_client(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
 
-async def get_current_active_client(current_client: BinaizeClient = Depends(_get_current_client)):
-    if current_client.disabled:
+async def get_current_active_shop(current_shop: BinaizeShop = Depends(_get_current_shop)):
+    if current_shop.disabled:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
-    return current_client
+    return current_shop
 
 
 @app.get("/", response_model=dict)
@@ -153,84 +154,85 @@ async def home_page():
     return response
 
 
-@app.post("/api/v1/schemas/client/sign_up", response_model=ResponseMessage, tags=["Client"],
-          summary="Sign up a new client")
-async def sign_up_new_client(new_client: ShopifyClient):
+@app.post("/api/v1/schemas/shop/sign_up", response_model=ResponseMessage, tags=["Shop"],
+          summary="Sign up a new shop")
+async def sign_up_new_shop(shop: ShopifyShop):
     """
-        Sign up a new client:
-        - **client_id**: shopify store id
-        - **shopify_store**: shopify store name
-        - **shopify_access_token**: shopify access token of the new client
+        Sign up a new shop:
+        - **shop_id**: shopify store domain name
+        - **shopify_access_token**: shopify access token of the new shop
     """
 
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
-    logger.info("signing up new client started.")
+    logger.info("signing up new shop started.")
 
-    logger.info("client_id : {client_id}".format(client_id=new_client.client_id))
-    logger.info("shopify_store : {shopify_store}".format(shopify_store=new_client.shopify_store))
+    logger.info("shop id : {shop_id}".format(shop_id=shop.shop_id))
     logger.info(
-        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=new_client.shopify_access_token))
+        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=shop.shopify_access_token))
 
     creation_time = DateUtils.get_timestamp_now()
-    user = get_client(app.rds_data_store, client_id=new_client.client_id)
+    user = get_shop(app.rds_data_store, shop_id=shop.shop_id)
     response = ResponseMessage()
-    response.message = "Client_id {client_id} is already registered.".format(
-        client_id=new_client.client_id)
+    response.message = "shop id {shop_id} is already registered.".format(
+        shop_id=shop.shop_id)
     response.status = status.HTTP_409_CONFLICT
     if user is None:
-        hashed_password = get_password_hash(new_client.shopify_store)
-        ClientAgent.add_new_client(data_store=app.rds_data_store, shopify_domain=new_client.shopify_store,
-                                   shopify_access_token=new_client.shopify_access_token,
-                                   hashed_password=hashed_password, creation_timestamp=creation_time)
-        response.message = "Sign up for new client with client_id {client_id} is successful.".format(
-            client_id=new_client.client_id)
+        hashed_password = get_password_hash(shop.shop_id)
+        sign_up_status = ShopAgent.add_new_shop(data_store=app.rds_data_store, shop_id=shop.shop_id,
+                                                shopify_access_token=shop.shopify_access_token,
+                                                hashed_password=hashed_password, creation_timestamp=creation_time)
+        if sign_up_status is None:
+            response.message = "sign up for new shop with shop id {shop_id} failed.".format(
+                shop_id=shop.shop_id)
+        else:
+            response.message = "sign up for new shop with shop id {shop_id} is successful.".format(
+                shop_id=shop.shop_id)
         response.status = status.HTTP_200_OK
 
     logger.info(response.message)
-    logger.info("signing up new client ended.")
+    logger.info("signing up new shop ended.")
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
 
     return response
 
 
-@app.post("/api/v1/schemas/client/delete", response_model=ResponseMessage, tags=["Client"],
-          summary="Remove an existing client")
-async def delete_client(*, client: ShopifyClient):
+@app.post("/api/v1/schemas/shop/delete", response_model=ResponseMessage, tags=["Shop"],
+          summary="Remove an existing shop")
+async def delete_shop(*, shop: ShopifyShop):
     """
-        Delete a new client:
-        - **shop_id**: the e-mail id of the new client
+        Delete a new shop:
+        - **shop_id**: shopify store domain name
     """
 
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
-    logger.info("deletion of existing client started.")
-    logger.info("client_id : {client_id}".format(client_id=client.client_id))
-    logger.info("shopify_store : {shopify_store}".format(shopify_store=client.shopify_store))
+    logger.info("deletion of existing shop started.")
+    logger.info("shop id : {shop_id}".format(shop_id=shop.shop_id))
     logger.info(
-        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=client.shopify_access_token))
+        "shopify_access_token : {shopify_access_token}".format(shopify_access_token=shop.shopify_access_token))
 
     response = ResponseMessage()
-    ClientAgent.delete_client_for_client_id(data_store=app.rds_data_store, client_id=client.client_id)
-    response.message = "Deletion for client with client_id {client_id} is successful.".format(
-        client_id=client.client_id)
+    ShopAgent.delete_shop_for_shop_id(data_store=app.rds_data_store, shop_id=shop.shop_id)
+    response.message = "deletion for shop with shop id {shop_id} is successful.".format(
+        shop_id=shop.shop_id)
     response.status = status.HTTP_200_OK
 
     logger.info(response.message)
-    logger.info("deletion of existing client ended.")
+    logger.info("deletion of existing shop ended.")
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
 
     return response
 
 
-@app.post("/api/v1/schemas/client/token", response_model=Token, tags=["Client"], summary="Login and get access token")
+@app.post("/api/v1/schemas/shop/token", response_model=Token, tags=["Shop"], summary="Login and get access token")
 async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
-        The client logs in and get an access token for the session:
-        - **username**: the e-mail id of the client used as client_id while signing up
-        - **password**: password used for signing up by the client
+        The shop logs in and get an access token for the session:
+        - **username**: shop_id of the shop while signing up
+        - **password**: password used for signing up by the shop
     """
 
-    user = authenticate_client(data_store=app.rds_data_store, client_id=form_data.username, password=form_data.password)
-    if not user:
+    shop = authenticate_shop(data_store=app.rds_data_store, shop_id=form_data.username, password=form_data.password)
+    if not shop:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -238,29 +240,39 @@ async def login_and_get_access_token(form_data: OAuth2PasswordRequestForm = Depe
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.client_id}, expires_delta=access_token_expires
+        data={"sub": shop.shop_id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/api/v1/schemas/client/details", response_model=Client, tags=["Client"],
-         summary="Get details of a logged in client")
-async def get_client_details(*, current_client: BinaizeClient = Depends(
-    get_current_active_client)):
+@app.get("/api/v1/schemas/shop/details", response_model=Shop, tags=["Shop"],
+         summary="Get details of a logged in shop")
+async def get_shop_details(*, shop: BinaizeShop = Depends(
+    get_current_active_shop)):
     """
-        Get details of a logged in client:
-        - **access_token**: access token issued by the server to the logged in client
+        Get details of a logged in shop:
+        - **access_token**: access token issued by the server to the logged in shop
     """
-    client = Client(client_id=current_client.client_id, full_name=current_client.client_id,
-                    company_name=current_client.client_id, disabled=current_client.disabled,
-                    shopify_app_eg_url=current_client.shopify_domain,
-                    client_timezone=current_client.client_timezone, creation_time=current_client.creation_time)
-    return client
+    shop = Shop(shop_id=shop.shop_id, shop_domain=shop.shop_domain, shop_owner=shop.shop_owner, email_id=shop.email_id,
+                city=shop.city, country=shop.country, province=shop.province, disabled=shop.disabled,
+                creation_time=shop.creation_time, timezone=shop.timezone)
+    return shop
+
+
+@app.get("/api/v1/schemas/shop/shopify_details", response_model=dict, tags=["Shop"],
+         summary="Get details of a logged in shop")
+async def get_shopify_details(*, shop_id: str):
+    """
+        Get details of a logged in shop:
+        - **shop_id**: shopify store domain name
+    """
+    shopify_details = ShopAgent.get_shopify_details_for_shop_id(data_store=app.rds_data_store, shop_id=shop_id)
+    return shopify_details
 
 
 @app.post("/api/v1/schemas/experiment/create", response_model=Experiment, tags=["Experiment"],
           summary="Create a new experiment")
-async def add_experiment(*, current_client: BinaizeClient = Depends(get_current_active_client),
+async def add_experiment(*, current_client: BinaizeShop = Depends(get_current_active_shop),
                          new_experiment: BaseExperiment):
     """
         Create a new experiment for a logged in client:
@@ -285,7 +297,7 @@ async def add_experiment(*, current_client: BinaizeClient = Depends(get_current_
 
 @app.get("/api/v1/schemas/experiment/list", response_model=List[Experiment], tags=["Experiment"],
          summary="List down all the experiments")
-async def list_experiments(*, current_client: BinaizeClient = Depends(get_current_active_client)):
+async def list_experiments(*, current_client: BinaizeShop = Depends(get_current_active_shop)):
     """
         List down all the experiments for a logged in client:
         - **access_token**: access token issued by the server to the logged in client
@@ -297,7 +309,7 @@ async def list_experiments(*, current_client: BinaizeClient = Depends(get_curren
 
 @app.post("/api/v1/schemas/variation/create", response_model=Variation, tags=["Variation"],
           summary="Create a new variation")
-async def add_variation(*, current_client: BinaizeClient = Depends(get_current_active_client),
+async def add_variation(*, current_client: BinaizeShop = Depends(get_current_active_shop),
                         new_variation: NewVariation):
     """
         Create a new variation for an existing experiment of a logged in client:
@@ -443,7 +455,7 @@ async def register_cookie(*, cookie: Cookie):
 
 @app.get("/api/v1/schemas/report/conversion-over-time", response_model=dict, tags=["Report"],
          summary="Get conversion rate")
-async def get_goal_conversion_for_dashboard(*, current_client: BinaizeClient = Depends(get_current_active_client),
+async def get_goal_conversion_for_dashboard(*, current_client: BinaizeShop = Depends(get_current_active_shop),
                                             experiment_id: str):
     """
         Get session count, visitor count, goal conversion count, goal conversion rate, sales conversion count and sales
@@ -462,7 +474,7 @@ async def get_goal_conversion_for_dashboard(*, current_client: BinaizeClient = D
 
 @app.get("/api/v1/schemas/report/conversion-table", response_model=List[dict], tags=["Report"],
          summary="Get conversion table")
-async def get_conversion_table_for_dashboard(*, current_client: BinaizeClient = Depends(get_current_active_client),
+async def get_conversion_table_for_dashboard(*, current_client: BinaizeShop = Depends(get_current_active_shop),
                                              experiment_id: str):
     """
         Get conversion table of all the variations of an existing experiment of a logged in client till now:
@@ -478,7 +490,7 @@ async def get_conversion_table_for_dashboard(*, current_client: BinaizeClient = 
 
 @app.get("/api/v1/schemas/report/experiment-summary", response_model=dict, tags=["Report"],
          summary="Get experiment summary")
-async def get_experiment_summary(*, current_client: BinaizeClient = Depends(get_current_active_client),
+async def get_experiment_summary(*, current_client: BinaizeShop = Depends(get_current_active_shop),
                                  experiment_id: str):
     """
         Get experiment summary of an existing experiment of a logged in client:
@@ -496,7 +508,7 @@ async def get_experiment_summary(*, current_client: BinaizeClient = Depends(get_
 @app.get("/api/v1/schemas/report/shop-funnel", response_model=dict, tags=["Report"],
          summary="Get shop funnel analytics")
 async def get_shop_funnel_analytics_for_dashboard(*,
-                                                  current_client: BinaizeClient = Depends(get_current_active_client),
+                                                  current_client: BinaizeShop = Depends(get_current_active_shop),
                                                   start_date: str, end_date: str):
     """
         Get shop funnel analytics of the client's website till now:
@@ -514,8 +526,8 @@ async def get_shop_funnel_analytics_for_dashboard(*,
 
 @app.get("/api/v1/schemas/report/product-conversion", response_model=dict, tags=["Report"],
          summary="Get product conversion analytics")
-async def get_product_conversion_analytics_for_dashboard(*, current_client: BinaizeClient = Depends(
-    get_current_active_client), start_date: str, end_date: str):
+async def get_product_conversion_analytics_for_dashboard(*, current_client: BinaizeShop = Depends(
+    get_current_active_shop), start_date: str, end_date: str):
     """
         Get product conversion analytics of the client's website till now:
         - **access_token**: access token issued by the server to the logged in client
@@ -533,7 +545,7 @@ async def get_product_conversion_analytics_for_dashboard(*, current_client: Bina
 @app.get("/api/v1/schemas/report/landing-page", response_model=dict, tags=["Report"],
          summary="Get landing page analytics")
 async def get_landing_page_analytics_for_dashboard(*,
-                                                   current_client: BinaizeClient = Depends(get_current_active_client),
+                                                   current_client: BinaizeShop = Depends(get_current_active_shop),
                                                    start_date: str, end_date: str
                                                    ):
     """
@@ -553,7 +565,7 @@ async def get_landing_page_analytics_for_dashboard(*,
 @app.get("/api/v1/schemas/report/visitor-activity", response_model=dict, tags=["Report"],
          summary="Get visitor analytics")
 async def get_landing_page_analytics_for_dashboard(*,
-                                                   current_client: BinaizeClient = Depends(get_current_active_client),
+                                                   current_client: BinaizeShop = Depends(get_current_active_shop),
                                                    start_date: str, end_date: str
                                                    ):
     """

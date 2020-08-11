@@ -1,3 +1,0 @@
-client_id,shopify_domain,shop_domain,shop_owner,email_id,hashed_password,disabled,client_timezone,shopify_access_token,city,country,province,creation_time
-39985610920,binaize-dev-watch.myshopify.com,dev.watches.binaize.com,Binaize Labs,binaizeshopify@gmail.com,test_hashed_password',False,'America/New_York,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,Austin,US,Texas,2020-05-28T19:07:40+05:30
-39985610917,binaize-dev-watch.myshopify.com,dev.watches.binaize.com,Binaize Labs,binaizeshopify@gmail.com,test_hashed_password',False,'America/New_York,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,Austin,US,Texas,2020-05-28T19:07:40+05:30

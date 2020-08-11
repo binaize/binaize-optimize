@@ -2,7 +2,7 @@ import datetime
 
 import requests
 
-from optimization_platform.src.agents.client_agent import ClientAgent
+from optimization_platform.src.agents.shop_agent import ShopAgent
 from utils.data_store.rds_data_store import IteratorFile
 from utils.date_utils import DateUtils
 from config import TABLE_ORDERS
@@ -27,7 +27,7 @@ class OrderAgent(object):
             max_datetime_utc = DateUtils.change_timezone(datetime_obj=max_datetime, timezone_str="UTC")
             order_updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
 
-        client_details = ClientAgent.get_client_details_for_client_id(data_store=data_store, client_id=client_id)
+        client_details = ShopAgent.get_shop_details_for_shop_id(data_store=data_store, shop_id=client_id)
         shared_url = client_details["shopify_app_eg_url"]
         base_url = "/".join(shared_url.split("/")[:6])
         order_url = "{base_url}/orders.json?limit=250".format(base_url=base_url)
