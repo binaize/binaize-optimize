@@ -170,24 +170,19 @@ async def sign_up_new_shop(shop: ShopifyShop):
     logger.info(
         "shopify_access_token : {shopify_access_token}".format(shopify_access_token=shop.shopify_access_token))
 
-    creation_time = DateUtils.get_timestamp_now()
-    user = get_shop(app.rds_data_store, shop_id=shop.shop_id)
     response = ResponseMessage()
-    response.message = "shop id {shop_id} is already registered.".format(
-        shop_id=shop.shop_id)
-    response.status = status.HTTP_409_CONFLICT
-    if user is None:
-        hashed_password = get_password_hash(shop.shop_id)
-        sign_up_status = ShopAgent.add_new_shop(data_store=app.rds_data_store, shop_id=shop.shop_id,
-                                                shopify_access_token=shop.shopify_access_token,
-                                                hashed_password=hashed_password, creation_timestamp=creation_time)
-        if sign_up_status is None:
-            response.message = "sign up for new shop with shop id {shop_id} failed.".format(
-                shop_id=shop.shop_id)
-        else:
-            response.message = "sign up for new shop with shop id {shop_id} is successful.".format(
-                shop_id=shop.shop_id)
-        response.status = status.HTTP_200_OK
+    creation_time = DateUtils.get_timestamp_now()
+    hashed_password = get_password_hash(shop.shop_id)
+    sign_up_status = ShopAgent.add_new_shop(data_store=app.rds_data_store, shop_id=shop.shop_id,
+                                            shopify_access_token=shop.shopify_access_token,
+                                            hashed_password=hashed_password, creation_timestamp=creation_time)
+    if sign_up_status is None:
+        response.message = "sign up for new shop with shop id {shop_id} failed.".format(
+            shop_id=shop.shop_id)
+    else:
+        response.message = "sign up for new shop with shop id {shop_id} is successful.".format(
+            shop_id=shop.shop_id)
+    response.status = status.HTTP_200_OK
 
     logger.info(response.message)
     logger.info("signing up new shop ended.")
@@ -260,14 +255,36 @@ async def get_shop_details(*, shop: BinaizeShop = Depends(
 
 
 @app.get("/api/v1/schemas/shop/shopify_details", response_model=dict, tags=["Shop"],
-         summary="Get details of a logged in shop")
+         summary="Get details of a registered shop")
 async def get_shopify_details(*, shop_id: str):
     """
-        Get details of a logged in shop:
+        Get details of a registered shop:
         - **shop_id**: shopify store domain name
     """
     shopify_details = ShopAgent.get_shopify_details_for_shop_id(data_store=app.rds_data_store, shop_id=shop_id)
     return shopify_details
+
+
+@app.post("/api/v1/schemas/shop/nonce/update", response_model=ResponseMessage, tags=["Shop"],
+          summary="Update nonce of shop")
+async def update_nonce(*, shop_nonce: ShopNonce):
+    """
+        Get details of a registered shop:
+        - **shop_id**: shopify store domain name
+    """
+    response = ResponseMessage()
+    upsert_status = ShopAgent.upsert_shopify_nonce_for_shop_id(data_store=app.rds_data_store,
+                                                               shop_id=shop_nonce.shop_id,
+                                                               shopify_nonce=shop_nonce.shopify_nonce)
+    if upsert_status is not None:
+        response.message = "updation of nonce {shopify_nonce} for shop with shop id {shop_id} is successful.".format(
+            shopify_nonce=shop_nonce.shopify_nonce, shop_id=shop_nonce.shop_id)
+        response.status = status.HTTP_200_OK
+    else:
+        response.message = "updation of nonce {shopify_nonce} for shop with shop id {shop_id} failed.".format(
+            shopify_nonce=shop_nonce.shopify_nonce, shop_id=shop_nonce.shop_id)
+        response.status = status.HTTP_424_FAILED_DEPENDENCY
+    return response
 
 
 @app.post("/api/v1/schemas/experiment/create", response_model=Experiment, tags=["Experiment"],

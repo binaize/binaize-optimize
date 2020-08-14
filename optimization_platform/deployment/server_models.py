@@ -39,6 +39,11 @@ class Shop(BaseModel):
     timezone: str
 
 
+class ShopNonce(BaseModel):
+    shop_id: str
+    shopify_nonce: str
+
+
 class ResponseMessage(BaseModel):
     status: str = None
     message: str = None

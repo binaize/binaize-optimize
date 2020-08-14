@@ -70,8 +70,11 @@ class ShopAgent(object):
         shop_details = None
         if df is not None:
             shop_details = df[columns].to_dict(orient="records")[0]
-            shop_details["creation_time"] = DateUtils.convert_datetime_to_conversion_dashboard_date_string(
-                datetime_obj=shop_details["creation_time"], timezone_str="UTC")
+            if shop_details["creation_time"] is not None:
+                shop_details["creation_time"] = DateUtils.convert_datetime_to_conversion_dashboard_date_string(
+                    datetime_obj=shop_details["creation_time"], timezone_str="UTC")
+            else:
+                shop_details["creation_time"] = None
         return shop_details
 
     @classmethod

@@ -10,10 +10,10 @@ create table if not exists experiments
     page_type          varchar(50),
     experiment_type    varchar(50),
     status             varchar(50),
-    creation_time      timestamptz  not null default now(),
-    last_updation_time timestamptz  not null default now(),
-    start_time         timestamptz  not null default now(),
-    end_time           timestamptz  not null default now()
+    creation_time      timestamptz,
+    last_updation_time timestamptz,
+    start_time         timestamptz,
+    end_time           timestamptz
 );
 
 create
