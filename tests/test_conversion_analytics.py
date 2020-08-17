@@ -97,7 +97,7 @@ class TestConversionAnalytics(TestCase):
                              company_name="test_company_name", hashed_password="test_hashed_password",
                              disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
                              client_timezone="test_client_timezone")
-        ProductAgent.sync_products(client_id="test_client_id", data_store=self.rds_data_store)
+        ProductAgent.sync_products(shop_id="test_client_id", data_store=self.rds_data_store)
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def _create_orders(self, x):
@@ -106,7 +106,7 @@ class TestConversionAnalytics(TestCase):
                              company_name="test_company_name", hashed_password="test_hashed_password",
                              disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
                              client_timezone="test_client_timezone")
-        OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
+        OrderAgent.sync_orders(shop_id="test_client_id", data_store=self.rds_data_store)
 
     @mock.patch('datetime.datetime', new=datetime_mock)
     def test_get_shop_funnel_analytics(self):

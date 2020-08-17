@@ -15,18 +15,18 @@ rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
 
 
 def main():
-    client_ids = ShopAgent.get_all_shop_ids(data_store=rds_data_store)
+    shop_ids = ShopAgent.get_all_shop_ids(data_store=rds_data_store)
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
-    logger.info("sync products job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
-    for client_id in client_ids:
-        logger.info("sync products job for client id = {client_id} started".format(client_id=client_id))
+    logger.info("sync products job for shop ids = {shop_ids} started".format(shop_ids=",".join(shop_ids)))
+    for shop_id in shop_ids:
+        logger.info("sync products job for shop id = {shop_id} started".format(shop_id=shop_id))
         try:
-            ProductAgent.sync_products(data_store=rds_data_store, client_id=client_id)
-            logger.info("sync products job for client id = {client_id} succeeded".format(client_id=client_id))
+            ProductAgent.sync_products(data_store=rds_data_store, shop_id=shop_id)
+            logger.info("sync products job for shop id = {shop_id} succeeded".format(shop_id=shop_id))
         except Exception:
-            logger.info("sync products job for client id = {client_id} failed".format(client_id=client_id))
-        logger.info("sync products job for client id = {client_id} ended".format(client_id=client_id))
-    logger.info("sync products job for client ids = {client_ids} ended".format(client_ids=",".join(client_ids)))
+            logger.info("sync products job for shop id = {shop_id} failed".format(shop_id=shop_id))
+        logger.info("sync products job for shop id = {shop_id} ended".format(shop_id=shop_id))
+    logger.info("sync products job for shop ids = {shop_ids} ended".format(shop_ids=",".join(shop_ids)))
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
 
 

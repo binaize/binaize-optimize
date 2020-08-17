@@ -19,14 +19,14 @@ rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
                               password=AWS_RDS_PASSWORD)
 
 
-def main(rds_data_store):
+def main():
     client_ids = ShopAgent.get_all_shop_ids(data_store=rds_data_store)
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
     logger.info("sync orders job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
     for client_id in client_ids:
         logger.info("sync orders job for client id = {client_id} started".format(client_id=client_id))
         try:
-            _, session_cart_time_list = OrderAgent.sync_orders(data_store=rds_data_store, client_id=client_id)
+            _, session_cart_time_list = OrderAgent.sync_orders(data_store=rds_data_store, shop_id=client_id)
             CookieAgent.register_dummy_cookie_for_client(data_store=rds_data_store, client_id=client_id,
                                                          session_cart_time_list=session_cart_time_list)
             experiment_id = ExperimentAgent.get_latest_experiment_id(data_store=rds_data_store, client_id=client_id)
@@ -57,7 +57,7 @@ def main(rds_data_store):
 
 def init():
     if __name__ == "__main__":
-        sys.exit(main(rds_data_store))
+        sys.exit(main())
 
 
 init()

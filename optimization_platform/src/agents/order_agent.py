@@ -12,13 +12,13 @@ import uuid
 class OrderAgent(object):
 
     @classmethod
-    def sync_orders(cls, data_store, client_id):
+    def sync_orders(cls, data_store, shop_id):
         table = TABLE_ORDERS
-        columns = ["client_id", "order_id", "email_id", "cart_token", "product_id",
+        columns = ["shop_id", "order_id", "email_id", "cart_token", "product_id",
                    "variant_id", "variant_quantity", "variant_price", "updated_at", "payment_status", "landing_page"]
-        sql = "select max(updated_at) from {table} where client_id = '{client_id}' and payment_status=TRUE".format(
+        sql = "select max(updated_at) from {table} where shop_id = '{shop_id}' and payment_status=TRUE".format(
             table=table,
-            client_id=client_id)
+            shop_id=shop_id)
         mobile_records = data_store.run_select_sql(query=sql)
         order_updated_at = None
         max_datetime = mobile_records[0][0]
@@ -27,33 +27,37 @@ class OrderAgent(object):
             max_datetime_utc = DateUtils.change_timezone(datetime_obj=max_datetime, timezone_str="UTC")
             order_updated_at = DateUtils.convert_datetime_to_iso_string(datetime_obj=max_datetime_utc)
 
-        client_details = ShopAgent.get_shop_details_for_shop_id(data_store=data_store, shop_id=client_id)
-        shared_url = client_details["shopify_app_eg_url"]
-        base_url = "/".join(shared_url.split("/")[:6])
-        order_url = "{base_url}/orders.json?limit=250".format(base_url=base_url)
+        shop_details = ShopAgent.get_shop_details_for_shop_id(data_store=data_store, shop_id=shop_id)
+        shopify_access_token = shop_details["shopify_access_token"]
+        order_url = "https://{shop_id}/admin/api/2020-04/orders.json?limit=250".format(shop_id=shop_id)
         if order_updated_at is not None:
-            order_url = "{base_url}/orders.json?updated_at_min={updated_at}".format(base_url=base_url,
-                                                                                    updated_at=order_updated_at)
-        r = requests.get(order_url)
+            order_url = "https://{shop_id}/admin/api/2020-04/orders.json?updated_at_min={updated_at}".format(
+                shop_id=shop_id,
+                updated_at=order_updated_at)
+        r = requests.get(order_url, headers={
+            "X-Shopify-Access-Token": shopify_access_token
+        })
         order_list = r.json()["orders"]
 
-        def get_next_url(base_url, header):
+        def get_next_url(shop_id, header):
             link_header = header.get('Link')
             rel_next_tag = 'rel="next"'
             if link_header is not None and rel_next_tag in link_header:
                 next_field = link_header.split(",")[-1]
                 url = next_field.split(";")[0][1:-1]
                 ext = "/".join(url.split("/")[6:])
-                next_url = "{base_url}/{ext}".format(base_url=base_url, ext=ext)
+                next_url = "https://{shop_id}/admin/api/2020-04/{ext}".format(shop_id=shop_id, ext=ext)
                 return next_url
             return None
 
         while True:
             header = r.headers
-            order_url = get_next_url(base_url, header)
+            order_url = get_next_url(shop_id, header)
             if order_url is None:
                 break
-            r = requests.get(order_url)
+            r = requests.get(order_url, headers={
+                "X-Shopify-Access-Token": shopify_access_token
+            })
             order_list += r.json()["orders"]
 
         variant_list = list()
@@ -72,7 +76,7 @@ class OrderAgent(object):
                 session_cart_time_list.append((session_id, cart_token, updated_at))
             for item in items:
                 variant_dict = dict()
-                variant_dict["client_id"] = client_id
+                variant_dict["shop_id"] = shop_id
                 variant_dict["order_id"] = order_id
                 variant_dict["email_id"] = email_id
                 variant_dict["cart_token"] = cart_token
@@ -86,35 +90,38 @@ class OrderAgent(object):
                 variant_list.append(variant_dict)
             order_id_list.append(order["id"])
 
-        base_url = "/".join(shared_url.split("/")[:6])
-        checkout_url = "{base_url}/checkouts.json?limit=250".format(base_url=base_url)
-        r = requests.get(checkout_url)
+        checkout_url = "https://{shop_id}/admin/api/2020-04/checkouts.json?limit=250".format(shop_id=shop_id)
+        r = requests.get(checkout_url, headers={
+            "X-Shopify-Access-Token": shopify_access_token
+        })
         checkout_list = r.json()["checkouts"]
 
-        def get_next_url(base_url, header):
+        def get_next_url(shop_id, header):
             link_header = header.get('Link')
             rel_next_tag = 'rel="next"'
             if link_header is not None and rel_next_tag in link_header:
                 next_field = link_header.split(",")[-1]
                 url = next_field.split(";")[0][1:-1]
                 ext = "/".join(url.split("/")[6:])
-                next_url = "{base_url}/{ext}".format(base_url=base_url, ext=ext)
+                next_url = "https://{shop_id}/admin/api/2020-04/{ext}".format(shop_id=shop_id, ext=ext)
                 return next_url
             return None
 
         while True:
             header = r.headers
-            checkout_url = get_next_url(base_url, header)
+            checkout_url = get_next_url(shop_id, header)
             if checkout_url is None:
                 break
-            r = requests.get(checkout_url)
+            r = requests.get(checkout_url, headers={
+                "X-Shopify-Access-Token": shopify_access_token
+            })
             checkout_list += r.json()["checkouts"]
 
         for checkout in checkout_list:
             items = checkout["line_items"]
             for item in items:
                 variant_dict = dict()
-                variant_dict["client_id"] = client_id
+                variant_dict["shop_id"] = shop_id
                 variant_dict["order_id"] = checkout["id"]
                 variant_dict["email_id"] = checkout["email"]
                 variant_dict["cart_token"] = checkout["cart_token"]
@@ -130,13 +137,13 @@ class OrderAgent(object):
 
         if len(variant_list) > 0:
             s = ",".join(["%s" for i in range(len(order_id_list))])
-            query = """delete from {table} where client_id = '{client_id}' and payment_status=FALSE""".format(
+            query = """delete from {table} where shop_id = '{shop_id}' and payment_status=FALSE""".format(
                 table=table,
-                client_id=client_id)
+                shop_id=shop_id)
             data_store.run_custom_sql(query=query)
-            query = """delete from {table} where client_id = '{client_id}' and order_id in ({s})""".format(
+            query = """delete from {table} where shop_id = '{shop_id}' and order_id in ({s})""".format(
                 table=table,
-                client_id=client_id,
+                shop_id=shop_id,
                 s=s)
             data_store.run_batch_delete_sql(query=query, data_list=order_id_list)
 

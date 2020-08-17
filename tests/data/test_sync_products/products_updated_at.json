@@ -1,0 +1,117 @@
+{
+  "products": [
+    {
+      "id": 5254622347427,
+      "title": "Tissot T Classic",
+      "body_html": "<p></p>",
+      "vendor": "binaize-watch",
+      "product_type": "",
+      "created_at": "2020-06-01T13:42:29-04:00",
+      "handle": "tissot-t-classic",
+      "updated_at": "2020-07-23T02:27:38-04:00",
+      "published_at": "2020-06-01T13:42:28-04:00",
+      "template_suffix": "",
+      "published_scope": "web",
+      "tags": "",
+      "admin_graphql_api_id": "gid://shopify/Product/5254622347427",
+      "variants": [
+        {
+          "id": 35203894444195,
+          "product_id": 5254622347427,
+          "title": "Black",
+          "price": "449.00",
+          "sku": "",
+          "position": 1,
+          "inventory_policy": "deny",
+          "compare_at_price": null,
+          "fulfillment_service": "manual",
+          "inventory_management": "shopify",
+          "option1": "Black",
+          "option2": null,
+          "option3": null,
+          "created_at": "2020-07-23T02:27:38-04:00",
+          "updated_at": "2020-07-23T02:27:38-04:00",
+          "taxable": true,
+          "barcode": "",
+          "grams": 0,
+          "image_id": null,
+          "weight": 0.0,
+          "weight_unit": "lb",
+          "inventory_item_id": 37326770471075,
+          "inventory_quantity": 58,
+          "old_inventory_quantity": 58,
+          "requires_shipping": true,
+          "admin_graphql_api_id": "gid://shopify/ProductVariant/35203894444195"
+        },
+        {
+          "id": 35203894476963,
+          "product_id": 5254622347427,
+          "title": "White",
+          "price": "439.00",
+          "sku": "",
+          "position": 2,
+          "inventory_policy": "deny",
+          "compare_at_price": null,
+          "fulfillment_service": "manual",
+          "inventory_management": "shopify",
+          "option1": "White",
+          "option2": null,
+          "option3": null,
+          "created_at": "2020-07-23T02:27:38-04:00",
+          "updated_at": "2020-07-23T02:27:38-04:00",
+          "taxable": true,
+          "barcode": "",
+          "grams": 0,
+          "image_id": null,
+          "weight": 0.0,
+          "weight_unit": "lb",
+          "inventory_item_id": 37326770536611,
+          "inventory_quantity": 58,
+          "old_inventory_quantity": 58,
+          "requires_shipping": true,
+          "admin_graphql_api_id": "gid://shopify/ProductVariant/35203894476963"
+        }
+      ],
+      "options": [
+        {
+          "id": 6719874990243,
+          "product_id": 5254622347427,
+          "name": "Color",
+          "position": 1,
+          "values": [
+            "Black",
+            "White"
+          ]
+        }
+      ],
+      "images": [
+        {
+          "id": 17224494481571,
+          "product_id": 5254622347427,
+          "position": 1,
+          "created_at": "2020-06-01T13:42:29-04:00",
+          "updated_at": "2020-06-01T13:42:29-04:00",
+          "alt": null,
+          "width": 400,
+          "height": 400,
+          "src": "https://cdn.shopify.com/s/files/1/0399/8561/0915/products/T063_610_11_037_01.jpg?v=1591033349",
+          "variant_ids": [],
+          "admin_graphql_api_id": "gid://shopify/ProductImage/17224494481571"
+        }
+      ],
+      "image": {
+        "id": 17224494481571,
+        "product_id": 5254622347427,
+        "position": 1,
+        "created_at": "2020-06-01T13:42:29-04:00",
+        "updated_at": "2020-06-01T13:42:29-04:00",
+        "alt": null,
+        "width": 400,
+        "height": 400,
+        "src": "https://cdn.shopify.com/s/files/1/0399/8561/0915/products/T063_610_11_037_01.jpg?v=1591033349",
+        "variant_ids": [],
+        "admin_graphql_api_id": "gid://shopify/ProductImage/17224494481571"
+      }
+    }
+  ]
+}

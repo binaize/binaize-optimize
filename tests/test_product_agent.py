@@ -5,7 +5,6 @@ from unittest import mock
 import testing.postgresql
 
 from config import *
-from optimization_platform.src.agents.shop_agent import ShopAgent
 from optimization_platform.src.agents.product_agent import ProductAgent
 from utils.data_store.rds_data_store import RDSDataStore
 
@@ -24,11 +23,11 @@ def mocked_requests_get(*args, **kwargs):
             return {}
 
     if "updated_at_min" in args[0]:
-        with open("tests/data/test_product_1.json", "r") as fp:
+        with open("tests/data/test_product_agent/products_updated_at.json", "r") as fp:
             data = json.load(fp)
         return MockResponse(data, 200)
     else:
-        with open("tests/data/test_product_2.json", "r") as fp:
+        with open("tests/data/test_product_agent/products.json", "r") as fp:
             data = json.load(fp)
         return MockResponse(data, 200)
 
@@ -54,29 +53,21 @@ class TestProductAgent(TestCase):
         with open("rds_tables.sql", "r") as fp:
             self.rds_data_store.run_create_table_sql(fp.read())
 
-    def _add_new_client(self, client_id, full_name, company_name, hashed_password, disabled, shopify_app_eg_url,
-                        client_timezone):
-        timestamp = 1590673060
-        status = ShopAgent.add_new_client(data_store=self.rds_data_store, client_id=client_id,
-                                          full_name=full_name,
-                                          company_name=company_name, hashed_password=hashed_password,
-                                          disabled=disabled, client_timezone=client_timezone,
-                                          shopify_app_eg_url=shopify_app_eg_url,
-                                          creation_timestamp=timestamp)
-        expected_status = True
-        self.assertEqual(first=status, second=expected_status)
-        return status
+    def _add_new_client(self):
+        csv_file_name = "tests/data/test_product_agent/shops.csv"
+        cursor = self.rds_data_store.conn.cursor()
+        sql = "COPY shops FROM STDIN DELIMITER ',' CSV HEADER"
+        with open(csv_file_name, "r") as fp:
+            cursor.copy_expert(sql, fp)
+        self.rds_data_store.conn.commit()
+        cursor.close()
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
-    def test_sync_products(self, mock_get):
-        self._add_new_client(client_id="test_client_id",
-                             full_name="test_full_name",
-                             company_name="test_company_name", hashed_password="test_hashed_password",
-                             disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
-                             client_timezone="test_client_timezone")
-        result = ProductAgent.sync_products(client_id="test_client_id", data_store=self.rds_data_store)
-        expected_result = 8
+    def test_sync_products(self, x):
+        self._add_new_client()
+        result = ProductAgent.sync_products(shop_id="binaize-dev-watch.myshopify.com", data_store=self.rds_data_store)
+        expected_result = 11
         self.assertEqual(first=result, second=expected_result)
-        result = ProductAgent.sync_products(client_id="test_client_id", data_store=self.rds_data_store)
-        expected_result = 1
+        result = ProductAgent.sync_products(shop_id="binaize-dev-watch.myshopify.com", data_store=self.rds_data_store)
+        expected_result = 2
         self.assertEqual(first=result, second=expected_result)

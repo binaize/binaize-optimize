@@ -85,7 +85,7 @@ class TestExperimentAnalytics(TestCase):
                              company_name="test_company_name", hashed_password="test_hashed_password",
                              disabled=False, shopify_app_eg_url="test_shopify_app_eg_url",
                              client_timezone="test_client_timezone")
-        OrderAgent.sync_orders(client_id="test_client_id", data_store=self.rds_data_store)
+        OrderAgent.sync_orders(shop_id="test_client_id", data_store=self.rds_data_store)
 
     def _create_cookie(self):
         timestamp = 1590673060
