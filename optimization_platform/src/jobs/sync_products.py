@@ -8,13 +8,8 @@ from utils.logger.pylogger import get_logger
 
 logger = get_logger("sync_products", "INFO")
 
-rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
-                              dbname=AWS_RDS_DBNAME,
-                              user=AWS_RDS_USER,
-                              password=AWS_RDS_PASSWORD)
 
-
-def main():
+def main(rds_data_store):
     client_ids = ClientAgent.get_all_client_ids(data_store=rds_data_store)
     logger.info("{hash}".format(hash="".join(["#" for i in range(60)])))
     logger.info("sync products job for client ids = {client_ids} started".format(client_ids=",".join(client_ids)))
@@ -32,7 +27,11 @@ def main():
 
 def init():
     if __name__ == "__main__":
-        sys.exit(main())
+        rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+                                      dbname=AWS_RDS_DBNAME,
+                                      user=AWS_RDS_USER,
+                                      password=AWS_RDS_PASSWORD)
+        sys.exit(main(rds_data_store))
 
 
 init()

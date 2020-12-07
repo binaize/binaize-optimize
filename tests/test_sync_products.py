@@ -34,9 +34,15 @@ def mocked_requests_get(*args, **kwargs):
 
 pgsql = testing.postgresql.Postgresql(cache_initialized_db=True, port=int(AWS_RDS_PORT))
 
-from optimization_platform.src.jobs.sync_products import rds_data_store, main, logger
+from optimization_platform.src.jobs.sync_products import main, logger
 
 logger.disabled = True
+from utils.data_store.rds_data_store import RDSDataStore
+
+rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+                              dbname=AWS_RDS_DBNAME,
+                              user=AWS_RDS_USER,
+                              password=AWS_RDS_PASSWORD)
 
 
 class TestProductAgent(TestCase):
@@ -77,14 +83,14 @@ class TestProductAgent(TestCase):
                              company_name="test_company_name_2", hashed_password="test_hashed_password_2",
                              disabled=False, shopify_app_eg_url="test_shopify_app_eg_url_2",
                              client_timezone="test_client_timezone_2")
-        main()
+        main(rds_data_store)
 
         result = self.rds_data_store.run_custom_sql("select * from products")
         len_result = len(result)
         expected_len_result = 16
         self.assertEqual(first=len_result, second=expected_len_result)
 
-        main()
+        main(rds_data_store)
 
         result = self.rds_data_store.run_custom_sql("select * from products")
         len_result = len(result)

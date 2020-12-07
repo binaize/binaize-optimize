@@ -13,11 +13,6 @@ from utils.date_utils import DateUtils
 
 logger = get_logger("sync_orders", "INFO")
 
-rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
-                              dbname=AWS_RDS_DBNAME,
-                              user=AWS_RDS_USER,
-                              password=AWS_RDS_PASSWORD)
-
 
 def main(rds_data_store):
     client_ids = ClientAgent.get_all_client_ids(data_store=rds_data_store)
@@ -57,6 +52,10 @@ def main(rds_data_store):
 
 def init():
     if __name__ == "__main__":
+        rds_data_store = RDSDataStore(host=AWS_RDS_HOST, port=AWS_RDS_PORT,
+                                      dbname=AWS_RDS_DBNAME,
+                                      user=AWS_RDS_USER,
+                                      password=AWS_RDS_PASSWORD)
         sys.exit(main(rds_data_store))
 
 
