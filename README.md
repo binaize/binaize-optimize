@@ -1,7 +1,5 @@
 # binaize-optimize
 
-## NEVER EVER COMMIT THE FILES ```config.py``` or ```config.env```
-
 ## For Local development
 
 1. Install python 3.6.8
